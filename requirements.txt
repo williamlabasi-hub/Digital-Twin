@@ -4,3 +4,5 @@ joblib
 numpy
 sgp4
 skyfield
+jsonschema
+PyYAML
