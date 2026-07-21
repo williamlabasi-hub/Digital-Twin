@@ -19,13 +19,14 @@ except ImportError:  # Allow direct execution: python src/health/health_monitor.
 
 
 BASE_DIR = Path(__file__).resolve().parent
+REPOSITORY_ROOT = BASE_DIR.parents[1]
 
-DEFAULT_MODEL_PATH = BASE_DIR / "satellite_health_model.joblib"
-DEFAULT_TELEMETRY_PATH = BASE_DIR / "HealthTelemetry1.json"
-DEFAULT_COMMAND_HISTORY_PATH = BASE_DIR / "CommandHistory1.json"
-DEFAULT_REPORT_PATH = BASE_DIR / "health_predictions.json"
-DEFAULT_HISTORY_PATH = BASE_DIR / "health_history.json"
-DEFAULT_SCHEMA_PATH = BASE_DIR / "health_predictions.schema.json"
+DEFAULT_MODEL_PATH = REPOSITORY_ROOT / "data" / "processed" / "health" / "models" / "satellite_health_model.joblib"
+DEFAULT_TELEMETRY_PATH = REPOSITORY_ROOT / "data" / "raw" / "telemetry" / "HealthTelemetry1.json"
+DEFAULT_COMMAND_HISTORY_PATH = REPOSITORY_ROOT / "data" / "raw" / "command_history" / "CommandHistory1.json"
+DEFAULT_REPORT_PATH = REPOSITORY_ROOT / "data" / "outputs" / "health" / "health_predictions.json"
+DEFAULT_HISTORY_PATH = REPOSITORY_ROOT / "data" / "outputs" / "health" / "health_history.json"
+DEFAULT_SCHEMA_PATH = REPOSITORY_ROOT / "docs" / "requirements" / "health" / "health_predictions.schema.json"
 
 
 OUTPUT_SCHEMA_VERSION = "1.1.0"

@@ -1,0 +1,112 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Satellite Health Predictions",
+  "type": "object",
+  "required": ["schema_version", "generated_at", "model_metadata", "report", "ml_records"],
+  "properties": {
+    "schema_version": {"const": "1.1.0"},
+    "generated_at": {"type": "string", "format": "date-time"},
+    "model_metadata": {
+      "type": "object",
+      "required": ["model_type", "feature_contract", "health_classes", "trained_at", "training_record_count", "training_data_type", "random_state", "number_of_trees"],
+      "properties": {
+        "model_type": {"type": "string"},
+        "feature_contract": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+        "health_classes": {"type": "array", "items": {"$ref": "#/definitions/healthClass"}, "minItems": 2, "uniqueItems": true},
+        "trained_at": {"type": "string", "format": "date-time"},
+        "training_record_count": {"type": "integer", "minimum": 1},
+        "training_data_type": {"type": "string"},
+        "random_state": {"type": "integer"},
+        "number_of_trees": {"type": "integer", "minimum": 1}
+      }
+    },
+    "report": {"type": "array", "items": {"$ref": "#/definitions/reportRecord"}},
+    "ml_records": {"type": "array", "items": {"$ref": "#/definitions/mlRecord"}}
+  },
+  "definitions": {
+    "healthClass": {"enum": ["Healthy", "Warning", "Degraded", "Critical"]},
+    "nullableNumber": {"type": ["number", "null"]},
+    "classProbabilities": {
+      "type": "object",
+      "required": ["Healthy", "Warning", "Degraded", "Critical"],
+      "properties": {
+        "Healthy": {"type": "number", "minimum": 0, "maximum": 1},
+        "Warning": {"type": "number", "minimum": 0, "maximum": 1},
+        "Degraded": {"type": "number", "minimum": 0, "maximum": 1},
+        "Critical": {"type": "number", "minimum": 0, "maximum": 1}
+      }
+    },
+    "reportRecord": {
+      "type": "object",
+      "required": ["report_generated_at", "satellite_id", "timestamp", "prediction", "predicted_probability", "class_probabilities", "probability_interpretation", "recent_command", "telemetry", "assessment", "data_quality", "recommendations", "recommendation_scope", "health_trend"],
+      "properties": {
+        "report_generated_at": {"type": "string", "format": "date-time"},
+        "satellite_id": {"type": "string", "minLength": 1},
+        "timestamp": {"type": "string", "format": "date-time"},
+        "prediction": {"$ref": "#/definitions/healthClass"},
+        "predicted_probability": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+        "class_probabilities": {"$ref": "#/definitions/classProbabilities"},
+        "probability_interpretation": {"enum": ["uncalibrated_random_forest_vote_fraction", "unavailable"]},
+        "recent_command": {
+          "type": "object",
+          "required": ["name", "status", "timestamp", "seconds_since_command"],
+          "properties": {
+            "name": {"type": ["string", "null"]},
+            "status": {"type": ["string", "null"]},
+            "timestamp": {"type": ["string", "null"], "format": "date-time"},
+            "seconds_since_command": {"type": ["number", "null"], "minimum": 0}
+          }
+        },
+        "telemetry": {
+          "type": "object",
+          "required": ["solar_panel_current", "bus_temperature_c", "payload_temperature_c", "reaction_wheel_rpm", "downlink_rate_kbps", "battery_voltage", "battery_current", "mode"],
+          "properties": {
+            "solar_panel_current": {"$ref": "#/definitions/nullableNumber"},
+            "bus_temperature_c": {"$ref": "#/definitions/nullableNumber"},
+            "payload_temperature_c": {"$ref": "#/definitions/nullableNumber"},
+            "reaction_wheel_rpm": {"$ref": "#/definitions/nullableNumber"},
+            "downlink_rate_kbps": {"$ref": "#/definitions/nullableNumber"},
+            "battery_voltage": {"$ref": "#/definitions/nullableNumber"},
+            "battery_current": {"$ref": "#/definitions/nullableNumber"},
+            "mode": {"type": ["string", "null"]}
+          }
+        },
+        "assessment": {"type": "array", "items": {"type": "string"}},
+        "data_quality": {
+          "type": "object",
+          "required": ["status", "missing_model_values", "preceding_command_available", "notes"],
+          "properties": {
+            "status": {"enum": ["complete", "degraded"]},
+            "missing_model_values": {"type": "array", "items": {"type": "string"}},
+            "preceding_command_available": {"type": "boolean"},
+            "telemetry_adapter_version": {"type": ["string", "null"]},
+            "notes": {"type": "array", "items": {"type": "string"}}
+          }
+        },
+        "recommendations": {"type": "array", "items": {"type": "string"}},
+        "recommendation_scope": {"const": "preliminary_health_advisory_not_operator_coa"},
+        "health_trend": {
+          "type": "object",
+          "required": ["previous_health_status", "trend"],
+          "properties": {
+            "previous_health_status": {"anyOf": [{"$ref": "#/definitions/healthClass"}, {"type": "null"}]},
+            "trend": {"type": "string"}
+          }
+        }
+      }
+    },
+    "mlRecord": {
+      "type": "object",
+      "required": ["satellite_id", "timestamp", "prediction", "predicted_probability", "class_probabilities", "seconds_since_command"],
+      "properties": {
+        "satellite_id": {"type": "string", "minLength": 1},
+        "timestamp": {"type": "string", "format": "date-time"},
+        "prediction": {"$ref": "#/definitions/healthClass"},
+        "predicted_probability": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+        "class_probabilities": {"$ref": "#/definitions/classProbabilities"},
+        "seconds_since_command": {"type": ["number", "null"], "minimum": 0}
+      }
+    }
+  }
+}
+

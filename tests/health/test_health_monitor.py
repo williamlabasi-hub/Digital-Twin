@@ -23,6 +23,14 @@ from health.health_monitor import (
 
 
 class HealthMonitorTests(unittest.TestCase):
+    def test_committed_example_output_matches_health_schema(self) -> None:
+        schema_path = REPOSITORY_ROOT / "docs" / "requirements" / "health" / "health_predictions.schema.json"
+        output_path = REPOSITORY_ROOT / "data" / "outputs" / "health" / "health_predictions.json"
+        schema = json.loads(schema_path.read_text(encoding="utf-8"))
+        output = json.loads(output_path.read_text(encoding="utf-8"))
+
+        self.assertFalse(list(Draft7Validator(schema).iter_errors(output)))
+
     def test_command_alignment_never_uses_a_future_command(self) -> None:
         telemetry = pd.DataFrame(
             [{"satellite_id": "SAT-1", "timestamp": "2026-01-01T00:10:00Z"}]
@@ -111,10 +119,8 @@ class HealthMonitorTests(unittest.TestCase):
             / "health"
             / "health_predictions.schema.json"
         )
-        if not model_path.exists() or not schema_path.exists():
-            self.skipTest(
-                "Versioned model artifact and health-report schema are not present."
-            )
+        if not model_path.exists():
+            self.skipTest("Versioned model artifact is not present.")
 
         dataset = prepare_dataset(
             REPOSITORY_ROOT / "data" / "raw" / "telemetry" / "HealthTelemetry1.json",
