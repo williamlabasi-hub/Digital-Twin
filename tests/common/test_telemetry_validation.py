@@ -23,7 +23,9 @@ class TelemetryValidationTests(unittest.TestCase):
         cls.example = json.loads(
             (
                 REPOSITORY_ROOT
-                / "examples"
+                / "tests"
+                / "fixtures"
+                / "telemetry"
                 / "housekeeping-telemetry.example.json"
             ).read_text(encoding="utf-8")
         )
