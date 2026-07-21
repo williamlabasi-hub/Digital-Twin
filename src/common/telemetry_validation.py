@@ -22,10 +22,19 @@ from jsonschema import Draft202012Validator, FormatChecker
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_SCHEMA_PATH = (
-    REPOSITORY_ROOT / "schemas" / "housekeeping-telemetry.schema.json"
+    REPOSITORY_ROOT
+    / "docs"
+    / "requirements"
+    / "telemetry"
+    / "housekeeping-telemetry.schema.json"
 )
+
 DEFAULT_DICTIONARY_PATH = (
-    REPOSITORY_ROOT / "config" / "housekeeping-telemetry.yaml"
+    REPOSITORY_ROOT
+    / "docs"
+    / "requirements"
+    / "telemetry"
+    / "housekeeping-telemetry.yaml"
 )
 
 
