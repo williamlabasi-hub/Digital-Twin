@@ -1,0 +1,195 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Page-1" id="n_RQRchUE6T6qd9beXDa">
+    <mxGraphModel dx="3689" dy="1319" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="KdTJCK1NTJSuXhm9uc-u-42" parent="1" style="rounded=0;whiteSpace=wrap;html=1;movable=0;resizable=0;rotatable=0;deletable=0;editable=0;locked=1;connectable=0;" value="" vertex="1">
+          <mxGeometry height="340" width="1530" x="150" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="KdTJCK1NTJSuXhm9uc-u-17" edge="1" parent="1" source="KdTJCK1NTJSuXhm9uc-u-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;startArrow=classic;startFill=1;entryX=0;entryY=1;entryDx=0;entryDy=0;" target="KdTJCK1NTJSuXhm9uc-u-15">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="210" y="320" />
+              <mxPoint x="210" y="320" />
+            </Array>
+            <mxPoint x="100" y="320" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="KdTJCK1NTJSuXhm9uc-u-2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Request Orbital Data&lt;div&gt;(import.requests {&lt;/div&gt;&lt;div&gt;response = requests.get(API_URL)&lt;/div&gt;&lt;div&gt;}&lt;/div&gt;" vertex="1">
+          <mxGeometry height="100" width="200" x="280" y="270" as="geometry" />
+        </mxCell>
+        <mxCell id="KdTJCK1NTJSuXhm9uc-u-3" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="orbital_data" vertex="1">
+          <mxGeometry height="30" width="200" x="280" y="370" as="geometry" />
+        </mxCell>
+        <mxCell id="KdTJCK1NTJSuXhm9uc-u-4" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Create JSON Orbital Data&lt;div&gt;(&quot;name&quot;: sat.name,&lt;/div&gt;&lt;div&gt;&quot;catalog&quot;: sat.model.satnum,&lt;/div&gt;&lt;div&gt;&quot;latitude&quot;: subpoint.latitude.degrees,&lt;/div&gt;&lt;div&gt;&quot;longitude&quot;: subpoint.longitude.degrees,&lt;/div&gt;&lt;div&gt;&quot;velocity_km_s&#39;: {&lt;/div&gt;&lt;div&gt;&quot;radial&quot;: v_radial,&lt;/div&gt;&lt;div&gt;&quot;along_track&quot;: v_along,&lt;/div&gt;&lt;div&gt;&quot;cross_track&quot;: v_cross&lt;/div&gt;&lt;div&gt;}&lt;/div&gt;&lt;div&gt;&quot;speed_km_s&quot; np.linalg.norm(v)&lt;/div&gt;&lt;div&gt;&quot;time&quot;: year, month, day, hour, minute, second)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="190" width="260" x="860" y="270" as="geometry" />
+        </mxCell>
+        <mxCell id="KdTJCK1NTJSuXhm9uc-u-8" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="propagated_data" vertex="1">
+          <mxGeometry height="30" width="260" x="860" y="460" as="geometry" />
+        </mxCell>
+        <mxCell id="KdTJCK1NTJSuXhm9uc-u-9" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Save to Data Repository&lt;div&gt;(json.dump(propagted_data,&lt;/div&gt;&lt;div&gt;orbita_data.json))&lt;/div&gt;" vertex="1">
+          <mxGeometry height="110" width="160" x="1220" y="270" as="geometry" />
+        </mxCell>
+        <mxCell id="KdTJCK1NTJSuXhm9uc-u-71" edge="1" parent="1" source="KdTJCK1NTJSuXhm9uc-u-10" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="KdTJCK1NTJSuXhm9uc-u-67">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="KdTJCK1NTJSuXhm9uc-u-10" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="orbital_data.json" vertex="1">
+          <mxGeometry height="30" width="160" x="1220" y="380" as="geometry" />
+        </mxCell>
+        <mxCell id="KdTJCK1NTJSuXhm9uc-u-11" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Display Orbital Data on Visualization Board&lt;div&gt;(&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;display.dashboard,&lt;/span&gt;&lt;/div&gt;&lt;div&gt;operator.checks)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="100" width="140" x="1480" y="270" as="geometry" />
+        </mxCell>
+        <mxCell id="KdTJCK1NTJSuXhm9uc-u-12" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Orbital Data Display" vertex="1">
+          <mxGeometry height="30" width="140" x="1480" y="370" as="geometry" />
+        </mxCell>
+        <UserObject label="&amp;nbsp; &amp;nbsp; &amp;nbsp; TLE API" link="&lt;a href=&quot;https://tle.ivanstanojevic.me/#/tle/44713&quot; style=&quot;forced-color-adjust: none; font-family: Helvetica; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: center; text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; white-space: normal; background-color: transparent;&quot;&gt;TLEhttps://tle.ivanstanojevic.me/#/tle/44713 API&lt;/a&gt;&lt;span style=&quot;color: rgb(0, 0, 0); font-family: Helvetica; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: center; text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; white-space: normal; background-color: rgb(236, 236, 236); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; display: inline !important; float: none;&quot;&gt;)&lt;/span&gt;" id="KdTJCK1NTJSuXhm9uc-u-15">
+          <mxCell parent="1" style="text;whiteSpace=wrap;html=1;fontColor=default;" vertex="1">
+            <mxGeometry height="30" width="70" x="180" y="290" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="KdTJCK1NTJSuXhm9uc-u-19" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;innerLoopWaypoints=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="140" y="400" as="sourcePoint" />
+            <mxPoint x="140" y="400" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="KdTJCK1NTJSuXhm9uc-u-26" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1190" y="340" />
+              <mxPoint x="1190" y="340" />
+            </Array>
+            <mxPoint x="1120" y="340" as="sourcePoint" />
+            <mxPoint x="1220" y="340" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="KdTJCK1NTJSuXhm9uc-u-31" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Extract Orbital Parameters&lt;div&gt;(name, catalogue, latitude,&lt;/div&gt;&lt;div&gt;longitude, velocity&lt;/div&gt;&lt;div&gt;speed, time)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="90" width="180" x="580" y="270" as="geometry" />
+        </mxCell>
+        <mxCell id="KdTJCK1NTJSuXhm9uc-u-32" parent="1" style="rounded=0;whiteSpace=wrap;html=1;align=center;" value="&lt;div style=&quot;&quot;&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;name&amp;nbsp; &amp;nbsp;catalog&amp;nbsp; &amp;nbsp;latitude&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;&quot;&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;longitude&amp;nbsp; &amp;nbsp;velocity&amp;nbsp; &amp;nbsp;speed&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;time&amp;nbsp;&lt;/span&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="180" x="580" y="360" as="geometry" />
+        </mxCell>
+        <mxCell id="KdTJCK1NTJSuXhm9uc-u-54" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="" vertex="1">
+          <mxGeometry width="110" x="-10" y="750" as="geometry" />
+        </mxCell>
+        <mxCell id="KdTJCK1NTJSuXhm9uc-u-55" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="" vertex="1">
+          <mxGeometry height="110" width="530" x="150" y="470" as="geometry" />
+        </mxCell>
+        <mxCell id="KdTJCK1NTJSuXhm9uc-u-41" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontSize=30;fontStyle=1" value="COAs Functional Diagram" vertex="1">
+          <mxGeometry height="30" width="520" x="140" y="502" as="geometry" />
+        </mxCell>
+        <mxCell id="KdTJCK1NTJSuXhm9uc-u-56" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="orbital_data" vertex="1">
+          <mxGeometry height="30" width="60" x="500" y="290" as="geometry" />
+        </mxCell>
+        <mxCell id="KdTJCK1NTJSuXhm9uc-u-57" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="propagated_data" vertex="1">
+          <mxGeometry height="30" width="60" x="1140" y="310" as="geometry" />
+        </mxCell>
+        <mxCell id="KdTJCK1NTJSuXhm9uc-u-59" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="name&lt;div&gt;catalog&lt;/div&gt;&lt;div&gt;latitude&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="60" x="780" y="290" as="geometry" />
+        </mxCell>
+        <mxCell id="KdTJCK1NTJSuXhm9uc-u-60" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="longitude&lt;div&gt;velocity&lt;/div&gt;&lt;div&gt;speed&lt;/div&gt;&lt;div&gt;time&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="60" x="780" y="350" as="geometry" />
+        </mxCell>
+        <mxCell id="KdTJCK1NTJSuXhm9uc-u-61" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;startArrow=classic;startFill=1;entryX=0;entryY=1;entryDx=0;entryDy=0;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="510" y="320" />
+              <mxPoint x="510" y="320" />
+            </Array>
+            <mxPoint x="580" y="320" as="sourcePoint" />
+            <mxPoint x="480" y="320" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="KdTJCK1NTJSuXhm9uc-u-62" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontSize=11;" value="(reference TLE Propagator for propagated data creation)" vertex="1">
+          <mxGeometry height="30" width="320" x="240" y="535" as="geometry" />
+        </mxCell>
+        <mxCell id="KdTJCK1NTJSuXhm9uc-u-63" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;startArrow=classic;startFill=1;entryX=0;entryY=1;entryDx=0;entryDy=0;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="790" y="330" />
+              <mxPoint x="790" y="330" />
+            </Array>
+            <mxPoint x="860" y="330" as="sourcePoint" />
+            <mxPoint x="760" y="330" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="KdTJCK1NTJSuXhm9uc-u-66" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;startArrow=classic;startFill=1;entryX=0;entryY=1;entryDx=0;entryDy=0;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1410" y="500" />
+              <mxPoint x="1410" y="500" />
+            </Array>
+            <mxPoint x="1480" y="500" as="sourcePoint" />
+            <mxPoint x="1380" y="500" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="KdTJCK1NTJSuXhm9uc-u-67" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Open JSON&lt;div&gt;(with open(&#39;(JSON)&#39;,&#39;r&#39;) as f:)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="72" width="160" x="1220" y="460" as="geometry" />
+        </mxCell>
+        <mxCell id="KdTJCK1NTJSuXhm9uc-u-68" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="f" vertex="1">
+          <mxGeometry height="30" width="160" x="1220" y="532" as="geometry" />
+        </mxCell>
+        <mxCell id="KdTJCK1NTJSuXhm9uc-u-72" edge="1" parent="1" source="KdTJCK1NTJSuXhm9uc-u-69" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1550" y="400" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="KdTJCK1NTJSuXhm9uc-u-69" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Load Data to Object (json.loads(f))" vertex="1">
+          <mxGeometry height="68" width="140" x="1480" y="460" as="geometry" />
+        </mxCell>
+        <mxCell id="KdTJCK1NTJSuXhm9uc-u-70" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="data" vertex="1">
+          <mxGeometry height="30" width="140" x="1480" y="528" as="geometry" />
+        </mxCell>
+        <mxCell id="KdTJCK1NTJSuXhm9uc-u-75" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="f" vertex="1">
+          <mxGeometry height="30" width="60" x="1400" y="470" as="geometry" />
+        </mxCell>
+        <mxCell id="KdTJCK1NTJSuXhm9uc-u-76" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="orbital_data.json" vertex="1">
+          <mxGeometry height="30" width="60" x="1320" y="420" as="geometry" />
+        </mxCell>
+        <mxCell id="KdTJCK1NTJSuXhm9uc-u-77" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="data" vertex="1">
+          <mxGeometry height="30" width="60" x="1540" y="425" as="geometry" />
+        </mxCell>
+        <mxCell id="KdTJCK1NTJSuXhm9uc-u-78" edge="1" parent="1" style="endArrow=none;dashed=1;html=1;rounded=0;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="1430" y="430" as="sourcePoint" />
+            <mxPoint x="1429.57" y="240" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="KdTJCK1NTJSuXhm9uc-u-80" edge="1" parent="1" style="endArrow=none;dashed=1;html=1;rounded=0;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <Array as="points">
+              <mxPoint x="1550" y="430" />
+            </Array>
+            <mxPoint x="1680" y="430" as="sourcePoint" />
+            <mxPoint x="1430" y="430" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="KdTJCK1NTJSuXhm9uc-u-81" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="&lt;b&gt;Visualization&lt;/b&gt;" vertex="1">
+          <mxGeometry height="30" width="60" x="1520" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="JStna5UOSO4Cb7S0Ppl2-1" edge="1" parent="1" style="endArrow=none;dashed=1;html=1;strokeWidth=2;rounded=0;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="563" y="470" as="sourcePoint" />
+            <mxPoint x="563" y="240" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="JStna5UOSO4Cb7S0Ppl2-2" edge="1" parent="1" style="endArrow=none;dashed=1;html=1;strokeWidth=2;rounded=0;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="1140" y="580" as="sourcePoint" />
+            <mxPoint x="1140" y="240" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="JStna5UOSO4Cb7S0Ppl2-3" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="&lt;font style=&quot;font-size: 19px;&quot;&gt;&lt;b&gt;TLE Propagator&lt;/b&gt;&lt;/font&gt;" vertex="1">
+          <mxGeometry height="40" width="210" x="790" y="540" as="geometry" />
+        </mxCell>
+        <mxCell id="JStna5UOSO4Cb7S0Ppl2-4" edge="1" parent="1" style="endArrow=none;dashed=1;html=1;strokeWidth=2;rounded=0;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="680" y="535" as="sourcePoint" />
+            <mxPoint x="1140" y="535" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
