@@ -1,10 +1,13 @@
 import argparse
 import json
+import platform
 from datetime import datetime, timezone
 from pathlib import Path
 
 import joblib
+import numpy as np
 import pandas as pd
+import sklearn
 
 from sklearn.compose import ColumnTransformer
 from sklearn.ensemble import RandomForestClassifier
@@ -29,6 +32,25 @@ except ImportError:  # Allow direct execution: python src/health/train_health_mo
 
 TARGET_COLUMN = "health_status"
 BASE_DIR = Path(__file__).resolve().parent
+REPOSITORY_ROOT = BASE_DIR.parents[1]
+DEFAULT_TELEMETRY_PATH = (
+    REPOSITORY_ROOT / "data" / "raw" / "telemetry" / "HealthTelemetry1.json"
+)
+DEFAULT_COMMAND_HISTORY_PATH = (
+    REPOSITORY_ROOT
+    / "data"
+    / "raw"
+    / "command_history"
+    / "CommandHistory1.json"
+)
+DEFAULT_MODEL_PATH = (
+    REPOSITORY_ROOT
+    / "data"
+    / "processed"
+    / "health"
+    / "models"
+    / "satellite_health_model.joblib"
+)
 
 
 
@@ -204,19 +226,19 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--telemetry",
         type=Path,
-        default=BASE_DIR / "HealthTelemetry1.json",
+        default=DEFAULT_TELEMETRY_PATH,
         help="Path to the telemetry JSON file.",
     )
     parser.add_argument(
         "--command-history",
         type=Path,
-        default=BASE_DIR / "CommandHistory1.json",
+        default=DEFAULT_COMMAND_HISTORY_PATH,
         help="Path to the command history JSON file.",
     )
     parser.add_argument(
         "--output-model",
         type=Path,
-        default=BASE_DIR / "satellite_health_model.joblib",
+        default=DEFAULT_MODEL_PATH,
         help="Path to save the trained model.",
     )
     parser.add_argument(
@@ -513,6 +535,11 @@ def main() -> None:
         "training_data_type": "synthetic_prototype",
         "random_state": args.random_state,
         "number_of_trees": args.trees,
+        "python_version": platform.python_version(),
+        "pandas_version": pd.__version__,
+        "scikit_learn_version": sklearn.__version__,
+        "joblib_version": joblib.__version__,
+        "numpy_version": np.__version__,
     }
 
     print("\nTraining complete.")
