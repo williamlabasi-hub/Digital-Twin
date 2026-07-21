@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import logging
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -14,8 +15,11 @@ try:
     from .health_features import HEALTH_CLASSES, MODEL_FEATURES, NUMERICAL_FEATURES
     from .telemetry_adapter import validate_and_adapt_housekeeping_record
 except ImportError:  # Allow direct execution: python src/health/health_monitor.py
-    from health_features import HEALTH_CLASSES, MODEL_FEATURES, NUMERICAL_FEATURES
-    from telemetry_adapter import validate_and_adapt_housekeeping_record
+    source_root = Path(__file__).resolve().parents[1]
+    if str(source_root) not in sys.path:
+        sys.path.insert(0, str(source_root))
+    from health.health_features import HEALTH_CLASSES, MODEL_FEATURES, NUMERICAL_FEATURES
+    from health.telemetry_adapter import validate_and_adapt_housekeeping_record
 
 
 BASE_DIR = Path(__file__).resolve().parent

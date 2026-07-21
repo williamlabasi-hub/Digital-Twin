@@ -1,4 +1,5 @@
 import json
+import subprocess
 import sys
 import unittest
 from pathlib import Path
@@ -23,6 +24,17 @@ from health.health_monitor import (
 
 
 class HealthMonitorTests(unittest.TestCase):
+    def test_health_monitor_supports_direct_script_help(self) -> None:
+        completed = subprocess.run(
+            [sys.executable, str(REPOSITORY_ROOT / "src" / "health" / "health_monitor.py"), "--help"],
+            cwd=REPOSITORY_ROOT,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        self.assertEqual(completed.returncode, 0, completed.stderr)
+        self.assertIn("satellite health predictions", completed.stdout.lower())
+
     def test_committed_example_output_matches_health_schema(self) -> None:
         schema_path = REPOSITORY_ROOT / "docs" / "requirements" / "health" / "health_predictions.schema.json"
         output_path = REPOSITORY_ROOT / "data" / "outputs" / "health" / "health_predictions.json"
