@@ -1,0 +1,537 @@
+schema_version: "0.1.0"
+document_status: prototype
+authority: preliminary_literature_review
+approval_status: unvalidated
+intended_use:
+  - interface_design
+  - synthetic_data_generation
+  - software_validation
+prohibited_use:
+  - flight_safety_decisions
+  - autonomous_safe_mode_entry
+  - certified_operational_limits
+
+record_requirements:
+  timestamp_format: ISO-8601 UTC
+  missing_value_representation: null
+  required_metadata:
+    - schema_version
+    - satellite_id
+    - timestamp
+    - source
+    - spacecraft_mode
+
+spacecraft_modes:
+  - nominal
+  - payload_operations
+  - communications
+  - safe
+  - recovery
+  - emergency
+
+parameters:
+  battery_voltage_v:
+    display_name: Battery Voltage
+    subsystem: power
+    description: Measured spacecraft battery or battery-bus voltage.
+    data_type: number
+    unit: V
+    physical_range: {minimum: 0, maximum: 50}
+    operational_limits: {status: TBD}
+    expected_sample_period_seconds: 10
+    stale_after_seconds: 30
+    nullable: false
+    measurement_kind: direct
+    source: {authority: prototype_assumption, reference: null, approval_status: unvalidated}
+
+  battery_current_a:
+    display_name: Battery Current
+    subsystem: power
+    description: Signed battery current; sign convention must be defined by the spacecraft interface.
+    data_type: number
+    unit: A
+    physical_range: {minimum: -20, maximum: 20}
+    operational_limits: {status: TBD}
+    expected_sample_period_seconds: 10
+    stale_after_seconds: 30
+    nullable: false
+    measurement_kind: direct
+    notes: [Define whether positive current means charging or discharging.]
+    source: {authority: prototype_assumption, reference: null, approval_status: unvalidated}
+
+  battery_state_of_charge_pct:
+    display_name: Battery State of Charge
+    subsystem: power
+    description: Estimated usable battery charge as a percentage.
+    data_type: number
+    unit: percent
+    physical_range: {minimum: 0, maximum: 100}
+    operational_limits: {status: TBD}
+    expected_sample_period_seconds: 30
+    stale_after_seconds: 90
+    nullable: true
+    measurement_kind: estimated
+    notes: [Record estimator quality or uncertainty when available.]
+    source: {authority: engineering_definition, reference: null, approval_status: pending}
+
+  solar_array_voltage_v:
+    display_name: Solar Array Voltage
+    subsystem: power
+    description: Solar-array output voltage at the power-conditioning interface.
+    data_type: number
+    unit: V
+    physical_range: {minimum: 0, maximum: 100}
+    operational_limits: {status: TBD}
+    expected_sample_period_seconds: 10
+    stale_after_seconds: 30
+    nullable: false
+    measurement_kind: direct
+    context_required: [eclipse_state, array_configuration]
+    source: {authority: prototype_assumption, reference: null, approval_status: unvalidated}
+
+  solar_array_current_a:
+    display_name: Solar Array Current
+    subsystem: power
+    description: Solar-array current delivered to the power system.
+    data_type: number
+    unit: A
+    physical_range: {minimum: 0, maximum: 20}
+    operational_limits: {status: TBD}
+    expected_sample_period_seconds: 10
+    stale_after_seconds: 30
+    nullable: false
+    measurement_kind: direct
+    context_required: [eclipse_state, array_configuration]
+    source: {authority: prototype_assumption, reference: null, approval_status: unvalidated}
+
+  rail_3v3_voltage_v:
+    display_name: 3.3 V Rail Voltage
+    subsystem: power
+    description: Measured low-voltage 3.3 V supply rail.
+    data_type: number
+    unit: V
+    physical_range: {minimum: 0, maximum: 5}
+    operational_limits: {status: TBD}
+    expected_sample_period_seconds: 10
+    stale_after_seconds: 30
+    nullable: true
+    measurement_kind: direct
+    source: {authority: subsystem_specification, reference: null, approval_status: pending}
+
+  rail_5v_voltage_v:
+    display_name: 5 V Rail Voltage
+    subsystem: power
+    description: Measured low-voltage 5 V supply rail.
+    data_type: number
+    unit: V
+    physical_range: {minimum: 0, maximum: 7}
+    operational_limits: {status: TBD}
+    expected_sample_period_seconds: 10
+    stale_after_seconds: 30
+    nullable: true
+    measurement_kind: direct
+    source: {authority: subsystem_specification, reference: null, approval_status: pending}
+
+  rail_12v_voltage_v:
+    display_name: 12 V Rail Voltage
+    subsystem: power
+    description: Measured 12 V subsystem supply rail.
+    data_type: number
+    unit: V
+    physical_range: {minimum: 0, maximum: 16}
+    operational_limits: {status: TBD}
+    expected_sample_period_seconds: 10
+    stale_after_seconds: 30
+    nullable: true
+    measurement_kind: direct
+    source: {authority: subsystem_specification, reference: null, approval_status: pending}
+
+  flight_computer_temperature_c:
+    display_name: Flight Computer Temperature
+    subsystem: thermal
+    description: Temperature measured at the flight-computer sensor location.
+    data_type: number
+    unit: degC
+    physical_range: {minimum: -100, maximum: 150}
+    operational_limits: {status: TBD}
+    expected_sample_period_seconds: 10
+    stale_after_seconds: 30
+    nullable: false
+    measurement_kind: direct
+    source: {authority: component_specification, reference: null, approval_status: pending}
+
+  payload_temperature_c:
+    display_name: Payload Temperature
+    subsystem: payload
+    description: Temperature measured at the payload sensor location.
+    data_type: number
+    unit: degC
+    physical_range: {minimum: -100, maximum: 150}
+    operational_limits: {status: TBD}
+    expected_sample_period_seconds: 10
+    stale_after_seconds: 30
+    nullable: true
+    measurement_kind: direct
+    source: {authority: payload_specification, reference: null, approval_status: pending}
+
+  radiator_temperature_c:
+    display_name: Radiator Temperature
+    subsystem: thermal
+    description: Temperature measured at a defined radiator or heat-sink location.
+    data_type: number
+    unit: degC
+    physical_range: {minimum: -150, maximum: 150}
+    operational_limits: {status: TBD}
+    expected_sample_period_seconds: 30
+    stale_after_seconds: 90
+    nullable: true
+    measurement_kind: direct
+    source: {authority: thermal_model, reference: null, approval_status: pending}
+
+  gyro_x_rate_deg_s:
+    display_name: Gyro X Angular Rate
+    subsystem: adcs
+    description: Measured spacecraft angular rate about the body X axis.
+    data_type: number
+    unit: deg/s
+    physical_range: {minimum: -100, maximum: 100}
+    operational_limits: {status: TBD}
+    expected_sample_period_seconds: 1
+    stale_after_seconds: 3
+    nullable: false
+    measurement_kind: direct
+    coordinate_frame: spacecraft_body
+    source: {authority: gyro_datasheet, reference: null, approval_status: pending}
+
+  gyro_y_rate_deg_s:
+    display_name: Gyro Y Angular Rate
+    subsystem: adcs
+    description: Measured spacecraft angular rate about the body Y axis.
+    data_type: number
+    unit: deg/s
+    physical_range: {minimum: -100, maximum: 100}
+    operational_limits: {status: TBD}
+    expected_sample_period_seconds: 1
+    stale_after_seconds: 3
+    nullable: false
+    measurement_kind: direct
+    coordinate_frame: spacecraft_body
+    source: {authority: gyro_datasheet, reference: null, approval_status: pending}
+
+  gyro_z_rate_deg_s:
+    display_name: Gyro Z Angular Rate
+    subsystem: adcs
+    description: Measured spacecraft angular rate about the body Z axis.
+    data_type: number
+    unit: deg/s
+    physical_range: {minimum: -100, maximum: 100}
+    operational_limits: {status: TBD}
+    expected_sample_period_seconds: 1
+    stale_after_seconds: 3
+    nullable: false
+    measurement_kind: direct
+    coordinate_frame: spacecraft_body
+    source: {authority: gyro_datasheet, reference: null, approval_status: pending}
+
+  gyro_bias_x_deg_hr:
+    display_name: Estimated Gyro X Bias
+    subsystem: adcs
+    description: Estimated gyro bias about the body X axis.
+    data_type: number
+    unit: deg/hr
+    physical_range: {minimum: -100, maximum: 100}
+    operational_limits: {status: TBD}
+    expected_sample_period_seconds: 60
+    stale_after_seconds: 180
+    nullable: true
+    measurement_kind: estimated
+    coordinate_frame: spacecraft_body
+    source: {authority: adcs_algorithm_definition, reference: null, approval_status: pending}
+
+  magnetometer_x_ut:
+    display_name: Magnetometer X
+    subsystem: adcs
+    description: Signed magnetic-field component along body X.
+    data_type: number
+    unit: uT
+    physical_range: {minimum: -100, maximum: 100}
+    operational_limits: {status: TBD}
+    expected_sample_period_seconds: 1
+    stale_after_seconds: 3
+    nullable: false
+    measurement_kind: direct
+    coordinate_frame: spacecraft_body
+    source: {authority: NOAA_reference_and_sensor_datasheet, reference: null, approval_status: unvalidated}
+
+  magnetometer_y_ut:
+    display_name: Magnetometer Y
+    subsystem: adcs
+    description: Signed magnetic-field component along body Y.
+    data_type: number
+    unit: uT
+    physical_range: {minimum: -100, maximum: 100}
+    operational_limits: {status: TBD}
+    expected_sample_period_seconds: 1
+    stale_after_seconds: 3
+    nullable: false
+    measurement_kind: direct
+    coordinate_frame: spacecraft_body
+    source: {authority: NOAA_reference_and_sensor_datasheet, reference: null, approval_status: unvalidated}
+
+  magnetometer_z_ut:
+    display_name: Magnetometer Z
+    subsystem: adcs
+    description: Signed magnetic-field component along body Z.
+    data_type: number
+    unit: uT
+    physical_range: {minimum: -100, maximum: 100}
+    operational_limits: {status: TBD}
+    expected_sample_period_seconds: 1
+    stale_after_seconds: 3
+    nullable: false
+    measurement_kind: direct
+    coordinate_frame: spacecraft_body
+    source: {authority: NOAA_reference_and_sensor_datasheet, reference: null, approval_status: unvalidated}
+
+  magnetic_field_magnitude_ut:
+    display_name: Magnetic Field Magnitude
+    subsystem: adcs
+    description: Magnitude of the measured magnetic-field vector.
+    data_type: number
+    unit: uT
+    physical_range: {minimum: 0, maximum: 100}
+    contextual_reference_range: {minimum: 25, maximum: 65, context: approximate Earth surface field}
+    operational_limits: {status: TBD}
+    expected_sample_period_seconds: 1
+    stale_after_seconds: 3
+    nullable: true
+    measurement_kind: derived
+    source: {authority: NOAA_geomagnetism_FAQ, reference: https://www.ncei.noaa.gov/products/geomagnetism-frequently-asked-questions, approval_status: reference_only}
+
+  sun_sensor_azimuth_deg:
+    display_name: Sun Sensor Azimuth
+    subsystem: adcs
+    description: Sun azimuth in the declared sensor or spacecraft frame.
+    data_type: number
+    unit: deg
+    physical_range: {minimum_inclusive: 0, maximum_exclusive: 360}
+    operational_limits: {status: TBD}
+    expected_sample_period_seconds: 1
+    stale_after_seconds: 3
+    nullable: true
+    measurement_kind: direct
+    notes: [Coordinate frame and wrap behavior must be defined.]
+    source: {authority: sun_sensor_datasheet, reference: null, approval_status: pending}
+
+  reaction_wheel_1_speed_rpm:
+    display_name: Reaction Wheel 1 Speed
+    subsystem: adcs
+    description: Signed rotational speed of reaction wheel 1.
+    data_type: number
+    unit: rpm
+    physical_range: {minimum: TBD, maximum: TBD}
+    operational_limits: {status: TBD}
+    expected_sample_period_seconds: 1
+    stale_after_seconds: 3
+    nullable: false
+    measurement_kind: direct
+    notes: [Populate from the selected wheel datasheet and momentum-management design.]
+    source: {authority: reaction_wheel_datasheet, reference: null, approval_status: pending}
+
+  reaction_wheel_2_speed_rpm:
+    display_name: Reaction Wheel 2 Speed
+    subsystem: adcs
+    description: Signed rotational speed of reaction wheel 2.
+    data_type: number
+    unit: rpm
+    physical_range: {minimum: TBD, maximum: TBD}
+    operational_limits: {status: TBD}
+    expected_sample_period_seconds: 1
+    stale_after_seconds: 3
+    nullable: false
+    measurement_kind: direct
+    source: {authority: reaction_wheel_datasheet, reference: null, approval_status: pending}
+
+  reaction_wheel_3_speed_rpm:
+    display_name: Reaction Wheel 3 Speed
+    subsystem: adcs
+    description: Signed rotational speed of reaction wheel 3.
+    data_type: number
+    unit: rpm
+    physical_range: {minimum: TBD, maximum: TBD}
+    operational_limits: {status: TBD}
+    expected_sample_period_seconds: 1
+    stale_after_seconds: 3
+    nullable: false
+    measurement_kind: direct
+    source: {authority: reaction_wheel_datasheet, reference: null, approval_status: pending}
+
+  thruster_firing:
+    display_name: Thruster Firing State
+    subsystem: propulsion
+    description: Whether a thruster firing is active for the identified thruster.
+    data_type: boolean
+    unit: null
+    operational_limits: {status: not_applicable}
+    expected_sample_period_seconds: 1
+    stale_after_seconds: 3
+    nullable: true
+    measurement_kind: state
+    source: {authority: propulsion_interface, reference: null, approval_status: pending}
+
+  thruster_pulse_width_ms:
+    display_name: Thruster Pulse Width
+    subsystem: propulsion
+    description: Commanded or measured firing duration; provenance must distinguish the two.
+    data_type: number
+    unit: ms
+    physical_range: {minimum: 0, maximum: TBD}
+    operational_limits: {status: TBD}
+    expected_sample_period_seconds: event_driven
+    stale_after_seconds: not_applicable
+    nullable: true
+    measurement_kind: direct_or_commanded
+    source: {authority: propulsion_interface, reference: null, approval_status: pending}
+
+  memory_usage_pct:
+    display_name: Memory Usage
+    subsystem: command_and_data_handling
+    description: Used memory as a percentage of configured capacity.
+    data_type: number
+    unit: percent
+    physical_range: {minimum: 0, maximum: 100}
+    operational_limits: {status: TBD}
+    expected_sample_period_seconds: 30
+    stale_after_seconds: 90
+    nullable: false
+    measurement_kind: derived
+    source: {authority: flight_software_interface, reference: null, approval_status: pending}
+
+  memory_corrected_error_count:
+    display_name: Corrected Memory Errors
+    subsystem: command_and_data_handling
+    description: Monotonic count of corrected memory errors since the defined reset event.
+    data_type: integer
+    unit: count
+    physical_range: {minimum: 0, maximum: null}
+    operational_limits: {status: TBD}
+    expected_sample_period_seconds: 60
+    stale_after_seconds: 180
+    nullable: true
+    measurement_kind: counter
+    source: {authority: flight_software_interface, reference: null, approval_status: pending}
+
+  onboard_data_generation_rate_kbps:
+    display_name: Onboard Data Generation Rate
+    subsystem: command_and_data_handling
+    description: Rate at which onboard producers generate stored or transmitted data.
+    data_type: number
+    unit: kbps
+    physical_range: {minimum: 0, maximum: TBD}
+    operational_limits: {status: TBD}
+    expected_sample_period_seconds: 10
+    stale_after_seconds: 30
+    nullable: true
+    measurement_kind: derived
+    source: {authority: mission_data_budget, reference: null, approval_status: pending}
+
+  downlink_rate_kbps:
+    display_name: Downlink Rate
+    subsystem: communications
+    description: Effective spacecraft downlink data rate.
+    data_type: number
+    unit: kbps
+    physical_range: {minimum: 0, maximum: TBD}
+    operational_limits: {status: TBD}
+    expected_sample_period_seconds: 10
+    stale_after_seconds: 30
+    nullable: true
+    measurement_kind: derived
+    context_required: [communications_pass_state, selected_radio_mode]
+    source: {authority: communications_link_budget, reference: null, approval_status: pending}
+
+  propellant_remaining_pct:
+    display_name: Propellant Remaining
+    subsystem: propulsion
+    description: Estimated usable propellant remaining.
+    data_type: number
+    unit: percent
+    physical_range: {minimum: 0, maximum: 100}
+    operational_limits: {status: TBD}
+    expected_sample_period_seconds: 300
+    stale_after_seconds: 900
+    nullable: true
+    measurement_kind: estimated
+    notes: [Include estimation method and uncertainty when available.]
+    source: {authority: propulsion_estimator_definition, reference: null, approval_status: pending}
+
+  propellant_tank_pressure_bar:
+    display_name: Propellant Tank Pressure
+    subsystem: propulsion
+    description: Pressure at the identified propellant tank sensor.
+    data_type: number
+    unit: bar
+    physical_range: {minimum: 0, maximum: TBD}
+    operational_limits: {status: TBD}
+    expected_sample_period_seconds: 30
+    stale_after_seconds: 90
+    nullable: true
+    measurement_kind: direct
+    source: {authority: propulsion_system_specification, reference: null, approval_status: pending}
+
+  clock_drift_us_day:
+    display_name: Clock Drift
+    subsystem: timing
+    description: Estimated accumulated clock drift normalized to one day.
+    data_type: number
+    unit: us/day
+    physical_range: {minimum: TBD, maximum: TBD}
+    operational_limits: {status: TBD}
+    expected_sample_period_seconds: 300
+    stale_after_seconds: 900
+    nullable: true
+    measurement_kind: estimated
+    source: {authority: timing_requirements, reference: null, approval_status: pending}
+
+  time_sync_offset_ms:
+    display_name: Time Synchronization Offset
+    subsystem: timing
+    description: Signed spacecraft time offset from the designated reference clock.
+    data_type: number
+    unit: ms
+    physical_range: {minimum: TBD, maximum: TBD}
+    operational_limits: {status: TBD}
+    expected_sample_period_seconds: 60
+    stale_after_seconds: 180
+    nullable: true
+    measurement_kind: derived
+    source: {authority: timing_requirements, reference: null, approval_status: pending}
+
+  command_queue_depth:
+    display_name: Command Queue Depth
+    subsystem: command_and_control
+    description: Number of commands currently queued for execution.
+    data_type: integer
+    unit: count
+    physical_range: {minimum: 0, maximum: TBD}
+    operational_limits: {status: TBD}
+    expected_sample_period_seconds: 10
+    stale_after_seconds: 30
+    nullable: false
+    measurement_kind: direct
+    source: {authority: flight_software_configuration, reference: null, approval_status: pending}
+
+  latest_command_status:
+    display_name: Latest Command Status
+    subsystem: command_and_control
+    description: Lifecycle status of the latest applicable command.
+    data_type: string
+    unit: null
+    allowed_values: [queued, executing, successful, failed, timed_out, rejected, cancelled]
+    operational_limits: {status: rule_based}
+    expected_sample_period_seconds: event_driven
+    stale_after_seconds: not_applicable
+    nullable: true
+    measurement_kind: state
+    source: {authority: command_interface, reference: null, approval_status: pending}
+

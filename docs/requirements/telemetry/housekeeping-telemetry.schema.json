@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/digital-twin/housekeeping-telemetry.schema.json",
+  "title": "Satellite Housekeeping Telemetry Record",
+  "description": "Prototype structural contract. Operational thresholds remain spacecraft-specific and unvalidated.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "satellite_id", "timestamp", "source", "spacecraft_mode", "telemetry"],
+  "properties": {
+    "schema_version": {"const": "0.1.0"},
+    "satellite_id": {"type": "string", "minLength": 1},
+    "timestamp": {"type": "string", "format": "date-time"},
+    "source": {"type": "string", "minLength": 1},
+    "sequence_number": {"type": ["integer", "null"], "minimum": 0},
+    "spacecraft_mode": {
+      "type": "string",
+      "enum": ["nominal", "payload_operations", "communications", "safe", "recovery", "emergency"]
+    },
+    "telemetry": {
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "battery_voltage_v": {"type": ["number", "null"], "minimum": 0, "maximum": 50},
+        "battery_current_a": {"type": ["number", "null"], "minimum": -20, "maximum": 20},
+        "battery_state_of_charge_pct": {"type": ["number", "null"], "minimum": 0, "maximum": 100},
+        "solar_array_voltage_v": {"type": ["number", "null"], "minimum": 0, "maximum": 100},
+        "solar_array_current_a": {"type": ["number", "null"], "minimum": 0, "maximum": 20},
+        "rail_3v3_voltage_v": {"type": ["number", "null"], "minimum": 0, "maximum": 5},
+        "rail_5v_voltage_v": {"type": ["number", "null"], "minimum": 0, "maximum": 7},
+        "rail_12v_voltage_v": {"type": ["number", "null"], "minimum": 0, "maximum": 16},
+        "flight_computer_temperature_c": {"type": ["number", "null"], "minimum": -100, "maximum": 150},
+        "payload_temperature_c": {"type": ["number", "null"], "minimum": -100, "maximum": 150},
+        "radiator_temperature_c": {"type": ["number", "null"], "minimum": -150, "maximum": 150},
+        "gyro_x_rate_deg_s": {"type": ["number", "null"], "minimum": -100, "maximum": 100},
+        "gyro_y_rate_deg_s": {"type": ["number", "null"], "minimum": -100, "maximum": 100},
+        "gyro_z_rate_deg_s": {"type": ["number", "null"], "minimum": -100, "maximum": 100},
+        "gyro_bias_x_deg_hr": {"type": ["number", "null"], "minimum": -100, "maximum": 100},
+        "magnetometer_x_ut": {"type": ["number", "null"], "minimum": -100, "maximum": 100},
+        "magnetometer_y_ut": {"type": ["number", "null"], "minimum": -100, "maximum": 100},
+        "magnetometer_z_ut": {"type": ["number", "null"], "minimum": -100, "maximum": 100},
+        "magnetic_field_magnitude_ut": {"type": ["number", "null"], "minimum": 0, "maximum": 100},
+        "sun_sensor_azimuth_deg": {"type": ["number", "null"], "minimum": 0, "exclusiveMaximum": 360},
+        "reaction_wheel_1_speed_rpm": {"type": ["number", "null"]},
+        "reaction_wheel_2_speed_rpm": {"type": ["number", "null"]},
+        "reaction_wheel_3_speed_rpm": {"type": ["number", "null"]},
+        "thruster_firing": {"type": ["boolean", "null"]},
+        "thruster_pulse_width_ms": {"type": ["number", "null"], "minimum": 0},
+        "memory_usage_pct": {"type": ["number", "null"], "minimum": 0, "maximum": 100},
+        "memory_corrected_error_count": {"type": ["integer", "null"], "minimum": 0},
+        "onboard_data_generation_rate_kbps": {"type": ["number", "null"], "minimum": 0},
+        "downlink_rate_kbps": {"type": ["number", "null"], "minimum": 0},
+        "propellant_remaining_pct": {"type": ["number", "null"], "minimum": 0, "maximum": 100},
+        "propellant_tank_pressure_bar": {"type": ["number", "null"], "minimum": 0},
+        "clock_drift_us_day": {"type": ["number", "null"]},
+        "time_sync_offset_ms": {"type": ["number", "null"]},
+        "command_queue_depth": {"type": ["integer", "null"], "minimum": 0},
+        "latest_command_status": {
+          "type": ["string", "null"],
+          "enum": ["queued", "executing", "successful", "failed", "timed_out", "rejected", "cancelled", null]
+        }
+      }
+    }
+  }
+}
+
