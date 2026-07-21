@@ -1,0 +1,33 @@
+{
+  "schema_version": "0.1.0",
+  "satellite_id": "SAT-001",
+  "timestamp": "2026-07-21T18:30:00Z",
+  "source": "housekeeping_simulator",
+  "sequence_number": 1042,
+  "spacecraft_mode": "nominal",
+  "telemetry": {
+    "battery_voltage_v": 28.1,
+    "battery_current_a": -2.4,
+    "battery_state_of_charge_pct": 82.0,
+    "solar_array_voltage_v": 31.5,
+    "solar_array_current_a": 5.8,
+    "flight_computer_temperature_c": 29.4,
+    "payload_temperature_c": 34.7,
+    "gyro_x_rate_deg_s": 0.02,
+    "gyro_y_rate_deg_s": -0.01,
+    "gyro_z_rate_deg_s": 0.03,
+    "magnetometer_x_ut": 18.5,
+    "magnetometer_y_ut": -4.2,
+    "magnetometer_z_ut": 37.1,
+    "magnetic_field_magnitude_ut": 41.67,
+    "sun_sensor_azimuth_deg": 142.6,
+    "reaction_wheel_1_speed_rpm": 4120,
+    "reaction_wheel_2_speed_rpm": -3860,
+    "reaction_wheel_3_speed_rpm": 2750,
+    "memory_usage_pct": 43.2,
+    "downlink_rate_kbps": 850,
+    "command_queue_depth": 2,
+    "latest_command_status": "successful"
+  }
+}
+
