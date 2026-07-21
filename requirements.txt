@@ -1,5 +1,8 @@
 pandas
 scikit-learn
 joblib
+numpy
+sgp4
+skyfield
 jsonschema>=4.18,<5.0
 PyYAML>=6.0,<7.0
