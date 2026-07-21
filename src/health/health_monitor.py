@@ -10,7 +10,12 @@ from typing import Any
 import joblib
 import pandas as pd
 
-from health_features import HEALTH_CLASSES, MODEL_FEATURES, NUMERICAL_FEATURES
+try:
+    from .health_features import HEALTH_CLASSES, MODEL_FEATURES, NUMERICAL_FEATURES
+    from .telemetry_adapter import validate_and_adapt_housekeeping_record
+except ImportError:  # Allow direct execution: python src/health/health_monitor.py
+    from health_features import HEALTH_CLASSES, MODEL_FEATURES, NUMERICAL_FEATURES
+    from telemetry_adapter import validate_and_adapt_housekeeping_record
 
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -211,6 +216,7 @@ def integrate_command_history(
 def prepare_dataset(
     telemetry_path: Path,
     command_history_path: Path,
+    validation_reference_time: datetime | None = None,
 ) -> pd.DataFrame:
     """
     Load telemetry and command history and create
@@ -225,9 +231,22 @@ def prepare_dataset(
         command_history_path
     )
 
-    telemetry_df = pd.DataFrame(
-        telemetry_records
-    )
+    envelope_flags = ["telemetry" in record for record in telemetry_records]
+    if any(envelope_flags) and not all(envelope_flags):
+        raise ValueError(
+            "Telemetry input may not mix Version 0.1 envelopes with legacy flat records."
+        )
+
+    if all(envelope_flags):
+        telemetry_records = [
+            validate_and_adapt_housekeeping_record(
+                record,
+                reference_time=validation_reference_time,
+            ).model_record
+            for record in telemetry_records
+        ]
+
+    telemetry_df = pd.DataFrame(telemetry_records)
 
     command_df = pd.DataFrame(
         command_records
@@ -575,7 +594,7 @@ def describe_data_quality(row: pd.Series) -> dict[str, Any]:
     ]
     command_available = pd.notna(row.get("recent_command_timestamp"))
 
-    notes: list[str] = []
+    notes: list[str] = list(row.get("input_validation_issues") or [])
     if missing_features:
         notes.append(
             "Missing model values were passed to the saved preprocessing "
@@ -584,10 +603,14 @@ def describe_data_quality(row: pd.Series) -> dict[str, Any]:
     if not command_available:
         notes.append("No preceding command was available for this sample.")
 
+    upstream_status = row.get("input_data_quality", "complete")
+    status = "degraded" if missing_features or upstream_status == "degraded" else "complete"
+
     return {
-        "status": "degraded" if missing_features else "complete",
+        "status": status,
         "missing_model_values": missing_features,
         "preceding_command_available": bool(command_available),
+        "telemetry_adapter_version": row.get("telemetry_adapter_version"),
         "notes": notes,
     }
 

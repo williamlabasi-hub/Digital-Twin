@@ -20,7 +20,10 @@ from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder
 
-from health_features import CATEGORICAL_FEATURES, MODEL_FEATURES, NUMERICAL_FEATURES
+try:
+    from .health_features import CATEGORICAL_FEATURES, MODEL_FEATURES, NUMERICAL_FEATURES
+except ImportError:  # Allow direct execution: python src/health/train_health_model.py
+    from health_features import CATEGORICAL_FEATURES, MODEL_FEATURES, NUMERICAL_FEATURES
 
 
 

@@ -1,4 +1,5 @@
 import json
+import sys
 import unittest
 from pathlib import Path
 
@@ -6,8 +7,11 @@ import joblib
 import pandas as pd
 from jsonschema import Draft7Validator
 
-from health_features import MODEL_FEATURES
-from health_monitor import (
+REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(REPOSITORY_ROOT / "src"))
+
+from health.health_features import MODEL_FEATURES
+from health.health_monitor import (
     build_ml_records,
     build_report,
     determine_health_trend,
@@ -92,15 +96,38 @@ class HealthMonitorTests(unittest.TestCase):
         self.assertNotIn("seconds_since_last_command", record)
 
     def test_saved_model_and_sample_data_produce_schema_valid_output(self) -> None:
-        project_dir = Path(__file__).resolve().parents[1]
-        dataset = prepare_dataset(
-            project_dir / "HealthTelemetry1.json",
-            project_dir / "CommandHistory1.json",
+        model_path = (
+            REPOSITORY_ROOT
+            / "data"
+            / "processed"
+            / "health"
+            / "models"
+            / "satellite_health_model.joblib"
         )
-        model = joblib.load(project_dir / "satellite_health_model.joblib")
+        schema_path = (
+            REPOSITORY_ROOT
+            / "docs"
+            / "requirements"
+            / "health"
+            / "health_predictions.schema.json"
+        )
+        if not model_path.exists() or not schema_path.exists():
+            self.skipTest(
+                "Versioned model artifact and health-report schema are not present."
+            )
+
+        dataset = prepare_dataset(
+            REPOSITORY_ROOT / "data" / "raw" / "telemetry" / "HealthTelemetry1.json",
+            REPOSITORY_ROOT
+            / "data"
+            / "raw"
+            / "command_history"
+            / "CommandHistory1.json",
+        )
+        model = joblib.load(model_path)
         report = build_report(dataset, model, history=[])
 
-        output_path = project_dir / "tests" / "_health_predictions_test.json"
+        output_path = Path(__file__).resolve().parent / "_health_predictions_test.json"
         try:
             save_report(
                 report,
@@ -109,9 +136,7 @@ class HealthMonitorTests(unittest.TestCase):
             )
             output = json.loads(output_path.read_text(encoding="utf-8"))
             schema = json.loads(
-                (project_dir / "health_predictions.schema.json").read_text(
-                    encoding="utf-8"
-                )
+                schema_path.read_text(encoding="utf-8")
             )
         finally:
             output_path.unlink(missing_ok=True)
