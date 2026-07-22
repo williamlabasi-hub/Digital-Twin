@@ -25,6 +25,7 @@
   },
   "definitions": {
     "healthClass": {"enum": ["Healthy", "Warning", "Degraded", "Critical"]},
+    "subsystemHealthClass": {"enum": ["Unknown", "Healthy", "Warning", "Degraded", "Critical"]},
     "nullableNumber": {"type": ["number", "null"]},
     "classProbabilities": {
       "type": "object",
@@ -38,23 +39,28 @@
     },
     "reportRecord": {
       "type": "object",
-      "required": ["report_generated_at", "satellite_id", "timestamp", "prediction", "overall_health", "subsystem_health", "predicted_probability", "class_probabilities", "probability_interpretation", "recent_command", "telemetry", "assessment", "data_quality", "recommendations", "recommendation_scope", "health_trend"],
+      "required": ["report_generated_at", "satellite_id", "timestamp", "prediction", "model_assurance", "overall_health", "subsystem_health", "fault_hypotheses", "predicted_probability", "class_probabilities", "probability_interpretation", "recent_command", "telemetry", "assessment", "data_quality", "recommendations", "recommendation_scope", "health_trend"],
       "properties": {
         "report_generated_at": {"type": "string", "format": "date-time"},
         "satellite_id": {"type": "string", "minLength": 1},
         "timestamp": {"type": "string", "format": "date-time"},
         "prediction": {"$ref": "#/definitions/healthClass"},
+        "model_assurance": {
+          "type": "object",
+          "required": ["decision", "accepted", "method", "reasons"]
+        },
         "overall_health": {
           "type": "object",
-          "required": ["status", "method", "contributors", "ml_status", "subsystem_statuses"],
+          "required": ["status", "method", "contributors", "ml_status", "ml_accepted", "subsystem_statuses"],
           "properties": {
-            "status": {"$ref": "#/definitions/healthClass"},
+            "status": {"$ref": "#/definitions/subsystemHealthClass"},
             "method": {"const": "maximum_severity"},
             "contributors": {"type": "array", "items": {"type": "string"}},
             "ml_status": {"$ref": "#/definitions/healthClass"},
+            "ml_accepted": {"type": "boolean"},
             "subsystem_statuses": {
               "type": "object",
-              "additionalProperties": {"$ref": "#/definitions/healthClass"}
+              "additionalProperties": {"$ref": "#/definitions/subsystemHealthClass"}
             }
           }
         },
@@ -64,9 +70,9 @@
           "properties": {
             "power": {
               "type": "object",
-              "required": ["status", "confidence", "method", "fault_codes", "evidence", "trends", "power_proxies", "context_notes", "limitations"],
+              "required": ["status", "confidence", "method", "fault_codes", "evidence", "trends", "power_proxies", "context_notes", "limitations", "data_completeness"],
               "properties": {
-                "status": {"$ref": "#/definitions/healthClass"},
+                "status": {"$ref": "#/definitions/subsystemHealthClass"},
                 "confidence": {"type": "number", "minimum": 0, "maximum": 1},
                 "method": {"const": "prototype_engineering_rules"},
                 "fault_codes": {"type": "array", "items": {"type": "string"}},
@@ -75,8 +81,16 @@
                 "power_proxies": {"type": "object"},
                 "context_notes": {"type": "array", "items": {"type": "string"}},
                 "limitations": {"type": "array", "items": {"type": "string"}}
+                ,"data_completeness": {"type": "object"}
               }
             }
+          }
+        },
+        "fault_hypotheses": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["hypothesis_id", "confidence", "summary", "supporting_subsystems", "status"]
           }
         },
         "predicted_probability": {"type": ["number", "null"], "minimum": 0, "maximum": 1},

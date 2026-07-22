@@ -24,6 +24,11 @@ seconds since command, spacecraft mode, eclipse state, array configuration,
 battery-current sign convention, and recent command context. The exact feature
 list is embedded in the artifact.
 
+The artifact also embeds observed numerical ranges and categorical values from
+training. Inference outside this profile is marked as an abstention and is not
+used as an overall-health contributor. This is a simple applicability check,
+not a complete statistical out-of-distribution detector.
+
 ## Training data
 
 This prototype is trained on 100 synthetic records from:

@@ -7,7 +7,7 @@ from typing import Any, Mapping
 import pandas as pd
 
 
-SEVERITY = {"Healthy": 0, "Warning": 1, "Degraded": 2, "Critical": 3}
+SEVERITY = {"Unknown": -1, "Healthy": 0, "Warning": 1, "Degraded": 2, "Critical": 3}
 
 
 def _number(value: Any) -> float | None:
@@ -44,6 +44,10 @@ def assess_power_subsystem(
     array_configuration = str(row.get("solar_array_configuration", "unknown"))
     sign_convention = str(row.get("battery_current_sign_convention", "unknown"))
     findings: list[dict[str, Any]] = []
+    available_measurements = sum(
+        value is not None
+        for value in (voltage, current, state_of_charge, solar_voltage, solar_current)
+    )
 
     if voltage is not None:
         if voltage < 22:
@@ -156,8 +160,10 @@ def assess_power_subsystem(
         key=lambda value: SEVERITY[value],
         default="Healthy",
     )
+    if available_measurements == 0:
+        status = "Unknown"
     quality = row.get("input_data_quality", "complete")
-    confidence = 0.9
+    confidence = 0.0 if status == "Unknown" else 0.9
     if context_notes:
         confidence = min(confidence, 0.6)
     if quality == "degraded":
@@ -193,6 +199,11 @@ def assess_power_subsystem(
         "limitations": [
             "Thresholds are prototype assumptions and are not approved spacecraft limits."
         ],
+        "data_completeness": {
+            "available_measurements": available_measurements,
+            "required_measurements": 5,
+            "sufficient": available_measurements > 0,
+        },
     }
 
 
@@ -213,14 +224,20 @@ def aggregate_health(ml_prediction: str, power_status: str) -> dict[str, Any]:
 
 
 def aggregate_all_health(
-    ml_prediction: str, subsystem_health: Mapping[str, Mapping[str, Any]]
+    ml_prediction: str,
+    subsystem_health: Mapping[str, Mapping[str, Any]],
+    *,
+    ml_accepted: bool = True,
 ) -> dict[str, Any]:
     """Conservatively combine ML with every available subsystem result."""
 
     subsystem_statuses = {
-        name: str(result["status"]) for name, result in subsystem_health.items()
+        name: str(result.get("effective_status", result["status"]))
+        for name, result in subsystem_health.items()
     }
-    candidates = {"ml_classifier": ml_prediction, **subsystem_statuses}
+    candidates = {**subsystem_statuses}
+    if ml_accepted:
+        candidates["ml_classifier"] = ml_prediction
     status = max(candidates.values(), key=lambda value: SEVERITY[value])
     contributors = [
         name for name, value in candidates.items() if SEVERITY[value] == SEVERITY[status]
@@ -230,5 +247,6 @@ def aggregate_all_health(
         "method": "maximum_severity",
         "contributors": contributors,
         "ml_status": ml_prediction,
+        "ml_accepted": ml_accepted,
         "subsystem_statuses": subsystem_statuses,
     }

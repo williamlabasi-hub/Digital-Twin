@@ -47,6 +47,27 @@ context notes, and limitations. Overall health uses maximum severity across the
 ML classifier and all subsystem results. This is intentionally conservative
 and preserves each contributor for operator review.
 
+Missing subsystem telemetry produces `Unknown`, never `Healthy`. Warning and
+degraded alerts require two consecutive samples for confirmation and two
+healthy samples to clear; critical alerts confirm immediately. Reports include
+alert duration and lifecycle state.
+
+Cross-subsystem fault isolation emits candidate hypotheses with supporting
+subsystems rather than claiming a confirmed root cause. The model artifact also
+contains numerical ranges and categorical values observed during training.
+Inference outside that profile is marked `abstained` and excluded from overall
+health aggregation, while the raw classifier output remains available for
+diagnostic review.
+
+Run the synthetic fault-injection validation harness with:
+
+```cmd
+python scripts\validate_health_scenarios.py
+```
+
+Hardware-in-the-loop work remains pending as documented in
+`docs/requirements/health/VALIDATION_PLAN.md`.
+
 Run the health data generation and training workflow from the repository root:
 
 ```cmd

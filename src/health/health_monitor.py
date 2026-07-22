@@ -13,6 +13,9 @@ import pandas as pd
 
 try:
     from .health_features import HEALTH_CLASSES, MODEL_FEATURES, NUMERICAL_FEATURES
+    from .health_state import apply_alert_persistence
+    from .fault_isolation import isolate_cross_subsystem_faults
+    from .model_assurance import assess_model_applicability
     from .power_health import aggregate_all_health, assess_power_subsystem
     from .subsystem_health import assess_non_power_subsystems
     from .telemetry_adapter import validate_and_prepare_canonical_record
@@ -21,6 +24,9 @@ except ImportError:  # Allow direct execution: python src/health/health_monitor.
     if str(source_root) not in sys.path:
         sys.path.insert(0, str(source_root))
     from health.health_features import HEALTH_CLASSES, MODEL_FEATURES, NUMERICAL_FEATURES
+    from health.health_state import apply_alert_persistence
+    from health.fault_isolation import isolate_cross_subsystem_faults
+    from health.model_assurance import assess_model_applicability
     from health.power_health import aggregate_all_health, assess_power_subsystem
     from health.subsystem_health import assess_non_power_subsystems
     from health.telemetry_adapter import validate_and_prepare_canonical_record
@@ -717,6 +723,7 @@ def determine_health_trend(
     """
 
     severity = {
+        "Unknown": -1,
         "Healthy": 0,
         "Warning": 1,
         "Degraded": 2,
@@ -851,6 +858,7 @@ def build_report(
     report: list[dict[str, Any]] = []
     trend_history = list(history)
     previous_telemetry_by_satellite: dict[str, dict[str, Any]] = {}
+    alert_state_by_satellite: dict[str, dict[str, dict[str, Any]]] = {}
     report_generated_at = datetime.now(timezone.utc).isoformat()
 
     for index, prediction_value in enumerate(
@@ -872,7 +880,20 @@ def build_report(
             "power": power_health,
             **assess_non_power_subsystems(row, previous_telemetry),
         }
-        overall_health = aggregate_all_health(prediction, subsystem_health)
+        satellite_alert_state = alert_state_by_satellite.setdefault(satellite_id, {})
+        for subsystem_name, subsystem_result in subsystem_health.items():
+            apply_alert_persistence(
+                subsystem_result,
+                row.get("timestamp"),
+                satellite_alert_state.setdefault(subsystem_name, {}),
+            )
+        model_assurance = assess_model_applicability(model, row)
+        overall_health = aggregate_all_health(
+            prediction,
+            subsystem_health,
+            ml_accepted=model_assurance["accepted"],
+        )
+        fault_hypotheses = isolate_cross_subsystem_faults(subsystem_health)
 
         health_trend = determine_health_trend(
             satellite_id=satellite_id,
@@ -888,8 +909,10 @@ def build_report(
                 row.get("timestamp")
             ),
             "prediction": prediction,
+            "model_assurance": model_assurance,
             "overall_health": overall_health,
             "subsystem_health": subsystem_health,
+            "fault_hypotheses": fault_hypotheses,
             "recent_command": {
                 "name": make_json_safe(
                     row.get(

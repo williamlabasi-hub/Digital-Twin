@@ -551,6 +551,19 @@ def main() -> None:
             REPOSITORY_ROOT.resolve()
         ).as_posix(),
         "legacy_adapter_required": False,
+        "training_profile": {
+            "numerical": {
+                feature: {
+                    "minimum": float(pd.to_numeric(X[feature]).min()),
+                    "maximum": float(pd.to_numeric(X[feature]).max()),
+                }
+                for feature in NUMERICAL_FEATURES
+            },
+            "categorical": {
+                feature: sorted(str(value) for value in X[feature].dropna().unique())
+                for feature in CATEGORICAL_FEATURES
+            },
+        },
         "random_state": args.random_state,
         "number_of_trees": args.trees,
         "python_version": platform.python_version(),
