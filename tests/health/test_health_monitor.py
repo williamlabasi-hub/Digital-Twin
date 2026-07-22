@@ -182,7 +182,10 @@ class HealthMonitorTests(unittest.TestCase):
         self.assertFalse(list(Draft7Validator(schema).iter_errors(output)))
         for entry in report:
             self.assertAlmostEqual(sum(entry["class_probabilities"].values()), 1.0)
-            self.assertIn("power", entry["subsystem_health"])
+            self.assertEqual(
+                set(entry["subsystem_health"]),
+                {"power", "thermal", "payload", "adcs", "communications", "cdh", "propulsion", "timing", "command_control"},
+            )
             self.assertIn(entry["overall_health"]["status"], {
                 "Healthy", "Warning", "Degraded", "Critical"
             })

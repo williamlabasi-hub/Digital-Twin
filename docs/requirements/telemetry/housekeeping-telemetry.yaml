@@ -31,10 +31,14 @@ operational_context:
   battery_current_sign_convention:
     allowed_values: [positive_discharge, positive_charge, unknown]
     default_when_missing: unknown
+  communications_pass_state:
+    allowed_values: [active, inactive, acquiring, unknown]
+    default_when_missing: unknown
   approval_status: unvalidated
   notes:
     - Low solar current is not a hardware fault when eclipse or a stowed array explains it.
     - Synthetic health data uses positive_discharge; flight sign convention requires approval.
+    - Low downlink rate is evaluated as a fault only during an active pass.
 
 spacecraft_modes:
   - nominal

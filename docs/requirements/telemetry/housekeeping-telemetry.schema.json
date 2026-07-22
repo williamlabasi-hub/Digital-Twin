@@ -29,6 +29,9 @@
         },
         "battery_current_sign_convention": {
           "enum": ["positive_discharge", "positive_charge", "unknown"]
+        },
+        "communications_pass_state": {
+          "enum": ["active", "inactive", "acquiring", "unknown"]
         }
       }
     },

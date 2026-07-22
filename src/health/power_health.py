@@ -210,3 +210,25 @@ def aggregate_health(ml_prediction: str, power_status: str) -> dict[str, Any]:
         "ml_status": ml_prediction,
         "power_status": power_status,
     }
+
+
+def aggregate_all_health(
+    ml_prediction: str, subsystem_health: Mapping[str, Mapping[str, Any]]
+) -> dict[str, Any]:
+    """Conservatively combine ML with every available subsystem result."""
+
+    subsystem_statuses = {
+        name: str(result["status"]) for name, result in subsystem_health.items()
+    }
+    candidates = {"ml_classifier": ml_prediction, **subsystem_statuses}
+    status = max(candidates.values(), key=lambda value: SEVERITY[value])
+    contributors = [
+        name for name, value in candidates.items() if SEVERITY[value] == SEVERITY[status]
+    ]
+    return {
+        "status": status,
+        "method": "maximum_severity",
+        "contributors": contributors,
+        "ml_status": ml_prediction,
+        "subsystem_statuses": subsystem_statuses,
+    }

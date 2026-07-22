@@ -29,6 +29,24 @@ isolated as a hardware fault without eclipse state and array configuration.
 Synthetic label sidecars include a `fault_scenario` for repeatable nominal,
 warning, degraded, and critical power tests.
 
+## Complete subsystem health
+
+`subsystem_health.py` adds explainable assessments for:
+
+- Thermal: flight-computer and radiator temperature levels and rates.
+- Payload: payload temperature level and rate.
+- ADCS: body-rate magnitude and individual reaction-wheel speeds.
+- Communications: downlink performance interpreted with pass state.
+- C&DH: memory utilization and corrected-error counter growth.
+- Propulsion: propellant estimate and thruster-state consistency.
+- Timing: clock drift and synchronization offset.
+- Command and control: command-queue depth and recent command failures.
+
+Every subsystem returns status, confidence, fault codes, evidence, trends,
+context notes, and limitations. Overall health uses maximum severity across the
+ML classifier and all subsystem results. This is intentionally conservative
+and preserves each contributor for operator review.
+
 Run the health data generation and training workflow from the repository root:
 
 ```cmd

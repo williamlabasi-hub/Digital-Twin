@@ -156,6 +156,7 @@ def validate_and_prepare_canonical_record(
         "satellite_id": record["satellite_id"],
         "timestamp": record["timestamp"],
         "spacecraft_mode": record["spacecraft_mode"],
+        **telemetry,
         "eclipse_state": (record.get("operational_context") or {}).get(
             "eclipse_state", "unknown"
         ),
@@ -165,6 +166,9 @@ def validate_and_prepare_canonical_record(
         "battery_current_sign_convention": (
             record.get("operational_context") or {}
         ).get("battery_current_sign_convention", "unknown"),
+        "communications_pass_state": (
+            record.get("operational_context") or {}
+        ).get("communications_pass_state", "unknown"),
         **{field: telemetry.get(field) for field in canonical_fields},
         "input_data_quality": validation.data_quality,
         "input_validation_issues": [issue.message for issue in validation.issues],

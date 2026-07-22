@@ -13,14 +13,16 @@ import pandas as pd
 
 try:
     from .health_features import HEALTH_CLASSES, MODEL_FEATURES, NUMERICAL_FEATURES
-    from .power_health import aggregate_health, assess_power_subsystem
+    from .power_health import aggregate_all_health, assess_power_subsystem
+    from .subsystem_health import assess_non_power_subsystems
     from .telemetry_adapter import validate_and_prepare_canonical_record
 except ImportError:  # Allow direct execution: python src/health/health_monitor.py
     source_root = Path(__file__).resolve().parents[1]
     if str(source_root) not in sys.path:
         sys.path.insert(0, str(source_root))
     from health.health_features import HEALTH_CLASSES, MODEL_FEATURES, NUMERICAL_FEATURES
-    from health.power_health import aggregate_health, assess_power_subsystem
+    from health.power_health import aggregate_all_health, assess_power_subsystem
+    from health.subsystem_health import assess_non_power_subsystems
     from health.telemetry_adapter import validate_and_prepare_canonical_record
 
 
@@ -36,6 +38,25 @@ DEFAULT_SCHEMA_PATH = REPOSITORY_ROOT / "docs" / "requirements" / "health" / "he
 
 
 OUTPUT_SCHEMA_VERSION = "1.1.0"
+
+REPORT_TELEMETRY_FIELDS = [
+    "battery_voltage_v", "battery_current_a", "battery_state_of_charge_pct",
+    "solar_array_voltage_v", "solar_array_current_a", "rail_3v3_voltage_v",
+    "rail_5v_voltage_v", "rail_12v_voltage_v",
+    "flight_computer_temperature_c", "payload_temperature_c",
+    "radiator_temperature_c", "gyro_x_rate_deg_s", "gyro_y_rate_deg_s",
+    "gyro_z_rate_deg_s", "gyro_bias_x_deg_hr", "magnetometer_x_ut",
+    "magnetometer_y_ut", "magnetometer_z_ut", "magnetic_field_magnitude_ut",
+    "sun_sensor_azimuth_deg", "reaction_wheel_1_speed_rpm",
+    "reaction_wheel_2_speed_rpm", "reaction_wheel_3_speed_rpm",
+    "thruster_firing", "thruster_pulse_width_ms", "memory_usage_pct",
+    "memory_corrected_error_count", "onboard_data_generation_rate_kbps",
+    "downlink_rate_kbps", "propellant_remaining_pct",
+    "propellant_tank_pressure_bar", "clock_drift_us_day",
+    "time_sync_offset_ms", "command_queue_depth", "latest_command_status",
+    "spacecraft_mode", "eclipse_state", "solar_array_configuration",
+    "battery_current_sign_convention", "communications_pass_state",
+]
 
 
 def load_json_records(
@@ -847,7 +868,11 @@ def build_report(
 
         previous_telemetry = previous_telemetry_by_satellite.get(satellite_id)
         power_health = assess_power_subsystem(row, previous_telemetry)
-        overall_health = aggregate_health(prediction, power_health["status"])
+        subsystem_health = {
+            "power": power_health,
+            **assess_non_power_subsystems(row, previous_telemetry),
+        }
+        overall_health = aggregate_all_health(prediction, subsystem_health)
 
         health_trend = determine_health_trend(
             satellite_id=satellite_id,
@@ -864,7 +889,7 @@ def build_report(
             ),
             "prediction": prediction,
             "overall_health": overall_health,
-            "subsystem_health": {"power": power_health},
+            "subsystem_health": subsystem_health,
             "recent_command": {
                 "name": make_json_safe(
                     row.get(
@@ -890,28 +915,8 @@ def build_report(
                 ),
             },
             "telemetry": {
-                **{
-                    feature: make_json_safe(row.get(feature))
-                    for feature in MODEL_FEATURES
-                    if feature not in {
-                        "recent_command_name",
-                        "recent_command_status",
-                        "seconds_since_last_command",
-                    }
-                },
-                "battery_state_of_charge_pct": make_json_safe(
-                    row.get("battery_state_of_charge_pct")
-                ),
-                "solar_array_voltage_v": make_json_safe(
-                    row.get("solar_array_voltage_v")
-                ),
-                "eclipse_state": make_json_safe(row.get("eclipse_state")),
-                "solar_array_configuration": make_json_safe(
-                    row.get("solar_array_configuration")
-                ),
-                "battery_current_sign_convention": make_json_safe(
-                    row.get("battery_current_sign_convention")
-                ),
+                field: make_json_safe(row.get(field))
+                for field in REPORT_TELEMETRY_FIELDS
             },
             "assessment": assess_telemetry(
                 row
@@ -1010,10 +1015,11 @@ def print_report(
             f"{result['overall_health']['status']}"
         )
 
-        print(
-            "Power subsystem: "
-            f"{result['subsystem_health']['power']['status']}"
-        )
+        for subsystem_name, subsystem_result in result["subsystem_health"].items():
+            print(
+                f"{subsystem_name.replace('_', ' ').title()} subsystem: "
+                f"{subsystem_result['status']}"
+            )
 
         if (
             "predicted_probability"

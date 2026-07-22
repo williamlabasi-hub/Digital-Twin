@@ -46,18 +46,21 @@
         "prediction": {"$ref": "#/definitions/healthClass"},
         "overall_health": {
           "type": "object",
-          "required": ["status", "method", "contributors", "ml_status", "power_status"],
+          "required": ["status", "method", "contributors", "ml_status", "subsystem_statuses"],
           "properties": {
             "status": {"$ref": "#/definitions/healthClass"},
             "method": {"const": "maximum_severity"},
             "contributors": {"type": "array", "items": {"type": "string"}},
             "ml_status": {"$ref": "#/definitions/healthClass"},
-            "power_status": {"$ref": "#/definitions/healthClass"}
+            "subsystem_statuses": {
+              "type": "object",
+              "additionalProperties": {"$ref": "#/definitions/healthClass"}
+            }
           }
         },
         "subsystem_health": {
           "type": "object",
-          "required": ["power"],
+          "required": ["power", "thermal", "payload", "adcs", "communications", "cdh", "propulsion", "timing", "command_control"],
           "properties": {
             "power": {
               "type": "object",

@@ -3,600 +3,1700 @@
     "satellite_id": "SAT-001",
     "timestamp": "2026-01-01T22:27:16Z",
     "health_status": "Healthy",
-    "fault_scenario": "nominal_power"
+    "fault_scenario": "nominal_power",
+    "subsystem_scenarios": [
+      "power_healthy",
+      "thermal_healthy",
+      "payload_healthy",
+      "adcs_healthy",
+      "communications_healthy",
+      "cdh_healthy",
+      "propulsion_healthy",
+      "timing_healthy",
+      "command_control_healthy"
+    ]
   },
   {
     "satellite_id": "SAT-001",
-    "timestamp": "2026-01-02T07:45:07Z",
+    "timestamp": "2026-01-02T12:44:15Z",
     "health_status": "Healthy",
-    "fault_scenario": "nominal_power"
+    "fault_scenario": "nominal_power",
+    "subsystem_scenarios": [
+      "power_healthy",
+      "thermal_healthy",
+      "payload_healthy",
+      "adcs_healthy",
+      "communications_healthy",
+      "cdh_healthy",
+      "propulsion_healthy",
+      "timing_healthy",
+      "command_control_healthy"
+    ]
   },
   {
     "satellite_id": "SAT-001",
-    "timestamp": "2026-01-02T09:55:14Z",
+    "timestamp": "2026-01-03T05:20:10Z",
     "health_status": "Warning",
-    "fault_scenario": "battery_undervoltage_warning"
+    "fault_scenario": "battery_undervoltage_warning",
+    "subsystem_scenarios": [
+      "power_warning",
+      "thermal_warning",
+      "payload_warning",
+      "adcs_warning",
+      "communications_warning",
+      "cdh_warning",
+      "propulsion_warning",
+      "timing_warning",
+      "command_control_warning"
+    ]
   },
   {
     "satellite_id": "SAT-001",
-    "timestamp": "2026-01-02T14:54:45Z",
+    "timestamp": "2026-01-03T12:50:26Z",
     "health_status": "Critical",
-    "fault_scenario": "critical_power_failure"
+    "fault_scenario": "critical_power_failure",
+    "subsystem_scenarios": [
+      "power_critical",
+      "thermal_critical",
+      "payload_critical",
+      "adcs_critical",
+      "communications_critical",
+      "cdh_critical",
+      "propulsion_critical",
+      "timing_critical",
+      "command_control_critical"
+    ]
   },
   {
     "satellite_id": "SAT-001",
-    "timestamp": "2026-01-02T19:47:12Z",
+    "timestamp": "2026-01-04T11:55:33Z",
     "health_status": "Degraded",
-    "fault_scenario": "combined_power_degradation"
+    "fault_scenario": "combined_power_degradation",
+    "subsystem_scenarios": [
+      "power_degraded",
+      "thermal_degraded",
+      "payload_degraded",
+      "adcs_degraded",
+      "communications_degraded",
+      "cdh_degraded",
+      "propulsion_degraded",
+      "timing_degraded",
+      "command_control_degraded"
+    ]
   },
   {
     "satellite_id": "SAT-001",
-    "timestamp": "2026-01-03T14:05:28Z",
+    "timestamp": "2026-01-05T06:08:46Z",
     "health_status": "Degraded",
-    "fault_scenario": "combined_power_degradation"
+    "fault_scenario": "combined_power_degradation",
+    "subsystem_scenarios": [
+      "power_degraded",
+      "thermal_degraded",
+      "payload_degraded",
+      "adcs_degraded",
+      "communications_degraded",
+      "cdh_degraded",
+      "propulsion_degraded",
+      "timing_degraded",
+      "command_control_degraded"
+    ]
   },
   {
     "satellite_id": "SAT-001",
-    "timestamp": "2026-01-03T17:40:15Z",
+    "timestamp": "2026-01-06T00:40:18Z",
     "health_status": "Warning",
-    "fault_scenario": "battery_undervoltage_warning"
+    "fault_scenario": "battery_undervoltage_warning",
+    "subsystem_scenarios": [
+      "power_warning",
+      "thermal_warning",
+      "payload_warning",
+      "adcs_warning",
+      "communications_warning",
+      "cdh_warning",
+      "propulsion_warning",
+      "timing_warning",
+      "command_control_warning"
+    ]
   },
   {
     "satellite_id": "SAT-001",
-    "timestamp": "2026-01-04T11:00:15Z",
+    "timestamp": "2026-01-06T22:24:46Z",
     "health_status": "Degraded",
-    "fault_scenario": "combined_power_degradation"
+    "fault_scenario": "combined_power_degradation",
+    "subsystem_scenarios": [
+      "power_degraded",
+      "thermal_degraded",
+      "payload_degraded",
+      "adcs_degraded",
+      "communications_degraded",
+      "cdh_degraded",
+      "propulsion_degraded",
+      "timing_degraded",
+      "command_control_degraded"
+    ]
   },
   {
     "satellite_id": "SAT-001",
-    "timestamp": "2026-01-05T08:14:20Z",
+    "timestamp": "2026-01-07T18:40:15Z",
     "health_status": "Critical",
-    "fault_scenario": "critical_power_failure"
+    "fault_scenario": "critical_power_failure",
+    "subsystem_scenarios": [
+      "power_critical",
+      "thermal_critical",
+      "payload_critical",
+      "adcs_critical",
+      "communications_critical",
+      "cdh_critical",
+      "propulsion_critical",
+      "timing_critical",
+      "command_control_critical"
+    ]
   },
   {
     "satellite_id": "SAT-001",
-    "timestamp": "2026-01-06T00:30:08Z",
+    "timestamp": "2026-01-07T23:44:38Z",
     "health_status": "Warning",
-    "fault_scenario": "battery_undervoltage_warning"
+    "fault_scenario": "battery_undervoltage_warning",
+    "subsystem_scenarios": [
+      "power_warning",
+      "thermal_warning",
+      "payload_warning",
+      "adcs_warning",
+      "communications_warning",
+      "cdh_warning",
+      "propulsion_warning",
+      "timing_warning",
+      "command_control_warning"
+    ]
   },
   {
     "satellite_id": "SAT-001",
-    "timestamp": "2026-01-06T14:57:22Z",
+    "timestamp": "2026-01-08T09:46:45Z",
     "health_status": "Critical",
-    "fault_scenario": "critical_power_failure"
+    "fault_scenario": "critical_power_failure",
+    "subsystem_scenarios": [
+      "power_critical",
+      "thermal_critical",
+      "payload_critical",
+      "adcs_critical",
+      "communications_critical",
+      "cdh_critical",
+      "propulsion_critical",
+      "timing_critical",
+      "command_control_critical"
+    ]
   },
   {
     "satellite_id": "SAT-001",
-    "timestamp": "2026-01-07T07:22:40Z",
+    "timestamp": "2026-01-08T23:21:54Z",
     "health_status": "Warning",
-    "fault_scenario": "battery_undervoltage_warning"
+    "fault_scenario": "battery_undervoltage_warning",
+    "subsystem_scenarios": [
+      "power_warning",
+      "thermal_warning",
+      "payload_warning",
+      "adcs_warning",
+      "communications_warning",
+      "cdh_warning",
+      "propulsion_warning",
+      "timing_warning",
+      "command_control_warning"
+    ]
   },
   {
     "satellite_id": "SAT-001",
-    "timestamp": "2026-01-07T16:01:35Z",
+    "timestamp": "2026-01-09T06:42:04Z",
     "health_status": "Warning",
-    "fault_scenario": "battery_undervoltage_warning"
+    "fault_scenario": "battery_undervoltage_warning",
+    "subsystem_scenarios": [
+      "power_warning",
+      "thermal_warning",
+      "payload_warning",
+      "adcs_warning",
+      "communications_warning",
+      "cdh_warning",
+      "propulsion_warning",
+      "timing_warning",
+      "command_control_warning"
+    ]
   },
   {
     "satellite_id": "SAT-001",
-    "timestamp": "2026-01-08T01:07:29Z",
+    "timestamp": "2026-01-10T04:39:38Z",
     "health_status": "Degraded",
-    "fault_scenario": "combined_power_degradation"
+    "fault_scenario": "combined_power_degradation",
+    "subsystem_scenarios": [
+      "power_degraded",
+      "thermal_degraded",
+      "payload_degraded",
+      "adcs_degraded",
+      "communications_degraded",
+      "cdh_degraded",
+      "propulsion_degraded",
+      "timing_degraded",
+      "command_control_degraded"
+    ]
   },
   {
     "satellite_id": "SAT-001",
-    "timestamp": "2026-01-08T17:56:48Z",
+    "timestamp": "2026-01-10T14:39:44Z",
     "health_status": "Degraded",
-    "fault_scenario": "combined_power_degradation"
+    "fault_scenario": "combined_power_degradation",
+    "subsystem_scenarios": [
+      "power_degraded",
+      "thermal_degraded",
+      "payload_degraded",
+      "adcs_degraded",
+      "communications_degraded",
+      "cdh_degraded",
+      "propulsion_degraded",
+      "timing_degraded",
+      "command_control_degraded"
+    ]
   },
   {
     "satellite_id": "SAT-001",
-    "timestamp": "2026-01-09T09:48:56Z",
+    "timestamp": "2026-01-11T05:51:40Z",
     "health_status": "Warning",
-    "fault_scenario": "battery_undervoltage_warning"
+    "fault_scenario": "battery_undervoltage_warning",
+    "subsystem_scenarios": [
+      "power_warning",
+      "thermal_warning",
+      "payload_warning",
+      "adcs_warning",
+      "communications_warning",
+      "cdh_warning",
+      "propulsion_warning",
+      "timing_warning",
+      "command_control_warning"
+    ]
   },
   {
     "satellite_id": "SAT-001",
-    "timestamp": "2026-01-09T21:08:52Z",
+    "timestamp": "2026-01-11T22:12:35Z",
     "health_status": "Degraded",
-    "fault_scenario": "combined_power_degradation"
+    "fault_scenario": "combined_power_degradation",
+    "subsystem_scenarios": [
+      "power_degraded",
+      "thermal_degraded",
+      "payload_degraded",
+      "adcs_degraded",
+      "communications_degraded",
+      "cdh_degraded",
+      "propulsion_degraded",
+      "timing_degraded",
+      "command_control_degraded"
+    ]
   },
   {
     "satellite_id": "SAT-001",
-    "timestamp": "2026-01-10T06:06:55Z",
+    "timestamp": "2026-01-12T20:10:25Z",
     "health_status": "Critical",
-    "fault_scenario": "critical_power_failure"
+    "fault_scenario": "critical_power_failure",
+    "subsystem_scenarios": [
+      "power_critical",
+      "thermal_critical",
+      "payload_critical",
+      "adcs_critical",
+      "communications_critical",
+      "cdh_critical",
+      "propulsion_critical",
+      "timing_critical",
+      "command_control_critical"
+    ]
   },
   {
     "satellite_id": "SAT-001",
-    "timestamp": "2026-01-10T17:12:42Z",
+    "timestamp": "2026-01-13T16:46:04Z",
     "health_status": "Healthy",
-    "fault_scenario": "nominal_power"
+    "fault_scenario": "nominal_power",
+    "subsystem_scenarios": [
+      "power_healthy",
+      "thermal_healthy",
+      "payload_healthy",
+      "adcs_healthy",
+      "communications_healthy",
+      "cdh_healthy",
+      "propulsion_healthy",
+      "timing_healthy",
+      "command_control_healthy"
+    ]
   },
   {
     "satellite_id": "SAT-001",
-    "timestamp": "2026-01-11T15:10:18Z",
+    "timestamp": "2026-01-13T18:23:44Z",
     "health_status": "Healthy",
-    "fault_scenario": "nominal_power"
+    "fault_scenario": "nominal_power",
+    "subsystem_scenarios": [
+      "power_healthy",
+      "thermal_healthy",
+      "payload_healthy",
+      "adcs_healthy",
+      "communications_healthy",
+      "cdh_healthy",
+      "propulsion_healthy",
+      "timing_healthy",
+      "command_control_healthy"
+    ]
   },
   {
     "satellite_id": "SAT-001",
-    "timestamp": "2026-01-11T21:06:44Z",
+    "timestamp": "2026-01-14T14:50:34Z",
     "health_status": "Critical",
-    "fault_scenario": "critical_power_failure"
+    "fault_scenario": "critical_power_failure",
+    "subsystem_scenarios": [
+      "power_critical",
+      "thermal_critical",
+      "payload_critical",
+      "adcs_critical",
+      "communications_critical",
+      "cdh_critical",
+      "propulsion_critical",
+      "timing_critical",
+      "command_control_critical"
+    ]
   },
   {
     "satellite_id": "SAT-001",
-    "timestamp": "2026-01-12T06:47:50Z",
+    "timestamp": "2026-01-15T05:41:30Z",
     "health_status": "Healthy",
-    "fault_scenario": "nominal_power"
+    "fault_scenario": "nominal_power",
+    "subsystem_scenarios": [
+      "power_healthy",
+      "thermal_healthy",
+      "payload_healthy",
+      "adcs_healthy",
+      "communications_healthy",
+      "cdh_healthy",
+      "propulsion_healthy",
+      "timing_healthy",
+      "command_control_healthy"
+    ]
   },
   {
     "satellite_id": "SAT-001",
-    "timestamp": "2026-01-13T05:39:27Z",
+    "timestamp": "2026-01-15T16:21:46Z",
     "health_status": "Healthy",
-    "fault_scenario": "nominal_power"
+    "fault_scenario": "nominal_power",
+    "subsystem_scenarios": [
+      "power_healthy",
+      "thermal_healthy",
+      "payload_healthy",
+      "adcs_healthy",
+      "communications_healthy",
+      "cdh_healthy",
+      "propulsion_healthy",
+      "timing_healthy",
+      "command_control_healthy"
+    ]
   },
   {
     "satellite_id": "SAT-001",
-    "timestamp": "2026-01-14T04:13:43Z",
+    "timestamp": "2026-01-16T09:27:49Z",
     "health_status": "Critical",
-    "fault_scenario": "critical_power_failure"
+    "fault_scenario": "critical_power_failure",
+    "subsystem_scenarios": [
+      "power_critical",
+      "thermal_critical",
+      "payload_critical",
+      "adcs_critical",
+      "communications_critical",
+      "cdh_critical",
+      "propulsion_critical",
+      "timing_critical",
+      "command_control_critical"
+    ]
   },
   {
     "satellite_id": "SAT-001",
-    "timestamp": "2026-01-14T23:01:01Z",
+    "timestamp": "2026-01-17T04:36:47Z",
     "health_status": "Healthy",
-    "fault_scenario": "nominal_power"
+    "fault_scenario": "nominal_power",
+    "subsystem_scenarios": [
+      "power_healthy",
+      "thermal_healthy",
+      "payload_healthy",
+      "adcs_healthy",
+      "communications_healthy",
+      "cdh_healthy",
+      "propulsion_healthy",
+      "timing_healthy",
+      "command_control_healthy"
+    ]
   },
   {
     "satellite_id": "SAT-002",
-    "timestamp": "2026-01-01T18:52:20Z",
-    "health_status": "Warning",
-    "fault_scenario": "battery_undervoltage_warning"
-  },
-  {
-    "satellite_id": "SAT-002",
-    "timestamp": "2026-01-02T09:43:16Z",
-    "health_status": "Warning",
-    "fault_scenario": "battery_undervoltage_warning"
-  },
-  {
-    "satellite_id": "SAT-002",
-    "timestamp": "2026-01-02T19:13:11Z",
-    "health_status": "Degraded",
-    "fault_scenario": "combined_power_degradation"
-  },
-  {
-    "satellite_id": "SAT-002",
-    "timestamp": "2026-01-03T17:59:36Z",
-    "health_status": "Healthy",
-    "fault_scenario": "nominal_power"
-  },
-  {
-    "satellite_id": "SAT-002",
-    "timestamp": "2026-01-04T13:01:58Z",
+    "timestamp": "2026-01-01T17:34:42Z",
     "health_status": "Critical",
-    "fault_scenario": "critical_power_failure"
+    "fault_scenario": "critical_power_failure",
+    "subsystem_scenarios": [
+      "power_critical",
+      "thermal_critical",
+      "payload_critical",
+      "adcs_critical",
+      "communications_critical",
+      "cdh_critical",
+      "propulsion_critical",
+      "timing_critical",
+      "command_control_critical"
+    ]
   },
   {
     "satellite_id": "SAT-002",
-    "timestamp": "2026-01-05T05:59:02Z",
-    "health_status": "Healthy",
-    "fault_scenario": "nominal_power"
-  },
-  {
-    "satellite_id": "SAT-002",
-    "timestamp": "2026-01-06T04:48:23Z",
-    "health_status": "Degraded",
-    "fault_scenario": "combined_power_degradation"
-  },
-  {
-    "satellite_id": "SAT-002",
-    "timestamp": "2026-01-06T14:30:03Z",
-    "health_status": "Critical",
-    "fault_scenario": "critical_power_failure"
-  },
-  {
-    "satellite_id": "SAT-002",
-    "timestamp": "2026-01-07T01:09:00Z",
-    "health_status": "Healthy",
-    "fault_scenario": "nominal_power"
-  },
-  {
-    "satellite_id": "SAT-002",
-    "timestamp": "2026-01-07T03:12:14Z",
-    "health_status": "Degraded",
-    "fault_scenario": "combined_power_degradation"
-  },
-  {
-    "satellite_id": "SAT-002",
-    "timestamp": "2026-01-07T16:47:07Z",
-    "health_status": "Healthy",
-    "fault_scenario": "nominal_power"
-  },
-  {
-    "satellite_id": "SAT-002",
-    "timestamp": "2026-01-08T02:09:49Z",
-    "health_status": "Healthy",
-    "fault_scenario": "nominal_power"
-  },
-  {
-    "satellite_id": "SAT-002",
-    "timestamp": "2026-01-08T12:31:10Z",
-    "health_status": "Degraded",
-    "fault_scenario": "combined_power_degradation"
-  },
-  {
-    "satellite_id": "SAT-002",
-    "timestamp": "2026-01-09T03:02:39Z",
+    "timestamp": "2026-01-02T09:03:00Z",
     "health_status": "Warning",
-    "fault_scenario": "battery_undervoltage_warning"
+    "fault_scenario": "battery_undervoltage_warning",
+    "subsystem_scenarios": [
+      "power_warning",
+      "thermal_warning",
+      "payload_warning",
+      "adcs_warning",
+      "communications_warning",
+      "cdh_warning",
+      "propulsion_warning",
+      "timing_warning",
+      "command_control_warning"
+    ]
   },
   {
     "satellite_id": "SAT-002",
-    "timestamp": "2026-01-09T09:40:12Z",
+    "timestamp": "2026-01-02T12:55:30Z",
     "health_status": "Warning",
-    "fault_scenario": "battery_undervoltage_warning"
+    "fault_scenario": "battery_undervoltage_warning",
+    "subsystem_scenarios": [
+      "power_warning",
+      "thermal_warning",
+      "payload_warning",
+      "adcs_warning",
+      "communications_warning",
+      "cdh_warning",
+      "propulsion_warning",
+      "timing_warning",
+      "command_control_warning"
+    ]
   },
   {
     "satellite_id": "SAT-002",
-    "timestamp": "2026-01-10T08:24:41Z",
-    "health_status": "Warning",
-    "fault_scenario": "battery_undervoltage_warning"
+    "timestamp": "2026-01-03T04:20:09Z",
+    "health_status": "Degraded",
+    "fault_scenario": "combined_power_degradation",
+    "subsystem_scenarios": [
+      "power_degraded",
+      "thermal_degraded",
+      "payload_degraded",
+      "adcs_degraded",
+      "communications_degraded",
+      "cdh_degraded",
+      "propulsion_degraded",
+      "timing_degraded",
+      "command_control_degraded"
+    ]
   },
   {
     "satellite_id": "SAT-002",
-    "timestamp": "2026-01-10T22:27:16Z",
-    "health_status": "Degraded",
-    "fault_scenario": "combined_power_degradation"
+    "timestamp": "2026-01-03T15:15:29Z",
+    "health_status": "Warning",
+    "fault_scenario": "battery_undervoltage_warning",
+    "subsystem_scenarios": [
+      "power_warning",
+      "thermal_warning",
+      "payload_warning",
+      "adcs_warning",
+      "communications_warning",
+      "cdh_warning",
+      "propulsion_warning",
+      "timing_warning",
+      "command_control_warning"
+    ]
   },
   {
     "satellite_id": "SAT-002",
-    "timestamp": "2026-01-11T03:23:06Z",
+    "timestamp": "2026-01-04T00:19:04Z",
     "health_status": "Critical",
-    "fault_scenario": "critical_power_failure"
+    "fault_scenario": "critical_power_failure",
+    "subsystem_scenarios": [
+      "power_critical",
+      "thermal_critical",
+      "payload_critical",
+      "adcs_critical",
+      "communications_critical",
+      "cdh_critical",
+      "propulsion_critical",
+      "timing_critical",
+      "command_control_critical"
+    ]
   },
   {
     "satellite_id": "SAT-002",
-    "timestamp": "2026-01-11T12:42:15Z",
-    "health_status": "Warning",
-    "fault_scenario": "battery_undervoltage_warning"
+    "timestamp": "2026-01-04T14:31:21Z",
+    "health_status": "Healthy",
+    "fault_scenario": "nominal_power",
+    "subsystem_scenarios": [
+      "power_healthy",
+      "thermal_healthy",
+      "payload_healthy",
+      "adcs_healthy",
+      "communications_healthy",
+      "cdh_healthy",
+      "propulsion_healthy",
+      "timing_healthy",
+      "command_control_healthy"
+    ]
   },
   {
     "satellite_id": "SAT-002",
-    "timestamp": "2026-01-12T05:06:10Z",
-    "health_status": "Critical",
-    "fault_scenario": "critical_power_failure"
+    "timestamp": "2026-01-04T19:31:29Z",
+    "health_status": "Degraded",
+    "fault_scenario": "combined_power_degradation",
+    "subsystem_scenarios": [
+      "power_degraded",
+      "thermal_degraded",
+      "payload_degraded",
+      "adcs_degraded",
+      "communications_degraded",
+      "cdh_degraded",
+      "propulsion_degraded",
+      "timing_degraded",
+      "command_control_degraded"
+    ]
   },
   {
     "satellite_id": "SAT-002",
-    "timestamp": "2026-01-12T16:03:08Z",
-    "health_status": "Healthy",
-    "fault_scenario": "nominal_power"
+    "timestamp": "2026-01-05T12:40:27Z",
+    "health_status": "Warning",
+    "fault_scenario": "battery_undervoltage_warning",
+    "subsystem_scenarios": [
+      "power_warning",
+      "thermal_warning",
+      "payload_warning",
+      "adcs_warning",
+      "communications_warning",
+      "cdh_warning",
+      "propulsion_warning",
+      "timing_warning",
+      "command_control_warning"
+    ]
   },
   {
     "satellite_id": "SAT-002",
-    "timestamp": "2026-01-13T10:44:04Z",
-    "health_status": "Degraded",
-    "fault_scenario": "combined_power_degradation"
+    "timestamp": "2026-01-05T16:46:55Z",
+    "health_status": "Critical",
+    "fault_scenario": "critical_power_failure",
+    "subsystem_scenarios": [
+      "power_critical",
+      "thermal_critical",
+      "payload_critical",
+      "adcs_critical",
+      "communications_critical",
+      "cdh_critical",
+      "propulsion_critical",
+      "timing_critical",
+      "command_control_critical"
+    ]
   },
   {
     "satellite_id": "SAT-002",
-    "timestamp": "2026-01-14T01:34:38Z",
-    "health_status": "Healthy",
-    "fault_scenario": "nominal_power"
+    "timestamp": "2026-01-06T03:31:09Z",
+    "health_status": "Critical",
+    "fault_scenario": "critical_power_failure",
+    "subsystem_scenarios": [
+      "power_critical",
+      "thermal_critical",
+      "payload_critical",
+      "adcs_critical",
+      "communications_critical",
+      "cdh_critical",
+      "propulsion_critical",
+      "timing_critical",
+      "command_control_critical"
+    ]
   },
   {
     "satellite_id": "SAT-002",
-    "timestamp": "2026-01-14T11:26:09Z",
-    "health_status": "Critical",
-    "fault_scenario": "critical_power_failure"
+    "timestamp": "2026-01-06T12:22:04Z",
+    "health_status": "Warning",
+    "fault_scenario": "battery_undervoltage_warning",
+    "subsystem_scenarios": [
+      "power_warning",
+      "thermal_warning",
+      "payload_warning",
+      "adcs_warning",
+      "communications_warning",
+      "cdh_warning",
+      "propulsion_warning",
+      "timing_warning",
+      "command_control_warning"
+    ]
   },
   {
     "satellite_id": "SAT-002",
-    "timestamp": "2026-01-15T11:17:55Z",
-    "health_status": "Critical",
-    "fault_scenario": "critical_power_failure"
-  },
-  {
-    "satellite_id": "SAT-003",
-    "timestamp": "2026-01-01T14:14:56Z",
-    "health_status": "Critical",
-    "fault_scenario": "critical_power_failure"
-  },
-  {
-    "satellite_id": "SAT-003",
-    "timestamp": "2026-01-01T18:20:00Z",
-    "health_status": "Warning",
-    "fault_scenario": "battery_undervoltage_warning"
-  },
-  {
-    "satellite_id": "SAT-003",
-    "timestamp": "2026-01-02T17:50:06Z",
-    "health_status": "Warning",
-    "fault_scenario": "battery_undervoltage_warning"
-  },
-  {
-    "satellite_id": "SAT-003",
-    "timestamp": "2026-01-03T05:05:38Z",
-    "health_status": "Healthy",
-    "fault_scenario": "nominal_power"
-  },
-  {
-    "satellite_id": "SAT-003",
-    "timestamp": "2026-01-03T21:11:59Z",
-    "health_status": "Critical",
-    "fault_scenario": "critical_power_failure"
-  },
-  {
-    "satellite_id": "SAT-003",
-    "timestamp": "2026-01-04T20:22:06Z",
-    "health_status": "Critical",
-    "fault_scenario": "critical_power_failure"
-  },
-  {
-    "satellite_id": "SAT-003",
-    "timestamp": "2026-01-05T17:10:39Z",
-    "health_status": "Healthy",
-    "fault_scenario": "nominal_power"
-  },
-  {
-    "satellite_id": "SAT-003",
-    "timestamp": "2026-01-05T23:05:14Z",
-    "health_status": "Warning",
-    "fault_scenario": "battery_undervoltage_warning"
-  },
-  {
-    "satellite_id": "SAT-003",
-    "timestamp": "2026-01-06T14:09:52Z",
+    "timestamp": "2026-01-07T10:19:49Z",
     "health_status": "Degraded",
-    "fault_scenario": "combined_power_degradation"
+    "fault_scenario": "combined_power_degradation",
+    "subsystem_scenarios": [
+      "power_degraded",
+      "thermal_degraded",
+      "payload_degraded",
+      "adcs_degraded",
+      "communications_degraded",
+      "cdh_degraded",
+      "propulsion_degraded",
+      "timing_degraded",
+      "command_control_degraded"
+    ]
   },
   {
-    "satellite_id": "SAT-003",
-    "timestamp": "2026-01-07T07:00:00Z",
-    "health_status": "Healthy",
-    "fault_scenario": "nominal_power"
-  },
-  {
-    "satellite_id": "SAT-003",
-    "timestamp": "2026-01-07T22:29:31Z",
-    "health_status": "Healthy",
-    "fault_scenario": "nominal_power"
-  },
-  {
-    "satellite_id": "SAT-003",
-    "timestamp": "2026-01-08T19:31:00Z",
-    "health_status": "Warning",
-    "fault_scenario": "battery_undervoltage_warning"
-  },
-  {
-    "satellite_id": "SAT-003",
-    "timestamp": "2026-01-09T11:25:25Z",
-    "health_status": "Degraded",
-    "fault_scenario": "combined_power_degradation"
-  },
-  {
-    "satellite_id": "SAT-003",
-    "timestamp": "2026-01-09T21:32:52Z",
+    "satellite_id": "SAT-002",
+    "timestamp": "2026-01-07T16:39:43Z",
     "health_status": "Critical",
-    "fault_scenario": "critical_power_failure"
+    "fault_scenario": "critical_power_failure",
+    "subsystem_scenarios": [
+      "power_critical",
+      "thermal_critical",
+      "payload_critical",
+      "adcs_critical",
+      "communications_critical",
+      "cdh_critical",
+      "propulsion_critical",
+      "timing_critical",
+      "command_control_critical"
+    ]
   },
   {
-    "satellite_id": "SAT-003",
-    "timestamp": "2026-01-09T23:39:01Z",
+    "satellite_id": "SAT-002",
+    "timestamp": "2026-01-08T12:07:25Z",
+    "health_status": "Degraded",
+    "fault_scenario": "combined_power_degradation",
+    "subsystem_scenarios": [
+      "power_degraded",
+      "thermal_degraded",
+      "payload_degraded",
+      "adcs_degraded",
+      "communications_degraded",
+      "cdh_degraded",
+      "propulsion_degraded",
+      "timing_degraded",
+      "command_control_degraded"
+    ]
+  },
+  {
+    "satellite_id": "SAT-002",
+    "timestamp": "2026-01-08T16:33:52Z",
     "health_status": "Healthy",
-    "fault_scenario": "nominal_power"
+    "fault_scenario": "nominal_power",
+    "subsystem_scenarios": [
+      "power_healthy",
+      "thermal_healthy",
+      "payload_healthy",
+      "adcs_healthy",
+      "communications_healthy",
+      "cdh_healthy",
+      "propulsion_healthy",
+      "timing_healthy",
+      "command_control_healthy"
+    ]
   },
   {
-    "satellite_id": "SAT-003",
-    "timestamp": "2026-01-10T17:38:02Z",
+    "satellite_id": "SAT-002",
+    "timestamp": "2026-01-09T06:00:23Z",
     "health_status": "Healthy",
-    "fault_scenario": "nominal_power"
+    "fault_scenario": "nominal_power",
+    "subsystem_scenarios": [
+      "power_healthy",
+      "thermal_healthy",
+      "payload_healthy",
+      "adcs_healthy",
+      "communications_healthy",
+      "cdh_healthy",
+      "propulsion_healthy",
+      "timing_healthy",
+      "command_control_healthy"
+    ]
   },
   {
-    "satellite_id": "SAT-003",
-    "timestamp": "2026-01-11T11:46:02Z",
+    "satellite_id": "SAT-002",
+    "timestamp": "2026-01-10T03:46:29Z",
     "health_status": "Healthy",
-    "fault_scenario": "nominal_power"
+    "fault_scenario": "nominal_power",
+    "subsystem_scenarios": [
+      "power_healthy",
+      "thermal_healthy",
+      "payload_healthy",
+      "adcs_healthy",
+      "communications_healthy",
+      "cdh_healthy",
+      "propulsion_healthy",
+      "timing_healthy",
+      "command_control_healthy"
+    ]
   },
   {
-    "satellite_id": "SAT-003",
-    "timestamp": "2026-01-11T20:00:52Z",
-    "health_status": "Critical",
-    "fault_scenario": "critical_power_failure"
-  },
-  {
-    "satellite_id": "SAT-003",
-    "timestamp": "2026-01-12T01:00:18Z",
+    "satellite_id": "SAT-002",
+    "timestamp": "2026-01-10T05:48:03Z",
     "health_status": "Degraded",
-    "fault_scenario": "combined_power_degradation"
+    "fault_scenario": "combined_power_degradation",
+    "subsystem_scenarios": [
+      "power_degraded",
+      "thermal_degraded",
+      "payload_degraded",
+      "adcs_degraded",
+      "communications_degraded",
+      "cdh_degraded",
+      "propulsion_degraded",
+      "timing_degraded",
+      "command_control_degraded"
+    ]
   },
   {
-    "satellite_id": "SAT-003",
-    "timestamp": "2026-01-12T18:03:45Z",
-    "health_status": "Degraded",
-    "fault_scenario": "combined_power_degradation"
-  },
-  {
-    "satellite_id": "SAT-003",
-    "timestamp": "2026-01-13T02:03:45Z",
-    "health_status": "Degraded",
-    "fault_scenario": "combined_power_degradation"
-  },
-  {
-    "satellite_id": "SAT-003",
-    "timestamp": "2026-01-13T05:56:23Z",
-    "health_status": "Degraded",
-    "fault_scenario": "combined_power_degradation"
-  },
-  {
-    "satellite_id": "SAT-003",
-    "timestamp": "2026-01-14T00:15:33Z",
+    "satellite_id": "SAT-002",
+    "timestamp": "2026-01-10T07:23:57Z",
     "health_status": "Warning",
-    "fault_scenario": "battery_undervoltage_warning"
+    "fault_scenario": "battery_undervoltage_warning",
+    "subsystem_scenarios": [
+      "power_warning",
+      "thermal_warning",
+      "payload_warning",
+      "adcs_warning",
+      "communications_warning",
+      "cdh_warning",
+      "propulsion_warning",
+      "timing_warning",
+      "command_control_warning"
+    ]
+  },
+  {
+    "satellite_id": "SAT-002",
+    "timestamp": "2026-01-10T21:13:33Z",
+    "health_status": "Healthy",
+    "fault_scenario": "nominal_power",
+    "subsystem_scenarios": [
+      "power_healthy",
+      "thermal_healthy",
+      "payload_healthy",
+      "adcs_healthy",
+      "communications_healthy",
+      "cdh_healthy",
+      "propulsion_healthy",
+      "timing_healthy",
+      "command_control_healthy"
+    ]
+  },
+  {
+    "satellite_id": "SAT-002",
+    "timestamp": "2026-01-11T12:18:11Z",
+    "health_status": "Degraded",
+    "fault_scenario": "combined_power_degradation",
+    "subsystem_scenarios": [
+      "power_degraded",
+      "thermal_degraded",
+      "payload_degraded",
+      "adcs_degraded",
+      "communications_degraded",
+      "cdh_degraded",
+      "propulsion_degraded",
+      "timing_degraded",
+      "command_control_degraded"
+    ]
+  },
+  {
+    "satellite_id": "SAT-002",
+    "timestamp": "2026-01-11T19:07:40Z",
+    "health_status": "Healthy",
+    "fault_scenario": "nominal_power",
+    "subsystem_scenarios": [
+      "power_healthy",
+      "thermal_healthy",
+      "payload_healthy",
+      "adcs_healthy",
+      "communications_healthy",
+      "cdh_healthy",
+      "propulsion_healthy",
+      "timing_healthy",
+      "command_control_healthy"
+    ]
+  },
+  {
+    "satellite_id": "SAT-002",
+    "timestamp": "2026-01-12T14:00:42Z",
+    "health_status": "Critical",
+    "fault_scenario": "critical_power_failure",
+    "subsystem_scenarios": [
+      "power_critical",
+      "thermal_critical",
+      "payload_critical",
+      "adcs_critical",
+      "communications_critical",
+      "cdh_critical",
+      "propulsion_critical",
+      "timing_critical",
+      "command_control_critical"
+    ]
+  },
+  {
+    "satellite_id": "SAT-002",
+    "timestamp": "2026-01-13T08:26:21Z",
+    "health_status": "Healthy",
+    "fault_scenario": "nominal_power",
+    "subsystem_scenarios": [
+      "power_healthy",
+      "thermal_healthy",
+      "payload_healthy",
+      "adcs_healthy",
+      "communications_healthy",
+      "cdh_healthy",
+      "propulsion_healthy",
+      "timing_healthy",
+      "command_control_healthy"
+    ]
   },
   {
     "satellite_id": "SAT-003",
-    "timestamp": "2026-01-14T21:56:16Z",
+    "timestamp": "2026-01-01T18:35:00Z",
     "health_status": "Critical",
-    "fault_scenario": "critical_power_failure"
+    "fault_scenario": "critical_power_failure",
+    "subsystem_scenarios": [
+      "power_critical",
+      "thermal_critical",
+      "payload_critical",
+      "adcs_critical",
+      "communications_critical",
+      "cdh_critical",
+      "propulsion_critical",
+      "timing_critical",
+      "command_control_critical"
+    ]
   },
   {
     "satellite_id": "SAT-003",
-    "timestamp": "2026-01-15T17:41:54Z",
+    "timestamp": "2026-01-02T16:36:58Z",
     "health_status": "Warning",
-    "fault_scenario": "battery_undervoltage_warning"
+    "fault_scenario": "battery_undervoltage_warning",
+    "subsystem_scenarios": [
+      "power_warning",
+      "thermal_warning",
+      "payload_warning",
+      "adcs_warning",
+      "communications_warning",
+      "cdh_warning",
+      "propulsion_warning",
+      "timing_warning",
+      "command_control_warning"
+    ]
   },
   {
-    "satellite_id": "SAT-004",
-    "timestamp": "2026-01-01T20:13:48Z",
-    "health_status": "Warning",
-    "fault_scenario": "battery_undervoltage_warning"
-  },
-  {
-    "satellite_id": "SAT-004",
-    "timestamp": "2026-01-02T11:38:45Z",
+    "satellite_id": "SAT-003",
+    "timestamp": "2026-01-03T11:58:31Z",
     "health_status": "Healthy",
-    "fault_scenario": "nominal_power"
+    "fault_scenario": "nominal_power",
+    "subsystem_scenarios": [
+      "power_healthy",
+      "thermal_healthy",
+      "payload_healthy",
+      "adcs_healthy",
+      "communications_healthy",
+      "cdh_healthy",
+      "propulsion_healthy",
+      "timing_healthy",
+      "command_control_healthy"
+    ]
   },
   {
-    "satellite_id": "SAT-004",
-    "timestamp": "2026-01-03T01:18:27Z",
-    "health_status": "Degraded",
-    "fault_scenario": "combined_power_degradation"
-  },
-  {
-    "satellite_id": "SAT-004",
-    "timestamp": "2026-01-03T04:45:26Z",
-    "health_status": "Healthy",
-    "fault_scenario": "nominal_power"
-  },
-  {
-    "satellite_id": "SAT-004",
-    "timestamp": "2026-01-03T15:46:30Z",
-    "health_status": "Healthy",
-    "fault_scenario": "nominal_power"
-  },
-  {
-    "satellite_id": "SAT-004",
-    "timestamp": "2026-01-04T07:56:22Z",
-    "health_status": "Warning",
-    "fault_scenario": "battery_undervoltage_warning"
-  },
-  {
-    "satellite_id": "SAT-004",
-    "timestamp": "2026-01-04T15:51:28Z",
-    "health_status": "Warning",
-    "fault_scenario": "battery_undervoltage_warning"
-  },
-  {
-    "satellite_id": "SAT-004",
-    "timestamp": "2026-01-05T13:20:19Z",
+    "satellite_id": "SAT-003",
+    "timestamp": "2026-01-03T23:53:25Z",
     "health_status": "Critical",
-    "fault_scenario": "critical_power_failure"
+    "fault_scenario": "critical_power_failure",
+    "subsystem_scenarios": [
+      "power_critical",
+      "thermal_critical",
+      "payload_critical",
+      "adcs_critical",
+      "communications_critical",
+      "cdh_critical",
+      "propulsion_critical",
+      "timing_critical",
+      "command_control_critical"
+    ]
   },
   {
-    "satellite_id": "SAT-004",
-    "timestamp": "2026-01-06T10:14:15Z",
-    "health_status": "Degraded",
-    "fault_scenario": "combined_power_degradation"
-  },
-  {
-    "satellite_id": "SAT-004",
-    "timestamp": "2026-01-07T06:36:53Z",
+    "satellite_id": "SAT-003",
+    "timestamp": "2026-01-04T03:09:28Z",
     "health_status": "Warning",
-    "fault_scenario": "battery_undervoltage_warning"
+    "fault_scenario": "battery_undervoltage_warning",
+    "subsystem_scenarios": [
+      "power_warning",
+      "thermal_warning",
+      "payload_warning",
+      "adcs_warning",
+      "communications_warning",
+      "cdh_warning",
+      "propulsion_warning",
+      "timing_warning",
+      "command_control_warning"
+    ]
   },
   {
-    "satellite_id": "SAT-004",
-    "timestamp": "2026-01-07T10:32:59Z",
+    "satellite_id": "SAT-003",
+    "timestamp": "2026-01-05T01:02:14Z",
     "health_status": "Healthy",
-    "fault_scenario": "nominal_power"
+    "fault_scenario": "nominal_power",
+    "subsystem_scenarios": [
+      "power_healthy",
+      "thermal_healthy",
+      "payload_healthy",
+      "adcs_healthy",
+      "communications_healthy",
+      "cdh_healthy",
+      "propulsion_healthy",
+      "timing_healthy",
+      "command_control_healthy"
+    ]
   },
   {
-    "satellite_id": "SAT-004",
-    "timestamp": "2026-01-08T08:03:59Z",
+    "satellite_id": "SAT-003",
+    "timestamp": "2026-01-05T22:04:29Z",
+    "health_status": "Critical",
+    "fault_scenario": "critical_power_failure",
+    "subsystem_scenarios": [
+      "power_critical",
+      "thermal_critical",
+      "payload_critical",
+      "adcs_critical",
+      "communications_critical",
+      "cdh_critical",
+      "propulsion_critical",
+      "timing_critical",
+      "command_control_critical"
+    ]
+  },
+  {
+    "satellite_id": "SAT-003",
+    "timestamp": "2026-01-06T11:16:23Z",
     "health_status": "Degraded",
-    "fault_scenario": "combined_power_degradation"
+    "fault_scenario": "combined_power_degradation",
+    "subsystem_scenarios": [
+      "power_degraded",
+      "thermal_degraded",
+      "payload_degraded",
+      "adcs_degraded",
+      "communications_degraded",
+      "cdh_degraded",
+      "propulsion_degraded",
+      "timing_degraded",
+      "command_control_degraded"
+    ]
   },
   {
-    "satellite_id": "SAT-004",
-    "timestamp": "2026-01-08T11:50:02Z",
+    "satellite_id": "SAT-003",
+    "timestamp": "2026-01-07T04:32:17Z",
+    "health_status": "Degraded",
+    "fault_scenario": "combined_power_degradation",
+    "subsystem_scenarios": [
+      "power_degraded",
+      "thermal_degraded",
+      "payload_degraded",
+      "adcs_degraded",
+      "communications_degraded",
+      "cdh_degraded",
+      "propulsion_degraded",
+      "timing_degraded",
+      "command_control_degraded"
+    ]
+  },
+  {
+    "satellite_id": "SAT-003",
+    "timestamp": "2026-01-08T03:13:51Z",
+    "health_status": "Critical",
+    "fault_scenario": "critical_power_failure",
+    "subsystem_scenarios": [
+      "power_critical",
+      "thermal_critical",
+      "payload_critical",
+      "adcs_critical",
+      "communications_critical",
+      "cdh_critical",
+      "propulsion_critical",
+      "timing_critical",
+      "command_control_critical"
+    ]
+  },
+  {
+    "satellite_id": "SAT-003",
+    "timestamp": "2026-01-09T01:17:11Z",
     "health_status": "Warning",
-    "fault_scenario": "battery_undervoltage_warning"
+    "fault_scenario": "battery_undervoltage_warning",
+    "subsystem_scenarios": [
+      "power_warning",
+      "thermal_warning",
+      "payload_warning",
+      "adcs_warning",
+      "communications_warning",
+      "cdh_warning",
+      "propulsion_warning",
+      "timing_warning",
+      "command_control_warning"
+    ]
   },
   {
-    "satellite_id": "SAT-004",
-    "timestamp": "2026-01-09T00:21:49Z",
-    "health_status": "Critical",
-    "fault_scenario": "critical_power_failure"
-  },
-  {
-    "satellite_id": "SAT-004",
-    "timestamp": "2026-01-09T07:32:16Z",
-    "health_status": "Degraded",
-    "fault_scenario": "combined_power_degradation"
-  },
-  {
-    "satellite_id": "SAT-004",
-    "timestamp": "2026-01-10T00:12:57Z",
-    "health_status": "Degraded",
-    "fault_scenario": "combined_power_degradation"
-  },
-  {
-    "satellite_id": "SAT-004",
-    "timestamp": "2026-01-10T21:14:39Z",
-    "health_status": "Degraded",
-    "fault_scenario": "combined_power_degradation"
-  },
-  {
-    "satellite_id": "SAT-004",
-    "timestamp": "2026-01-11T11:20:03Z",
-    "health_status": "Critical",
-    "fault_scenario": "critical_power_failure"
-  },
-  {
-    "satellite_id": "SAT-004",
-    "timestamp": "2026-01-12T02:34:29Z",
-    "health_status": "Healthy",
-    "fault_scenario": "nominal_power"
-  },
-  {
-    "satellite_id": "SAT-004",
-    "timestamp": "2026-01-12T09:33:31Z",
-    "health_status": "Healthy",
-    "fault_scenario": "nominal_power"
-  },
-  {
-    "satellite_id": "SAT-004",
-    "timestamp": "2026-01-13T06:06:22Z",
-    "health_status": "Critical",
-    "fault_scenario": "critical_power_failure"
-  },
-  {
-    "satellite_id": "SAT-004",
-    "timestamp": "2026-01-13T22:20:01Z",
-    "health_status": "Critical",
-    "fault_scenario": "critical_power_failure"
-  },
-  {
-    "satellite_id": "SAT-004",
-    "timestamp": "2026-01-14T02:20:36Z",
-    "health_status": "Critical",
-    "fault_scenario": "critical_power_failure"
-  },
-  {
-    "satellite_id": "SAT-004",
-    "timestamp": "2026-01-14T12:21:20Z",
+    "satellite_id": "SAT-003",
+    "timestamp": "2026-01-09T13:08:58Z",
     "health_status": "Warning",
-    "fault_scenario": "battery_undervoltage_warning"
+    "fault_scenario": "battery_undervoltage_warning",
+    "subsystem_scenarios": [
+      "power_warning",
+      "thermal_warning",
+      "payload_warning",
+      "adcs_warning",
+      "communications_warning",
+      "cdh_warning",
+      "propulsion_warning",
+      "timing_warning",
+      "command_control_warning"
+    ]
+  },
+  {
+    "satellite_id": "SAT-003",
+    "timestamp": "2026-01-10T11:07:29Z",
+    "health_status": "Healthy",
+    "fault_scenario": "nominal_power",
+    "subsystem_scenarios": [
+      "power_healthy",
+      "thermal_healthy",
+      "payload_healthy",
+      "adcs_healthy",
+      "communications_healthy",
+      "cdh_healthy",
+      "propulsion_healthy",
+      "timing_healthy",
+      "command_control_healthy"
+    ]
+  },
+  {
+    "satellite_id": "SAT-003",
+    "timestamp": "2026-01-11T08:36:02Z",
+    "health_status": "Degraded",
+    "fault_scenario": "combined_power_degradation",
+    "subsystem_scenarios": [
+      "power_degraded",
+      "thermal_degraded",
+      "payload_degraded",
+      "adcs_degraded",
+      "communications_degraded",
+      "cdh_degraded",
+      "propulsion_degraded",
+      "timing_degraded",
+      "command_control_degraded"
+    ]
+  },
+  {
+    "satellite_id": "SAT-003",
+    "timestamp": "2026-01-12T07:36:22Z",
+    "health_status": "Healthy",
+    "fault_scenario": "nominal_power",
+    "subsystem_scenarios": [
+      "power_healthy",
+      "thermal_healthy",
+      "payload_healthy",
+      "adcs_healthy",
+      "communications_healthy",
+      "cdh_healthy",
+      "propulsion_healthy",
+      "timing_healthy",
+      "command_control_healthy"
+    ]
+  },
+  {
+    "satellite_id": "SAT-003",
+    "timestamp": "2026-01-13T02:23:46Z",
+    "health_status": "Degraded",
+    "fault_scenario": "combined_power_degradation",
+    "subsystem_scenarios": [
+      "power_degraded",
+      "thermal_degraded",
+      "payload_degraded",
+      "adcs_degraded",
+      "communications_degraded",
+      "cdh_degraded",
+      "propulsion_degraded",
+      "timing_degraded",
+      "command_control_degraded"
+    ]
+  },
+  {
+    "satellite_id": "SAT-003",
+    "timestamp": "2026-01-13T22:46:24Z",
+    "health_status": "Healthy",
+    "fault_scenario": "nominal_power",
+    "subsystem_scenarios": [
+      "power_healthy",
+      "thermal_healthy",
+      "payload_healthy",
+      "adcs_healthy",
+      "communications_healthy",
+      "cdh_healthy",
+      "propulsion_healthy",
+      "timing_healthy",
+      "command_control_healthy"
+    ]
+  },
+  {
+    "satellite_id": "SAT-003",
+    "timestamp": "2026-01-14T02:47:01Z",
+    "health_status": "Warning",
+    "fault_scenario": "battery_undervoltage_warning",
+    "subsystem_scenarios": [
+      "power_warning",
+      "thermal_warning",
+      "payload_warning",
+      "adcs_warning",
+      "communications_warning",
+      "cdh_warning",
+      "propulsion_warning",
+      "timing_warning",
+      "command_control_warning"
+    ]
+  },
+  {
+    "satellite_id": "SAT-003",
+    "timestamp": "2026-01-14T23:27:53Z",
+    "health_status": "Degraded",
+    "fault_scenario": "combined_power_degradation",
+    "subsystem_scenarios": [
+      "power_degraded",
+      "thermal_degraded",
+      "payload_degraded",
+      "adcs_degraded",
+      "communications_degraded",
+      "cdh_degraded",
+      "propulsion_degraded",
+      "timing_degraded",
+      "command_control_degraded"
+    ]
+  },
+  {
+    "satellite_id": "SAT-003",
+    "timestamp": "2026-01-15T06:04:54Z",
+    "health_status": "Critical",
+    "fault_scenario": "critical_power_failure",
+    "subsystem_scenarios": [
+      "power_critical",
+      "thermal_critical",
+      "payload_critical",
+      "adcs_critical",
+      "communications_critical",
+      "cdh_critical",
+      "propulsion_critical",
+      "timing_critical",
+      "command_control_critical"
+    ]
+  },
+  {
+    "satellite_id": "SAT-003",
+    "timestamp": "2026-01-16T01:02:08Z",
+    "health_status": "Healthy",
+    "fault_scenario": "nominal_power",
+    "subsystem_scenarios": [
+      "power_healthy",
+      "thermal_healthy",
+      "payload_healthy",
+      "adcs_healthy",
+      "communications_healthy",
+      "cdh_healthy",
+      "propulsion_healthy",
+      "timing_healthy",
+      "command_control_healthy"
+    ]
+  },
+  {
+    "satellite_id": "SAT-003",
+    "timestamp": "2026-01-16T10:51:43Z",
+    "health_status": "Healthy",
+    "fault_scenario": "nominal_power",
+    "subsystem_scenarios": [
+      "power_healthy",
+      "thermal_healthy",
+      "payload_healthy",
+      "adcs_healthy",
+      "communications_healthy",
+      "cdh_healthy",
+      "propulsion_healthy",
+      "timing_healthy",
+      "command_control_healthy"
+    ]
+  },
+  {
+    "satellite_id": "SAT-003",
+    "timestamp": "2026-01-17T00:57:07Z",
+    "health_status": "Critical",
+    "fault_scenario": "critical_power_failure",
+    "subsystem_scenarios": [
+      "power_critical",
+      "thermal_critical",
+      "payload_critical",
+      "adcs_critical",
+      "communications_critical",
+      "cdh_critical",
+      "propulsion_critical",
+      "timing_critical",
+      "command_control_critical"
+    ]
+  },
+  {
+    "satellite_id": "SAT-003",
+    "timestamp": "2026-01-17T17:05:49Z",
+    "health_status": "Degraded",
+    "fault_scenario": "combined_power_degradation",
+    "subsystem_scenarios": [
+      "power_degraded",
+      "thermal_degraded",
+      "payload_degraded",
+      "adcs_degraded",
+      "communications_degraded",
+      "cdh_degraded",
+      "propulsion_degraded",
+      "timing_degraded",
+      "command_control_degraded"
+    ]
+  },
+  {
+    "satellite_id": "SAT-003",
+    "timestamp": "2026-01-18T09:49:49Z",
+    "health_status": "Warning",
+    "fault_scenario": "battery_undervoltage_warning",
+    "subsystem_scenarios": [
+      "power_warning",
+      "thermal_warning",
+      "payload_warning",
+      "adcs_warning",
+      "communications_warning",
+      "cdh_warning",
+      "propulsion_warning",
+      "timing_warning",
+      "command_control_warning"
+    ]
   },
   {
     "satellite_id": "SAT-004",
-    "timestamp": "2026-01-15T00:00:36Z",
+    "timestamp": "2026-01-01T18:49:38Z",
+    "health_status": "Degraded",
+    "fault_scenario": "combined_power_degradation",
+    "subsystem_scenarios": [
+      "power_degraded",
+      "thermal_degraded",
+      "payload_degraded",
+      "adcs_degraded",
+      "communications_degraded",
+      "cdh_degraded",
+      "propulsion_degraded",
+      "timing_degraded",
+      "command_control_degraded"
+    ]
+  },
+  {
+    "satellite_id": "SAT-004",
+    "timestamp": "2026-01-02T15:36:04Z",
     "health_status": "Healthy",
-    "fault_scenario": "nominal_power"
+    "fault_scenario": "nominal_power",
+    "subsystem_scenarios": [
+      "power_healthy",
+      "thermal_healthy",
+      "payload_healthy",
+      "adcs_healthy",
+      "communications_healthy",
+      "cdh_healthy",
+      "propulsion_healthy",
+      "timing_healthy",
+      "command_control_healthy"
+    ]
+  },
+  {
+    "satellite_id": "SAT-004",
+    "timestamp": "2026-01-03T03:15:20Z",
+    "health_status": "Warning",
+    "fault_scenario": "battery_undervoltage_warning",
+    "subsystem_scenarios": [
+      "power_warning",
+      "thermal_warning",
+      "payload_warning",
+      "adcs_warning",
+      "communications_warning",
+      "cdh_warning",
+      "propulsion_warning",
+      "timing_warning",
+      "command_control_warning"
+    ]
+  },
+  {
+    "satellite_id": "SAT-004",
+    "timestamp": "2026-01-03T17:41:34Z",
+    "health_status": "Degraded",
+    "fault_scenario": "combined_power_degradation",
+    "subsystem_scenarios": [
+      "power_degraded",
+      "thermal_degraded",
+      "payload_degraded",
+      "adcs_degraded",
+      "communications_degraded",
+      "cdh_degraded",
+      "propulsion_degraded",
+      "timing_degraded",
+      "command_control_degraded"
+    ]
+  },
+  {
+    "satellite_id": "SAT-004",
+    "timestamp": "2026-01-04T10:16:06Z",
+    "health_status": "Healthy",
+    "fault_scenario": "nominal_power",
+    "subsystem_scenarios": [
+      "power_healthy",
+      "thermal_healthy",
+      "payload_healthy",
+      "adcs_healthy",
+      "communications_healthy",
+      "cdh_healthy",
+      "propulsion_healthy",
+      "timing_healthy",
+      "command_control_healthy"
+    ]
+  },
+  {
+    "satellite_id": "SAT-004",
+    "timestamp": "2026-01-04T19:36:14Z",
+    "health_status": "Warning",
+    "fault_scenario": "battery_undervoltage_warning",
+    "subsystem_scenarios": [
+      "power_warning",
+      "thermal_warning",
+      "payload_warning",
+      "adcs_warning",
+      "communications_warning",
+      "cdh_warning",
+      "propulsion_warning",
+      "timing_warning",
+      "command_control_warning"
+    ]
+  },
+  {
+    "satellite_id": "SAT-004",
+    "timestamp": "2026-01-04T23:40:16Z",
+    "health_status": "Healthy",
+    "fault_scenario": "nominal_power",
+    "subsystem_scenarios": [
+      "power_healthy",
+      "thermal_healthy",
+      "payload_healthy",
+      "adcs_healthy",
+      "communications_healthy",
+      "cdh_healthy",
+      "propulsion_healthy",
+      "timing_healthy",
+      "command_control_healthy"
+    ]
+  },
+  {
+    "satellite_id": "SAT-004",
+    "timestamp": "2026-01-05T03:07:47Z",
+    "health_status": "Warning",
+    "fault_scenario": "battery_undervoltage_warning",
+    "subsystem_scenarios": [
+      "power_warning",
+      "thermal_warning",
+      "payload_warning",
+      "adcs_warning",
+      "communications_warning",
+      "cdh_warning",
+      "propulsion_warning",
+      "timing_warning",
+      "command_control_warning"
+    ]
+  },
+  {
+    "satellite_id": "SAT-004",
+    "timestamp": "2026-01-06T02:17:47Z",
+    "health_status": "Healthy",
+    "fault_scenario": "nominal_power",
+    "subsystem_scenarios": [
+      "power_healthy",
+      "thermal_healthy",
+      "payload_healthy",
+      "adcs_healthy",
+      "communications_healthy",
+      "cdh_healthy",
+      "propulsion_healthy",
+      "timing_healthy",
+      "command_control_healthy"
+    ]
+  },
+  {
+    "satellite_id": "SAT-004",
+    "timestamp": "2026-01-07T00:11:30Z",
+    "health_status": "Healthy",
+    "fault_scenario": "nominal_power",
+    "subsystem_scenarios": [
+      "power_healthy",
+      "thermal_healthy",
+      "payload_healthy",
+      "adcs_healthy",
+      "communications_healthy",
+      "cdh_healthy",
+      "propulsion_healthy",
+      "timing_healthy",
+      "command_control_healthy"
+    ]
+  },
+  {
+    "satellite_id": "SAT-004",
+    "timestamp": "2026-01-07T12:30:13Z",
+    "health_status": "Degraded",
+    "fault_scenario": "combined_power_degradation",
+    "subsystem_scenarios": [
+      "power_degraded",
+      "thermal_degraded",
+      "payload_degraded",
+      "adcs_degraded",
+      "communications_degraded",
+      "cdh_degraded",
+      "propulsion_degraded",
+      "timing_degraded",
+      "command_control_degraded"
+    ]
+  },
+  {
+    "satellite_id": "SAT-004",
+    "timestamp": "2026-01-07T15:41:03Z",
+    "health_status": "Healthy",
+    "fault_scenario": "nominal_power",
+    "subsystem_scenarios": [
+      "power_healthy",
+      "thermal_healthy",
+      "payload_healthy",
+      "adcs_healthy",
+      "communications_healthy",
+      "cdh_healthy",
+      "propulsion_healthy",
+      "timing_healthy",
+      "command_control_healthy"
+    ]
+  },
+  {
+    "satellite_id": "SAT-004",
+    "timestamp": "2026-01-08T09:03:08Z",
+    "health_status": "Critical",
+    "fault_scenario": "critical_power_failure",
+    "subsystem_scenarios": [
+      "power_critical",
+      "thermal_critical",
+      "payload_critical",
+      "adcs_critical",
+      "communications_critical",
+      "cdh_critical",
+      "propulsion_critical",
+      "timing_critical",
+      "command_control_critical"
+    ]
+  },
+  {
+    "satellite_id": "SAT-004",
+    "timestamp": "2026-01-08T15:08:30Z",
+    "health_status": "Critical",
+    "fault_scenario": "critical_power_failure",
+    "subsystem_scenarios": [
+      "power_critical",
+      "thermal_critical",
+      "payload_critical",
+      "adcs_critical",
+      "communications_critical",
+      "cdh_critical",
+      "propulsion_critical",
+      "timing_critical",
+      "command_control_critical"
+    ]
+  },
+  {
+    "satellite_id": "SAT-004",
+    "timestamp": "2026-01-08T22:57:20Z",
+    "health_status": "Critical",
+    "fault_scenario": "critical_power_failure",
+    "subsystem_scenarios": [
+      "power_critical",
+      "thermal_critical",
+      "payload_critical",
+      "adcs_critical",
+      "communications_critical",
+      "cdh_critical",
+      "propulsion_critical",
+      "timing_critical",
+      "command_control_critical"
+    ]
+  },
+  {
+    "satellite_id": "SAT-004",
+    "timestamp": "2026-01-09T10:11:02Z",
+    "health_status": "Warning",
+    "fault_scenario": "battery_undervoltage_warning",
+    "subsystem_scenarios": [
+      "power_warning",
+      "thermal_warning",
+      "payload_warning",
+      "adcs_warning",
+      "communications_warning",
+      "cdh_warning",
+      "propulsion_warning",
+      "timing_warning",
+      "command_control_warning"
+    ]
+  },
+  {
+    "satellite_id": "SAT-004",
+    "timestamp": "2026-01-09T18:02:14Z",
+    "health_status": "Critical",
+    "fault_scenario": "critical_power_failure",
+    "subsystem_scenarios": [
+      "power_critical",
+      "thermal_critical",
+      "payload_critical",
+      "adcs_critical",
+      "communications_critical",
+      "cdh_critical",
+      "propulsion_critical",
+      "timing_critical",
+      "command_control_critical"
+    ]
+  },
+  {
+    "satellite_id": "SAT-004",
+    "timestamp": "2026-01-10T06:46:58Z",
+    "health_status": "Warning",
+    "fault_scenario": "battery_undervoltage_warning",
+    "subsystem_scenarios": [
+      "power_warning",
+      "thermal_warning",
+      "payload_warning",
+      "adcs_warning",
+      "communications_warning",
+      "cdh_warning",
+      "propulsion_warning",
+      "timing_warning",
+      "command_control_warning"
+    ]
+  },
+  {
+    "satellite_id": "SAT-004",
+    "timestamp": "2026-01-10T10:36:56Z",
+    "health_status": "Critical",
+    "fault_scenario": "critical_power_failure",
+    "subsystem_scenarios": [
+      "power_critical",
+      "thermal_critical",
+      "payload_critical",
+      "adcs_critical",
+      "communications_critical",
+      "cdh_critical",
+      "propulsion_critical",
+      "timing_critical",
+      "command_control_critical"
+    ]
+  },
+  {
+    "satellite_id": "SAT-004",
+    "timestamp": "2026-01-10T21:07:22Z",
+    "health_status": "Critical",
+    "fault_scenario": "critical_power_failure",
+    "subsystem_scenarios": [
+      "power_critical",
+      "thermal_critical",
+      "payload_critical",
+      "adcs_critical",
+      "communications_critical",
+      "cdh_critical",
+      "propulsion_critical",
+      "timing_critical",
+      "command_control_critical"
+    ]
+  },
+  {
+    "satellite_id": "SAT-004",
+    "timestamp": "2026-01-11T01:18:47Z",
+    "health_status": "Degraded",
+    "fault_scenario": "combined_power_degradation",
+    "subsystem_scenarios": [
+      "power_degraded",
+      "thermal_degraded",
+      "payload_degraded",
+      "adcs_degraded",
+      "communications_degraded",
+      "cdh_degraded",
+      "propulsion_degraded",
+      "timing_degraded",
+      "command_control_degraded"
+    ]
+  },
+  {
+    "satellite_id": "SAT-004",
+    "timestamp": "2026-01-11T23:47:03Z",
+    "health_status": "Healthy",
+    "fault_scenario": "nominal_power",
+    "subsystem_scenarios": [
+      "power_healthy",
+      "thermal_healthy",
+      "payload_healthy",
+      "adcs_healthy",
+      "communications_healthy",
+      "cdh_healthy",
+      "propulsion_healthy",
+      "timing_healthy",
+      "command_control_healthy"
+    ]
+  },
+  {
+    "satellite_id": "SAT-004",
+    "timestamp": "2026-01-12T03:13:26Z",
+    "health_status": "Warning",
+    "fault_scenario": "battery_undervoltage_warning",
+    "subsystem_scenarios": [
+      "power_warning",
+      "thermal_warning",
+      "payload_warning",
+      "adcs_warning",
+      "communications_warning",
+      "cdh_warning",
+      "propulsion_warning",
+      "timing_warning",
+      "command_control_warning"
+    ]
+  },
+  {
+    "satellite_id": "SAT-004",
+    "timestamp": "2026-01-12T16:17:35Z",
+    "health_status": "Degraded",
+    "fault_scenario": "combined_power_degradation",
+    "subsystem_scenarios": [
+      "power_degraded",
+      "thermal_degraded",
+      "payload_degraded",
+      "adcs_degraded",
+      "communications_degraded",
+      "cdh_degraded",
+      "propulsion_degraded",
+      "timing_degraded",
+      "command_control_degraded"
+    ]
+  },
+  {
+    "satellite_id": "SAT-004",
+    "timestamp": "2026-01-13T12:22:54Z",
+    "health_status": "Degraded",
+    "fault_scenario": "combined_power_degradation",
+    "subsystem_scenarios": [
+      "power_degraded",
+      "thermal_degraded",
+      "payload_degraded",
+      "adcs_degraded",
+      "communications_degraded",
+      "cdh_degraded",
+      "propulsion_degraded",
+      "timing_degraded",
+      "command_control_degraded"
+    ]
   }
 ]

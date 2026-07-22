@@ -24,6 +24,11 @@ POWER_SCENARIO_BY_HEALTH = {
     "Critical": "critical_power_failure",
 }
 
+SCENARIO_SUBSYSTEMS = [
+    "power", "thermal", "payload", "adcs", "communications",
+    "cdh", "propulsion", "timing", "command_control",
+]
+
 SATELLITE_IDS = [
     "SAT-001",
     "SAT-002",
@@ -96,6 +101,11 @@ FEATURE_RANGES = {
         "reaction_wheel_rpm": (2200, 4700),
         "downlink_rate_kbps": (750, 1200),
         "mode": ["nominal"],
+        "memory_usage_pct": (20.0, 55.0),
+        "propellant_remaining_pct": (60.0, 100.0),
+        "clock_drift_us_day": (-20.0, 20.0),
+        "time_sync_offset_ms": (-20.0, 20.0),
+        "command_queue_depth": (0, 8),
     },
     "Warning": {
         "battery_state_of_charge_pct": (25.0, 55.0),
@@ -107,6 +117,11 @@ FEATURE_RANGES = {
         "reaction_wheel_rpm": (4200, 6800),
         "downlink_rate_kbps": (400, 850),
         "mode": ["nominal", "safe"],
+        "memory_usage_pct": (55.0, 82.0),
+        "propellant_remaining_pct": (25.0, 65.0),
+        "clock_drift_us_day": (-150.0, 150.0),
+        "time_sync_offset_ms": (-150.0, 150.0),
+        "command_queue_depth": (8, 25),
     },
     "Degraded": {
         "battery_state_of_charge_pct": (12.0, 35.0),
@@ -118,6 +133,11 @@ FEATURE_RANGES = {
         "reaction_wheel_rpm": (6200, 8800),
         "downlink_rate_kbps": (100, 450),
         "mode": ["safe", "recovery"],
+        "memory_usage_pct": (78.0, 96.0),
+        "propellant_remaining_pct": (8.0, 25.0),
+        "clock_drift_us_day": (-700.0, 700.0),
+        "time_sync_offset_ms": (-700.0, 700.0),
+        "command_queue_depth": (18, 45),
     },
     "Critical": {
         "battery_state_of_charge_pct": (2.0, 14.0),
@@ -129,6 +149,11 @@ FEATURE_RANGES = {
         "reaction_wheel_rpm": (8200, 10500),
         "downlink_rate_kbps": (0, 150),
         "mode": ["recovery", "emergency"],
+        "memory_usage_pct": (94.0, 100.0),
+        "propellant_remaining_pct": (0.0, 8.0),
+        "clock_drift_us_day": (-1500.0, 1500.0),
+        "time_sync_offset_ms": (-1500.0, 1500.0),
+        "command_queue_depth": (45, 70),
     },
 }
 
@@ -209,7 +234,7 @@ def sample_command_status(health_status: str) -> str:
 def sample_feature_value(feature_name: str, health_status: str) -> Any:
     value = FEATURE_RANGES[health_status][feature_name]
     if isinstance(value, tuple):
-        if feature_name in {"reaction_wheel_rpm", "downlink_rate_kbps"}:
+        if feature_name in {"reaction_wheel_rpm", "downlink_rate_kbps", "command_queue_depth"}:
             return int(random.uniform(*value))
         return round(random.uniform(*value), 2)
 
@@ -245,6 +270,7 @@ def generate_telemetry_record(
             "eclipse_state": eclipse_state,
             "solar_array_configuration": "deployed",
             "battery_current_sign_convention": "positive_discharge",
+            "communications_pass_state": "active",
         },
         "telemetry": {
             "battery_voltage_v": battery_voltage,
@@ -256,6 +282,7 @@ def generate_telemetry_record(
             "solar_array_current_a": solar_current,
             "flight_computer_temperature_c": computer_temperature,
             "payload_temperature_c": sample_feature_value("payload_temperature_c", health_status),
+            "radiator_temperature_c": round(computer_temperature - random.uniform(5, 20), 2),
             "gyro_x_rate_deg_s": round(random.uniform(-2, 2), 3),
             "gyro_y_rate_deg_s": round(random.uniform(-2, 2), 3),
             "gyro_z_rate_deg_s": round(random.uniform(-2, 2), 3),
@@ -266,8 +293,16 @@ def generate_telemetry_record(
             "reaction_wheel_2_speed_rpm": -round(wheel_speed * random.uniform(0.7, 1.0)),
             "reaction_wheel_3_speed_rpm": round(wheel_speed * random.uniform(0.5, 0.9)),
             "downlink_rate_kbps": sample_feature_value("downlink_rate_kbps", health_status),
-            "memory_usage_pct": round(random.uniform(20, 85), 2),
-            "command_queue_depth": random.randint(0, 12),
+            "memory_usage_pct": sample_feature_value("memory_usage_pct", health_status),
+            "memory_corrected_error_count": HEALTH_CLASSES.index(health_status) * random.randint(0, 5),
+            "propellant_remaining_pct": sample_feature_value("propellant_remaining_pct", health_status),
+            "propellant_tank_pressure_bar": round(random.uniform(5, 20), 2),
+            "thruster_firing": False,
+            "thruster_pulse_width_ms": 0,
+            "clock_drift_us_day": sample_feature_value("clock_drift_us_day", health_status),
+            "time_sync_offset_ms": sample_feature_value("time_sync_offset_ms", health_status),
+            "command_queue_depth": sample_feature_value("command_queue_depth", health_status),
+            "latest_command_status": sample_command_status(health_status),
         },
     }
 
@@ -338,6 +373,10 @@ def generate_dummy_data(
                 "timestamp": telemetry_record["timestamp"],
                 "health_status": health_status,
                 "fault_scenario": POWER_SCENARIO_BY_HEALTH[health_status],
+                "subsystem_scenarios": [
+                    f"{subsystem}_{health_status.lower()}"
+                    for subsystem in SCENARIO_SUBSYSTEMS
+                ],
             })
 
             command_time = record_time - timedelta(
