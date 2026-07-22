@@ -14,6 +14,7 @@ from common.telemetry_validation import load_contracts  # noqa: E402
 from health.telemetry_adapter import (  # noqa: E402
     TelemetryAdapterError,
     validate_and_adapt_housekeeping_record,
+    validate_and_prepare_canonical_record,
 )
 from health.health_monitor import prepare_dataset  # noqa: E402
 
@@ -101,10 +102,23 @@ class TelemetryAdapterTests(unittest.TestCase):
                 validation_reference_time=self.example_time,
             )
 
-        self.assertEqual(dataset.loc[0, "battery_voltage"], 28.1)
+        self.assertEqual(dataset.loc[0, "battery_voltage_v"], 28.1)
+        self.assertEqual(dataset.loc[0, "battery_current_a"], -2.4)
+        self.assertEqual(dataset.loc[0, "reaction_wheel_2_speed_rpm"], -3860)
         self.assertEqual(dataset.loc[0, "recent_command_name"], "maintain_attitude")
         self.assertEqual(dataset.loc[0, "seconds_since_last_command"], 60.0)
         self.assertEqual(dataset.loc[0, "input_data_quality"], "complete")
+
+    def test_canonical_model_keeps_native_fields_without_assumptions(self) -> None:
+        prepared = validate_and_prepare_canonical_record(
+            self.example,
+            schema=self.schema,
+            dictionary=self.dictionary,
+            reference_time=self.example_time,
+        )
+        self.assertEqual(prepared.model_record["battery_current_a"], -2.4)
+        self.assertEqual(prepared.model_record["reaction_wheel_2_speed_rpm"], -3860)
+        self.assertEqual(prepared.assumptions, ())
 
     def test_prepare_dataset_rejects_mixed_envelope_and_legacy_records(self) -> None:
         legacy = {"satellite_id": "SAT-001", "timestamp": "2026-07-21T18:30:00Z"}

@@ -1,0 +1,602 @@
+[
+  {
+    "satellite_id": "SAT-001",
+    "timestamp": "2026-01-01T22:27:16Z",
+    "health_status": "Healthy",
+    "fault_scenario": "nominal_power"
+  },
+  {
+    "satellite_id": "SAT-001",
+    "timestamp": "2026-01-02T07:45:07Z",
+    "health_status": "Healthy",
+    "fault_scenario": "nominal_power"
+  },
+  {
+    "satellite_id": "SAT-001",
+    "timestamp": "2026-01-02T09:55:14Z",
+    "health_status": "Warning",
+    "fault_scenario": "battery_undervoltage_warning"
+  },
+  {
+    "satellite_id": "SAT-001",
+    "timestamp": "2026-01-02T14:54:45Z",
+    "health_status": "Critical",
+    "fault_scenario": "critical_power_failure"
+  },
+  {
+    "satellite_id": "SAT-001",
+    "timestamp": "2026-01-02T19:47:12Z",
+    "health_status": "Degraded",
+    "fault_scenario": "combined_power_degradation"
+  },
+  {
+    "satellite_id": "SAT-001",
+    "timestamp": "2026-01-03T14:05:28Z",
+    "health_status": "Degraded",
+    "fault_scenario": "combined_power_degradation"
+  },
+  {
+    "satellite_id": "SAT-001",
+    "timestamp": "2026-01-03T17:40:15Z",
+    "health_status": "Warning",
+    "fault_scenario": "battery_undervoltage_warning"
+  },
+  {
+    "satellite_id": "SAT-001",
+    "timestamp": "2026-01-04T11:00:15Z",
+    "health_status": "Degraded",
+    "fault_scenario": "combined_power_degradation"
+  },
+  {
+    "satellite_id": "SAT-001",
+    "timestamp": "2026-01-05T08:14:20Z",
+    "health_status": "Critical",
+    "fault_scenario": "critical_power_failure"
+  },
+  {
+    "satellite_id": "SAT-001",
+    "timestamp": "2026-01-06T00:30:08Z",
+    "health_status": "Warning",
+    "fault_scenario": "battery_undervoltage_warning"
+  },
+  {
+    "satellite_id": "SAT-001",
+    "timestamp": "2026-01-06T14:57:22Z",
+    "health_status": "Critical",
+    "fault_scenario": "critical_power_failure"
+  },
+  {
+    "satellite_id": "SAT-001",
+    "timestamp": "2026-01-07T07:22:40Z",
+    "health_status": "Warning",
+    "fault_scenario": "battery_undervoltage_warning"
+  },
+  {
+    "satellite_id": "SAT-001",
+    "timestamp": "2026-01-07T16:01:35Z",
+    "health_status": "Warning",
+    "fault_scenario": "battery_undervoltage_warning"
+  },
+  {
+    "satellite_id": "SAT-001",
+    "timestamp": "2026-01-08T01:07:29Z",
+    "health_status": "Degraded",
+    "fault_scenario": "combined_power_degradation"
+  },
+  {
+    "satellite_id": "SAT-001",
+    "timestamp": "2026-01-08T17:56:48Z",
+    "health_status": "Degraded",
+    "fault_scenario": "combined_power_degradation"
+  },
+  {
+    "satellite_id": "SAT-001",
+    "timestamp": "2026-01-09T09:48:56Z",
+    "health_status": "Warning",
+    "fault_scenario": "battery_undervoltage_warning"
+  },
+  {
+    "satellite_id": "SAT-001",
+    "timestamp": "2026-01-09T21:08:52Z",
+    "health_status": "Degraded",
+    "fault_scenario": "combined_power_degradation"
+  },
+  {
+    "satellite_id": "SAT-001",
+    "timestamp": "2026-01-10T06:06:55Z",
+    "health_status": "Critical",
+    "fault_scenario": "critical_power_failure"
+  },
+  {
+    "satellite_id": "SAT-001",
+    "timestamp": "2026-01-10T17:12:42Z",
+    "health_status": "Healthy",
+    "fault_scenario": "nominal_power"
+  },
+  {
+    "satellite_id": "SAT-001",
+    "timestamp": "2026-01-11T15:10:18Z",
+    "health_status": "Healthy",
+    "fault_scenario": "nominal_power"
+  },
+  {
+    "satellite_id": "SAT-001",
+    "timestamp": "2026-01-11T21:06:44Z",
+    "health_status": "Critical",
+    "fault_scenario": "critical_power_failure"
+  },
+  {
+    "satellite_id": "SAT-001",
+    "timestamp": "2026-01-12T06:47:50Z",
+    "health_status": "Healthy",
+    "fault_scenario": "nominal_power"
+  },
+  {
+    "satellite_id": "SAT-001",
+    "timestamp": "2026-01-13T05:39:27Z",
+    "health_status": "Healthy",
+    "fault_scenario": "nominal_power"
+  },
+  {
+    "satellite_id": "SAT-001",
+    "timestamp": "2026-01-14T04:13:43Z",
+    "health_status": "Critical",
+    "fault_scenario": "critical_power_failure"
+  },
+  {
+    "satellite_id": "SAT-001",
+    "timestamp": "2026-01-14T23:01:01Z",
+    "health_status": "Healthy",
+    "fault_scenario": "nominal_power"
+  },
+  {
+    "satellite_id": "SAT-002",
+    "timestamp": "2026-01-01T18:52:20Z",
+    "health_status": "Warning",
+    "fault_scenario": "battery_undervoltage_warning"
+  },
+  {
+    "satellite_id": "SAT-002",
+    "timestamp": "2026-01-02T09:43:16Z",
+    "health_status": "Warning",
+    "fault_scenario": "battery_undervoltage_warning"
+  },
+  {
+    "satellite_id": "SAT-002",
+    "timestamp": "2026-01-02T19:13:11Z",
+    "health_status": "Degraded",
+    "fault_scenario": "combined_power_degradation"
+  },
+  {
+    "satellite_id": "SAT-002",
+    "timestamp": "2026-01-03T17:59:36Z",
+    "health_status": "Healthy",
+    "fault_scenario": "nominal_power"
+  },
+  {
+    "satellite_id": "SAT-002",
+    "timestamp": "2026-01-04T13:01:58Z",
+    "health_status": "Critical",
+    "fault_scenario": "critical_power_failure"
+  },
+  {
+    "satellite_id": "SAT-002",
+    "timestamp": "2026-01-05T05:59:02Z",
+    "health_status": "Healthy",
+    "fault_scenario": "nominal_power"
+  },
+  {
+    "satellite_id": "SAT-002",
+    "timestamp": "2026-01-06T04:48:23Z",
+    "health_status": "Degraded",
+    "fault_scenario": "combined_power_degradation"
+  },
+  {
+    "satellite_id": "SAT-002",
+    "timestamp": "2026-01-06T14:30:03Z",
+    "health_status": "Critical",
+    "fault_scenario": "critical_power_failure"
+  },
+  {
+    "satellite_id": "SAT-002",
+    "timestamp": "2026-01-07T01:09:00Z",
+    "health_status": "Healthy",
+    "fault_scenario": "nominal_power"
+  },
+  {
+    "satellite_id": "SAT-002",
+    "timestamp": "2026-01-07T03:12:14Z",
+    "health_status": "Degraded",
+    "fault_scenario": "combined_power_degradation"
+  },
+  {
+    "satellite_id": "SAT-002",
+    "timestamp": "2026-01-07T16:47:07Z",
+    "health_status": "Healthy",
+    "fault_scenario": "nominal_power"
+  },
+  {
+    "satellite_id": "SAT-002",
+    "timestamp": "2026-01-08T02:09:49Z",
+    "health_status": "Healthy",
+    "fault_scenario": "nominal_power"
+  },
+  {
+    "satellite_id": "SAT-002",
+    "timestamp": "2026-01-08T12:31:10Z",
+    "health_status": "Degraded",
+    "fault_scenario": "combined_power_degradation"
+  },
+  {
+    "satellite_id": "SAT-002",
+    "timestamp": "2026-01-09T03:02:39Z",
+    "health_status": "Warning",
+    "fault_scenario": "battery_undervoltage_warning"
+  },
+  {
+    "satellite_id": "SAT-002",
+    "timestamp": "2026-01-09T09:40:12Z",
+    "health_status": "Warning",
+    "fault_scenario": "battery_undervoltage_warning"
+  },
+  {
+    "satellite_id": "SAT-002",
+    "timestamp": "2026-01-10T08:24:41Z",
+    "health_status": "Warning",
+    "fault_scenario": "battery_undervoltage_warning"
+  },
+  {
+    "satellite_id": "SAT-002",
+    "timestamp": "2026-01-10T22:27:16Z",
+    "health_status": "Degraded",
+    "fault_scenario": "combined_power_degradation"
+  },
+  {
+    "satellite_id": "SAT-002",
+    "timestamp": "2026-01-11T03:23:06Z",
+    "health_status": "Critical",
+    "fault_scenario": "critical_power_failure"
+  },
+  {
+    "satellite_id": "SAT-002",
+    "timestamp": "2026-01-11T12:42:15Z",
+    "health_status": "Warning",
+    "fault_scenario": "battery_undervoltage_warning"
+  },
+  {
+    "satellite_id": "SAT-002",
+    "timestamp": "2026-01-12T05:06:10Z",
+    "health_status": "Critical",
+    "fault_scenario": "critical_power_failure"
+  },
+  {
+    "satellite_id": "SAT-002",
+    "timestamp": "2026-01-12T16:03:08Z",
+    "health_status": "Healthy",
+    "fault_scenario": "nominal_power"
+  },
+  {
+    "satellite_id": "SAT-002",
+    "timestamp": "2026-01-13T10:44:04Z",
+    "health_status": "Degraded",
+    "fault_scenario": "combined_power_degradation"
+  },
+  {
+    "satellite_id": "SAT-002",
+    "timestamp": "2026-01-14T01:34:38Z",
+    "health_status": "Healthy",
+    "fault_scenario": "nominal_power"
+  },
+  {
+    "satellite_id": "SAT-002",
+    "timestamp": "2026-01-14T11:26:09Z",
+    "health_status": "Critical",
+    "fault_scenario": "critical_power_failure"
+  },
+  {
+    "satellite_id": "SAT-002",
+    "timestamp": "2026-01-15T11:17:55Z",
+    "health_status": "Critical",
+    "fault_scenario": "critical_power_failure"
+  },
+  {
+    "satellite_id": "SAT-003",
+    "timestamp": "2026-01-01T14:14:56Z",
+    "health_status": "Critical",
+    "fault_scenario": "critical_power_failure"
+  },
+  {
+    "satellite_id": "SAT-003",
+    "timestamp": "2026-01-01T18:20:00Z",
+    "health_status": "Warning",
+    "fault_scenario": "battery_undervoltage_warning"
+  },
+  {
+    "satellite_id": "SAT-003",
+    "timestamp": "2026-01-02T17:50:06Z",
+    "health_status": "Warning",
+    "fault_scenario": "battery_undervoltage_warning"
+  },
+  {
+    "satellite_id": "SAT-003",
+    "timestamp": "2026-01-03T05:05:38Z",
+    "health_status": "Healthy",
+    "fault_scenario": "nominal_power"
+  },
+  {
+    "satellite_id": "SAT-003",
+    "timestamp": "2026-01-03T21:11:59Z",
+    "health_status": "Critical",
+    "fault_scenario": "critical_power_failure"
+  },
+  {
+    "satellite_id": "SAT-003",
+    "timestamp": "2026-01-04T20:22:06Z",
+    "health_status": "Critical",
+    "fault_scenario": "critical_power_failure"
+  },
+  {
+    "satellite_id": "SAT-003",
+    "timestamp": "2026-01-05T17:10:39Z",
+    "health_status": "Healthy",
+    "fault_scenario": "nominal_power"
+  },
+  {
+    "satellite_id": "SAT-003",
+    "timestamp": "2026-01-05T23:05:14Z",
+    "health_status": "Warning",
+    "fault_scenario": "battery_undervoltage_warning"
+  },
+  {
+    "satellite_id": "SAT-003",
+    "timestamp": "2026-01-06T14:09:52Z",
+    "health_status": "Degraded",
+    "fault_scenario": "combined_power_degradation"
+  },
+  {
+    "satellite_id": "SAT-003",
+    "timestamp": "2026-01-07T07:00:00Z",
+    "health_status": "Healthy",
+    "fault_scenario": "nominal_power"
+  },
+  {
+    "satellite_id": "SAT-003",
+    "timestamp": "2026-01-07T22:29:31Z",
+    "health_status": "Healthy",
+    "fault_scenario": "nominal_power"
+  },
+  {
+    "satellite_id": "SAT-003",
+    "timestamp": "2026-01-08T19:31:00Z",
+    "health_status": "Warning",
+    "fault_scenario": "battery_undervoltage_warning"
+  },
+  {
+    "satellite_id": "SAT-003",
+    "timestamp": "2026-01-09T11:25:25Z",
+    "health_status": "Degraded",
+    "fault_scenario": "combined_power_degradation"
+  },
+  {
+    "satellite_id": "SAT-003",
+    "timestamp": "2026-01-09T21:32:52Z",
+    "health_status": "Critical",
+    "fault_scenario": "critical_power_failure"
+  },
+  {
+    "satellite_id": "SAT-003",
+    "timestamp": "2026-01-09T23:39:01Z",
+    "health_status": "Healthy",
+    "fault_scenario": "nominal_power"
+  },
+  {
+    "satellite_id": "SAT-003",
+    "timestamp": "2026-01-10T17:38:02Z",
+    "health_status": "Healthy",
+    "fault_scenario": "nominal_power"
+  },
+  {
+    "satellite_id": "SAT-003",
+    "timestamp": "2026-01-11T11:46:02Z",
+    "health_status": "Healthy",
+    "fault_scenario": "nominal_power"
+  },
+  {
+    "satellite_id": "SAT-003",
+    "timestamp": "2026-01-11T20:00:52Z",
+    "health_status": "Critical",
+    "fault_scenario": "critical_power_failure"
+  },
+  {
+    "satellite_id": "SAT-003",
+    "timestamp": "2026-01-12T01:00:18Z",
+    "health_status": "Degraded",
+    "fault_scenario": "combined_power_degradation"
+  },
+  {
+    "satellite_id": "SAT-003",
+    "timestamp": "2026-01-12T18:03:45Z",
+    "health_status": "Degraded",
+    "fault_scenario": "combined_power_degradation"
+  },
+  {
+    "satellite_id": "SAT-003",
+    "timestamp": "2026-01-13T02:03:45Z",
+    "health_status": "Degraded",
+    "fault_scenario": "combined_power_degradation"
+  },
+  {
+    "satellite_id": "SAT-003",
+    "timestamp": "2026-01-13T05:56:23Z",
+    "health_status": "Degraded",
+    "fault_scenario": "combined_power_degradation"
+  },
+  {
+    "satellite_id": "SAT-003",
+    "timestamp": "2026-01-14T00:15:33Z",
+    "health_status": "Warning",
+    "fault_scenario": "battery_undervoltage_warning"
+  },
+  {
+    "satellite_id": "SAT-003",
+    "timestamp": "2026-01-14T21:56:16Z",
+    "health_status": "Critical",
+    "fault_scenario": "critical_power_failure"
+  },
+  {
+    "satellite_id": "SAT-003",
+    "timestamp": "2026-01-15T17:41:54Z",
+    "health_status": "Warning",
+    "fault_scenario": "battery_undervoltage_warning"
+  },
+  {
+    "satellite_id": "SAT-004",
+    "timestamp": "2026-01-01T20:13:48Z",
+    "health_status": "Warning",
+    "fault_scenario": "battery_undervoltage_warning"
+  },
+  {
+    "satellite_id": "SAT-004",
+    "timestamp": "2026-01-02T11:38:45Z",
+    "health_status": "Healthy",
+    "fault_scenario": "nominal_power"
+  },
+  {
+    "satellite_id": "SAT-004",
+    "timestamp": "2026-01-03T01:18:27Z",
+    "health_status": "Degraded",
+    "fault_scenario": "combined_power_degradation"
+  },
+  {
+    "satellite_id": "SAT-004",
+    "timestamp": "2026-01-03T04:45:26Z",
+    "health_status": "Healthy",
+    "fault_scenario": "nominal_power"
+  },
+  {
+    "satellite_id": "SAT-004",
+    "timestamp": "2026-01-03T15:46:30Z",
+    "health_status": "Healthy",
+    "fault_scenario": "nominal_power"
+  },
+  {
+    "satellite_id": "SAT-004",
+    "timestamp": "2026-01-04T07:56:22Z",
+    "health_status": "Warning",
+    "fault_scenario": "battery_undervoltage_warning"
+  },
+  {
+    "satellite_id": "SAT-004",
+    "timestamp": "2026-01-04T15:51:28Z",
+    "health_status": "Warning",
+    "fault_scenario": "battery_undervoltage_warning"
+  },
+  {
+    "satellite_id": "SAT-004",
+    "timestamp": "2026-01-05T13:20:19Z",
+    "health_status": "Critical",
+    "fault_scenario": "critical_power_failure"
+  },
+  {
+    "satellite_id": "SAT-004",
+    "timestamp": "2026-01-06T10:14:15Z",
+    "health_status": "Degraded",
+    "fault_scenario": "combined_power_degradation"
+  },
+  {
+    "satellite_id": "SAT-004",
+    "timestamp": "2026-01-07T06:36:53Z",
+    "health_status": "Warning",
+    "fault_scenario": "battery_undervoltage_warning"
+  },
+  {
+    "satellite_id": "SAT-004",
+    "timestamp": "2026-01-07T10:32:59Z",
+    "health_status": "Healthy",
+    "fault_scenario": "nominal_power"
+  },
+  {
+    "satellite_id": "SAT-004",
+    "timestamp": "2026-01-08T08:03:59Z",
+    "health_status": "Degraded",
+    "fault_scenario": "combined_power_degradation"
+  },
+  {
+    "satellite_id": "SAT-004",
+    "timestamp": "2026-01-08T11:50:02Z",
+    "health_status": "Warning",
+    "fault_scenario": "battery_undervoltage_warning"
+  },
+  {
+    "satellite_id": "SAT-004",
+    "timestamp": "2026-01-09T00:21:49Z",
+    "health_status": "Critical",
+    "fault_scenario": "critical_power_failure"
+  },
+  {
+    "satellite_id": "SAT-004",
+    "timestamp": "2026-01-09T07:32:16Z",
+    "health_status": "Degraded",
+    "fault_scenario": "combined_power_degradation"
+  },
+  {
+    "satellite_id": "SAT-004",
+    "timestamp": "2026-01-10T00:12:57Z",
+    "health_status": "Degraded",
+    "fault_scenario": "combined_power_degradation"
+  },
+  {
+    "satellite_id": "SAT-004",
+    "timestamp": "2026-01-10T21:14:39Z",
+    "health_status": "Degraded",
+    "fault_scenario": "combined_power_degradation"
+  },
+  {
+    "satellite_id": "SAT-004",
+    "timestamp": "2026-01-11T11:20:03Z",
+    "health_status": "Critical",
+    "fault_scenario": "critical_power_failure"
+  },
+  {
+    "satellite_id": "SAT-004",
+    "timestamp": "2026-01-12T02:34:29Z",
+    "health_status": "Healthy",
+    "fault_scenario": "nominal_power"
+  },
+  {
+    "satellite_id": "SAT-004",
+    "timestamp": "2026-01-12T09:33:31Z",
+    "health_status": "Healthy",
+    "fault_scenario": "nominal_power"
+  },
+  {
+    "satellite_id": "SAT-004",
+    "timestamp": "2026-01-13T06:06:22Z",
+    "health_status": "Critical",
+    "fault_scenario": "critical_power_failure"
+  },
+  {
+    "satellite_id": "SAT-004",
+    "timestamp": "2026-01-13T22:20:01Z",
+    "health_status": "Critical",
+    "fault_scenario": "critical_power_failure"
+  },
+  {
+    "satellite_id": "SAT-004",
+    "timestamp": "2026-01-14T02:20:36Z",
+    "health_status": "Critical",
+    "fault_scenario": "critical_power_failure"
+  },
+  {
+    "satellite_id": "SAT-004",
+    "timestamp": "2026-01-14T12:21:20Z",
+    "health_status": "Warning",
+    "fault_scenario": "battery_undervoltage_warning"
+  },
+  {
+    "satellite_id": "SAT-004",
+    "timestamp": "2026-01-15T00:00:36Z",
+    "health_status": "Healthy",
+    "fault_scenario": "nominal_power"
+  }
+]

@@ -25,8 +25,10 @@ from sklearn.preprocessing import OneHotEncoder
 
 try:
     from .health_features import CATEGORICAL_FEATURES, MODEL_FEATURES, NUMERICAL_FEATURES
+    from .health_monitor import prepare_dataset
 except ImportError:  # Allow direct execution: python src/health/train_health_model.py
     from health_features import CATEGORICAL_FEATURES, MODEL_FEATURES, NUMERICAL_FEATURES
+    from health_monitor import prepare_dataset
 
 
 
@@ -42,6 +44,9 @@ DEFAULT_COMMAND_HISTORY_PATH = (
     / "raw"
     / "command_history"
     / "CommandHistory1.json"
+)
+DEFAULT_LABELS_PATH = (
+    REPOSITORY_ROOT / "data" / "raw" / "telemetry" / "HealthLabels1.json"
 )
 DEFAULT_MODEL_PATH = (
     REPOSITORY_ROOT
@@ -198,22 +203,22 @@ def integrate_command_history(
 def load_dataset_from_paths(
     telemetry_path: Path,
     command_history_path: Path,
+    labels_path: Path,
 ) -> pd.DataFrame:
-    """Load, validate, and integrate telemetry and command-history data."""
+    """Validate canonical telemetry, integrate commands, and attach labels."""
 
-    telemetry_records = load_json_file(telemetry_path)
-    command_records = load_json_file(command_history_path)
-
-    telemetry_df = pd.DataFrame(telemetry_records)
-    command_df = pd.DataFrame(command_records)
-
-    if telemetry_df.empty:
-        raise ValueError("Telemetry JSON contains no records.")
-
-    if command_df.empty:
-        raise ValueError("Command history JSON contains no records.")
-
-    return integrate_command_history(telemetry_df, command_df)
+    dataset = prepare_dataset(telemetry_path, command_history_path)
+    labels = pd.DataFrame(load_json_file(labels_path))
+    required = {"satellite_id", "timestamp", TARGET_COLUMN}
+    if missing := required - set(labels.columns):
+        raise ValueError(f"Training labels are missing columns: {sorted(missing)}")
+    labels["timestamp"] = pd.to_datetime(labels["timestamp"], errors="raise", utc=True)
+    dataset = dataset.merge(
+        labels[list(required)], on=["satellite_id", "timestamp"], how="left", validate="one_to_one"
+    )
+    if dataset[TARGET_COLUMN].isna().any():
+        raise ValueError("Every canonical telemetry record must have one sidecar label.")
+    return dataset
 
 
 
@@ -234,6 +239,12 @@ def parse_args() -> argparse.Namespace:
         type=Path,
         default=DEFAULT_COMMAND_HISTORY_PATH,
         help="Path to the command history JSON file.",
+    )
+    parser.add_argument(
+        "--labels",
+        type=Path,
+        default=DEFAULT_LABELS_PATH,
+        help="Path to health labels stored separately from canonical telemetry.",
     )
     parser.add_argument(
         "--output-model",
@@ -466,10 +477,12 @@ def main() -> None:
 
     print(f"\nTelemetry file: {args.telemetry}")
     print(f"Command history file: {args.command_history}")
+    print(f"Training labels file: {args.labels}")
 
     dataset = load_dataset_from_paths(
         telemetry_path=args.telemetry,
-        command_history_path=args.command_history
+        command_history_path=args.command_history,
+        labels_path=args.labels,
     )
 
     validate_dataset(dataset)
@@ -533,6 +546,11 @@ def main() -> None:
         "trained_at": datetime.now(timezone.utc).isoformat(),
         "training_record_count": len(dataset),
         "training_data_type": "synthetic_prototype",
+        "telemetry_contract_version": "0.1.0",
+        "training_label_source": args.labels.resolve().relative_to(
+            REPOSITORY_ROOT.resolve()
+        ).as_posix(),
+        "legacy_adapter_required": False,
         "random_state": args.random_state,
         "number_of_trees": args.trees,
         "python_version": platform.python_version(),

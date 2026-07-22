@@ -38,12 +38,44 @@
     },
     "reportRecord": {
       "type": "object",
-      "required": ["report_generated_at", "satellite_id", "timestamp", "prediction", "predicted_probability", "class_probabilities", "probability_interpretation", "recent_command", "telemetry", "assessment", "data_quality", "recommendations", "recommendation_scope", "health_trend"],
+      "required": ["report_generated_at", "satellite_id", "timestamp", "prediction", "overall_health", "subsystem_health", "predicted_probability", "class_probabilities", "probability_interpretation", "recent_command", "telemetry", "assessment", "data_quality", "recommendations", "recommendation_scope", "health_trend"],
       "properties": {
         "report_generated_at": {"type": "string", "format": "date-time"},
         "satellite_id": {"type": "string", "minLength": 1},
         "timestamp": {"type": "string", "format": "date-time"},
         "prediction": {"$ref": "#/definitions/healthClass"},
+        "overall_health": {
+          "type": "object",
+          "required": ["status", "method", "contributors", "ml_status", "power_status"],
+          "properties": {
+            "status": {"$ref": "#/definitions/healthClass"},
+            "method": {"const": "maximum_severity"},
+            "contributors": {"type": "array", "items": {"type": "string"}},
+            "ml_status": {"$ref": "#/definitions/healthClass"},
+            "power_status": {"$ref": "#/definitions/healthClass"}
+          }
+        },
+        "subsystem_health": {
+          "type": "object",
+          "required": ["power"],
+          "properties": {
+            "power": {
+              "type": "object",
+              "required": ["status", "confidence", "method", "fault_codes", "evidence", "trends", "power_proxies", "context_notes", "limitations"],
+              "properties": {
+                "status": {"$ref": "#/definitions/healthClass"},
+                "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+                "method": {"const": "prototype_engineering_rules"},
+                "fault_codes": {"type": "array", "items": {"type": "string"}},
+                "evidence": {"type": "array", "items": {"type": "object"}},
+                "trends": {"type": "object"},
+                "power_proxies": {"type": "object"},
+                "context_notes": {"type": "array", "items": {"type": "string"}},
+                "limitations": {"type": "array", "items": {"type": "string"}}
+              }
+            }
+          }
+        },
         "predicted_probability": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
         "class_probabilities": {"$ref": "#/definitions/classProbabilities"},
         "probability_interpretation": {"enum": ["uncalibrated_random_forest_vote_fraction", "unavailable"]},
@@ -59,16 +91,23 @@
         },
         "telemetry": {
           "type": "object",
-          "required": ["solar_panel_current", "bus_temperature_c", "payload_temperature_c", "reaction_wheel_rpm", "downlink_rate_kbps", "battery_voltage", "battery_current", "mode"],
+          "required": ["solar_array_current_a", "solar_array_voltage_v", "battery_state_of_charge_pct", "flight_computer_temperature_c", "payload_temperature_c", "reaction_wheel_1_speed_rpm", "reaction_wheel_2_speed_rpm", "reaction_wheel_3_speed_rpm", "downlink_rate_kbps", "battery_voltage_v", "battery_current_a", "spacecraft_mode", "eclipse_state", "solar_array_configuration", "battery_current_sign_convention"],
           "properties": {
-            "solar_panel_current": {"$ref": "#/definitions/nullableNumber"},
-            "bus_temperature_c": {"$ref": "#/definitions/nullableNumber"},
+            "solar_array_current_a": {"$ref": "#/definitions/nullableNumber"},
+            "solar_array_voltage_v": {"$ref": "#/definitions/nullableNumber"},
+            "battery_state_of_charge_pct": {"$ref": "#/definitions/nullableNumber"},
+            "flight_computer_temperature_c": {"$ref": "#/definitions/nullableNumber"},
             "payload_temperature_c": {"$ref": "#/definitions/nullableNumber"},
-            "reaction_wheel_rpm": {"$ref": "#/definitions/nullableNumber"},
+            "reaction_wheel_1_speed_rpm": {"$ref": "#/definitions/nullableNumber"},
+            "reaction_wheel_2_speed_rpm": {"$ref": "#/definitions/nullableNumber"},
+            "reaction_wheel_3_speed_rpm": {"$ref": "#/definitions/nullableNumber"},
             "downlink_rate_kbps": {"$ref": "#/definitions/nullableNumber"},
-            "battery_voltage": {"$ref": "#/definitions/nullableNumber"},
-            "battery_current": {"$ref": "#/definitions/nullableNumber"},
-            "mode": {"type": ["string", "null"]}
+            "battery_voltage_v": {"$ref": "#/definitions/nullableNumber"},
+            "battery_current_a": {"$ref": "#/definitions/nullableNumber"},
+            "spacecraft_mode": {"type": ["string", "null"]},
+            "eclipse_state": {"type": ["string", "null"]},
+            "solar_array_configuration": {"type": ["string", "null"]},
+            "battery_current_sign_convention": {"type": ["string", "null"]}
           }
         },
         "assessment": {"type": "array", "items": {"type": "string"}},
@@ -80,6 +119,7 @@
             "missing_model_values": {"type": "array", "items": {"type": "string"}},
             "preceding_command_available": {"type": "boolean"},
             "telemetry_adapter_version": {"type": ["string", "null"]},
+            "telemetry_contract_version": {"type": ["string", "null"]},
             "notes": {"type": "array", "items": {"type": "string"}}
           }
         },
@@ -109,4 +149,3 @@
     }
   }
 }
-

@@ -8,6 +8,7 @@ import math
 
 
 BASE_DIR = Path(__file__).resolve().parent
+REPOSITORY_ROOT = BASE_DIR.parent
 
 HEALTH_CLASSES = [
     "Healthy",
@@ -15,6 +16,13 @@ HEALTH_CLASSES = [
     "Degraded",
     "Critical",
 ]
+
+POWER_SCENARIO_BY_HEALTH = {
+    "Healthy": "nominal_power",
+    "Warning": "battery_undervoltage_warning",
+    "Degraded": "combined_power_degradation",
+    "Critical": "critical_power_failure",
+}
 
 SATELLITE_IDS = [
     "SAT-001",
@@ -79,6 +87,7 @@ COMMAND_STATUS_WEIGHTS = {
 
 FEATURE_RANGES = {
     "Healthy": {
+        "battery_state_of_charge_pct": (70.0, 100.0),
         "battery_voltage": (27.0, 29.5),
         "battery_current": (3.0, 5.0),
         "solar_panel_current": (4.5, 7.0),
@@ -89,6 +98,7 @@ FEATURE_RANGES = {
         "mode": ["nominal"],
     },
     "Warning": {
+        "battery_state_of_charge_pct": (25.0, 55.0),
         "battery_voltage": (24.8, 27.3),
         "battery_current": (4.8, 6.5),
         "solar_panel_current": (2.5, 5.0),
@@ -99,6 +109,7 @@ FEATURE_RANGES = {
         "mode": ["nominal", "safe"],
     },
     "Degraded": {
+        "battery_state_of_charge_pct": (12.0, 35.0),
         "battery_voltage": (21.8, 25.2),
         "battery_current": (6.0, 8.2),
         "solar_panel_current": (1.0, 3.0),
@@ -109,6 +120,7 @@ FEATURE_RANGES = {
         "mode": ["safe", "recovery"],
     },
     "Critical": {
+        "battery_state_of_charge_pct": (2.0, 14.0),
         "battery_voltage": (18.0, 22.5),
         "battery_current": (7.8, 10.0),
         "solar_panel_current": (0.0, 1.5),
@@ -129,14 +141,20 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--telemetry-output",
         type=Path,
-        default=BASE_DIR / "HealthTelemetry1.json",
+        default=REPOSITORY_ROOT / "data" / "raw" / "telemetry" / "HealthTelemetry1.json",
         help="Path to write the generated telemetry JSON file.",
     )
     parser.add_argument(
         "--command-history-output",
         type=Path,
-        default=BASE_DIR / "CommandHistory1.json",
+        default=REPOSITORY_ROOT / "data" / "raw" / "command_history" / "CommandHistory1.json",
         help="Path to write the generated command history JSON file.",
+    )
+    parser.add_argument(
+        "--labels-output",
+        type=Path,
+        default=REPOSITORY_ROOT / "data" / "raw" / "telemetry" / "HealthLabels1.json",
+        help="Path to write training labels kept outside canonical telemetry.",
     )
     parser.add_argument(
         "--records-per-satellite",
@@ -159,7 +177,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--end-date",
         type=str,
-        default="2026-12-31T23:59:59Z",
+        default="2026-07-21T23:59:59Z",
         help="End timestamp for generated records in ISO 8601 UTC.",
     )
 
@@ -208,18 +226,49 @@ def generate_telemetry_record(
     health_status: str,
 ) -> dict[str, Any]:
 
+    battery_voltage = sample_feature_value("battery_voltage", health_status)
+    battery_current = sample_feature_value("battery_current", health_status)
+    solar_current = sample_feature_value("solar_panel_current", health_status)
+    eclipse_state = "sunlight"
+    if health_status == "Healthy" and random.random() < 0.2:
+        eclipse_state = "eclipse"
+        solar_current = round(random.uniform(0.0, 0.3), 2)
+    computer_temperature = sample_feature_value("bus_temperature_c", health_status)
+    wheel_speed = sample_feature_value("reaction_wheel_rpm", health_status)
     return {
+        "schema_version": "0.1.0",
         "satellite_id": satellite_id,
         "timestamp": isoformat_utc(timestamp),
-        "health_status": health_status,
-        "solar_panel_current": sample_feature_value("solar_panel_current", health_status),
-        "bus_temperature_c": sample_feature_value("bus_temperature_c", health_status),
-        "payload_temperature_c": sample_feature_value("payload_temperature_c", health_status),
-        "reaction_wheel_rpm": sample_feature_value("reaction_wheel_rpm", health_status),
-        "downlink_rate_kbps": sample_feature_value("downlink_rate_kbps", health_status),
-        "battery_voltage": sample_feature_value("battery_voltage", health_status),
-        "battery_current": sample_feature_value("battery_current", health_status),
-        "mode": sample_feature_value("mode", health_status),
+        "source": "synthetic_health_generator",
+        "spacecraft_mode": sample_feature_value("mode", health_status),
+        "operational_context": {
+            "eclipse_state": eclipse_state,
+            "solar_array_configuration": "deployed",
+            "battery_current_sign_convention": "positive_discharge",
+        },
+        "telemetry": {
+            "battery_voltage_v": battery_voltage,
+            "battery_current_a": round(random.choice((-1, 1)) * battery_current, 2),
+            "battery_state_of_charge_pct": sample_feature_value(
+                "battery_state_of_charge_pct", health_status
+            ),
+            "solar_array_voltage_v": round(battery_voltage + random.uniform(1, 5), 2),
+            "solar_array_current_a": solar_current,
+            "flight_computer_temperature_c": computer_temperature,
+            "payload_temperature_c": sample_feature_value("payload_temperature_c", health_status),
+            "gyro_x_rate_deg_s": round(random.uniform(-2, 2), 3),
+            "gyro_y_rate_deg_s": round(random.uniform(-2, 2), 3),
+            "gyro_z_rate_deg_s": round(random.uniform(-2, 2), 3),
+            "magnetometer_x_ut": round(random.uniform(-45, 45), 2),
+            "magnetometer_y_ut": round(random.uniform(-45, 45), 2),
+            "magnetometer_z_ut": round(random.uniform(-45, 45), 2),
+            "reaction_wheel_1_speed_rpm": wheel_speed,
+            "reaction_wheel_2_speed_rpm": -round(wheel_speed * random.uniform(0.7, 1.0)),
+            "reaction_wheel_3_speed_rpm": round(wheel_speed * random.uniform(0.5, 0.9)),
+            "downlink_rate_kbps": sample_feature_value("downlink_rate_kbps", health_status),
+            "memory_usage_pct": round(random.uniform(20, 85), 2),
+            "command_queue_depth": random.randint(0, 12),
+        },
     }
 
 
@@ -249,7 +298,7 @@ def generate_dummy_data(
     records_per_satellite: int,
     start_date: str,
     end_date: str,
-) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]]]:
     start_dt = parse_iso_datetime(start_date)
     end_dt = parse_iso_datetime(end_date)
 
@@ -258,6 +307,7 @@ def generate_dummy_data(
 
     telemetry_records: list[dict[str, Any]] = []
     command_records: list[dict[str, Any]] = []
+    label_records: list[dict[str, Any]] = []
 
     for satellite_id in SATELLITE_IDS:
         current_time = start_dt
@@ -277,13 +327,18 @@ def generate_dummy_data(
             if record_time > end_dt:
                 record_time = end_dt
 
-            telemetry_records.append(
-                generate_telemetry_record(
+            telemetry_record = generate_telemetry_record(
                     satellite_id=satellite_id,
                     timestamp=record_time,
                     health_status=health_status,
                 )
-            )
+            telemetry_records.append(telemetry_record)
+            label_records.append({
+                "satellite_id": satellite_id,
+                "timestamp": telemetry_record["timestamp"],
+                "health_status": health_status,
+                "fault_scenario": POWER_SCENARIO_BY_HEALTH[health_status],
+            })
 
             command_time = record_time - timedelta(
                 minutes=random.randint(5, 120)
@@ -304,7 +359,8 @@ def generate_dummy_data(
     telemetry_records.sort(key=lambda record: (record["satellite_id"], record["timestamp"]))
     command_records.sort(key=lambda record: (record["satellite_id"], record["timestamp"]))
 
-    return telemetry_records, command_records
+    label_records.sort(key=lambda record: (record["satellite_id"], record["timestamp"]))
+    return telemetry_records, command_records, label_records
 
 
 
@@ -319,7 +375,7 @@ def main() -> None:
     args = parse_args()
     random.seed(args.seed)
 
-    telemetry_records, command_records = generate_dummy_data(
+    telemetry_records, command_records, label_records = generate_dummy_data(
         records_per_satellite=args.records_per_satellite,
         start_date=args.start_date,
         end_date=args.end_date,
@@ -327,17 +383,19 @@ def main() -> None:
 
     write_json_file(args.telemetry_output, telemetry_records)
     write_json_file(args.command_history_output, command_records)
+    write_json_file(args.labels_output, label_records)
 
     print("\nDummy Data Generation Complete")
     print("------------------------------")
     print(f"Telemetry Records: {len(telemetry_records)}")
     print(f"Command Records:   {len(command_records)}")
+    print(f"Label Records:     {len(label_records)}")
 
     print("\nHealth Status Counts")
 
     counts = {}
 
-    for record in telemetry_records:
+    for record in label_records:
         status = record["health_status"]
         counts[status] = counts.get(status, 0) + 1
 

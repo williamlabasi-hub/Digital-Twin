@@ -15,6 +15,7 @@ from health.health_features import MODEL_FEATURES
 from health.health_monitor import (
     build_ml_records,
     build_report,
+    create_recommendations,
     determine_health_trend,
     integrate_command_history,
     prepare_dataset,
@@ -24,6 +25,24 @@ from health.health_monitor import (
 
 
 class HealthMonitorTests(unittest.TestCase):
+    def test_stale_healthy_prediction_does_not_recommend_nominal_operations(self) -> None:
+        row = pd.Series(
+            {
+                **{feature: 1 for feature in MODEL_FEATURES},
+                "input_data_quality": "degraded",
+                "input_validation_issues": [
+                    "battery_voltage_v is 900 seconds old; limit is 30 seconds."
+                ],
+            }
+        )
+
+        recommendations = create_recommendations("Healthy", row)
+
+        self.assertNotIn("Continue nominal operations.", recommendations)
+        self.assertNotIn("No corrective action is currently required.", recommendations)
+        self.assertTrue(any("historical" in item for item in recommendations))
+        self.assertTrue(any("current telemetry" in item for item in recommendations))
+
     def test_health_monitor_supports_direct_script_help(self) -> None:
         completed = subprocess.run(
             [sys.executable, str(REPOSITORY_ROOT / "src" / "health" / "health_monitor.py"), "--help"],
@@ -163,6 +182,10 @@ class HealthMonitorTests(unittest.TestCase):
         self.assertFalse(list(Draft7Validator(schema).iter_errors(output)))
         for entry in report:
             self.assertAlmostEqual(sum(entry["class_probabilities"].values()), 1.0)
+            self.assertIn("power", entry["subsystem_health"])
+            self.assertIn(entry["overall_health"]["status"], {
+                "Healthy", "Warning", "Degraded", "Critical"
+            })
 
 
 if __name__ == "__main__":

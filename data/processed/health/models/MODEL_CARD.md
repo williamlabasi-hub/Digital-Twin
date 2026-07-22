@@ -17,16 +17,19 @@
 
 ## Features
 
-The model consumes solar current, bus and payload temperatures, reaction-wheel
-speed, downlink rate, battery voltage/current, seconds since command, spacecraft
-mode, and recent command name/status. The preprocessing pipeline and classifier
-are saved together, and the exact feature list is embedded in the artifact.
+The model consumes canonical battery state of charge, solar-array voltage and
+current, flight-computer and payload temperatures, all three signed
+reaction-wheel speeds, downlink rate, signed battery current, battery voltage,
+seconds since command, spacecraft mode, eclipse state, array configuration,
+battery-current sign convention, and recent command context. The exact feature
+list is embedded in the artifact.
 
 ## Training data
 
 This prototype is trained on 100 synthetic records from:
 
-- `data/raw/telemetry/HealthTelemetry1.json`
+- `data/raw/telemetry/HealthTelemetry1.json` (schema-valid envelopes)
+- `data/raw/telemetry/HealthLabels1.json` (training-only label sidecar)
 - `data/raw/command_history/CommandHistory1.json`
 
 The generator deliberately creates separable classes and correlates command
@@ -46,11 +49,10 @@ This model is not flight-qualified, safety-certified, probability-calibrated,
 or validated on real telemetry. Do not use it for autonomous commanding or
 safe-mode entry.
 
-## Adapter assumptions
+## Contract
 
-- Flight-computer temperature maps to legacy bus temperature.
-- Maximum absolute wheel speed maps to the legacy wheel-speed feature.
-- Absolute battery current maps to the unsigned legacy current feature.
+The model uses canonical Version 0.1 telemetry names directly and does not
+require legacy field mapping. Labels remain outside the telemetry contract.
 
 ## Reproduction
 

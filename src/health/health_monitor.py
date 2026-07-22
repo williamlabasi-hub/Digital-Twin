@@ -13,13 +13,15 @@ import pandas as pd
 
 try:
     from .health_features import HEALTH_CLASSES, MODEL_FEATURES, NUMERICAL_FEATURES
-    from .telemetry_adapter import validate_and_adapt_housekeeping_record
+    from .power_health import aggregate_health, assess_power_subsystem
+    from .telemetry_adapter import validate_and_prepare_canonical_record
 except ImportError:  # Allow direct execution: python src/health/health_monitor.py
     source_root = Path(__file__).resolve().parents[1]
     if str(source_root) not in sys.path:
         sys.path.insert(0, str(source_root))
     from health.health_features import HEALTH_CLASSES, MODEL_FEATURES, NUMERICAL_FEATURES
-    from health.telemetry_adapter import validate_and_adapt_housekeeping_record
+    from health.power_health import aggregate_health, assess_power_subsystem
+    from health.telemetry_adapter import validate_and_prepare_canonical_record
 
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -244,12 +246,17 @@ def prepare_dataset(
 
     if all(envelope_flags):
         telemetry_records = [
-            validate_and_adapt_housekeeping_record(
+            validate_and_prepare_canonical_record(
                 record,
                 reference_time=validation_reference_time,
             ).model_record
             for record in telemetry_records
         ]
+    else:
+        raise ValueError(
+            "Legacy flat telemetry is not accepted by the canonical health model. "
+            "Provide Version 0.1 housekeeping envelope records."
+        )
 
     telemetry_df = pd.DataFrame(telemetry_records)
 
@@ -351,27 +358,29 @@ def assess_telemetry(
     assessment: list[str] = []
 
     battery_voltage = row.get(
-        "battery_voltage"
+        "battery_voltage_v"
     )
 
     bus_temperature = row.get(
-        "bus_temperature_c"
+        "flight_computer_temperature_c"
     )
 
     payload_temperature = row.get(
         "payload_temperature_c"
     )
 
-    reaction_wheel_rpm = row.get(
-        "reaction_wheel_rpm"
-    )
+    wheel_speeds = [
+        row.get(f"reaction_wheel_{index}_speed_rpm") for index in range(1, 4)
+    ]
+    wheel_speeds = [abs(value) for value in wheel_speeds if pd.notna(value)]
+    reaction_wheel_rpm = max(wheel_speeds) if wheel_speeds else None
 
     downlink_rate = row.get(
         "downlink_rate_kbps"
     )
 
     solar_current = row.get(
-        "solar_panel_current"
+        "solar_array_current_a"
     )
 
     command_status = str(
@@ -536,8 +545,33 @@ def create_recommendations(
         )
     )
 
+    validation_issues = list(row.get("input_validation_issues") or [])
+    missing_model_values = [
+        feature for feature in MODEL_FEATURES if pd.isna(row.get(feature))
+    ]
+    degraded_input = (
+        row.get("input_data_quality") == "degraded" or bool(missing_model_values)
+    )
+    stale_input = any("seconds old" in str(issue) for issue in validation_issues)
+
+    if degraded_input:
+        quality_recommendations = [
+            "Obtain complete, current telemetry before making an operational decision.",
+            "Do not use this degraded-input prediction as the sole basis for commanding or safe-mode decisions.",
+        ]
+        if stale_input:
+            quality_recommendations.insert(
+                1,
+                "Treat this prediction as historical rather than a current health assessment.",
+            )
+
+        if prediction == "Healthy":
+            recommendations = quality_recommendations
+        else:
+            recommendations = quality_recommendations + recommendations
+
     bus_temperature = row.get(
-        "bus_temperature_c"
+        "flight_computer_temperature_c"
     )
 
     payload_temperature = row.get(
@@ -545,12 +579,14 @@ def create_recommendations(
     )
 
     battery_voltage = row.get(
-        "battery_voltage"
+        "battery_voltage_v"
     )
 
-    reaction_wheel_rpm = row.get(
-        "reaction_wheel_rpm"
-    )
+    wheel_speeds = [
+        row.get(f"reaction_wheel_{index}_speed_rpm") for index in range(1, 4)
+    ]
+    wheel_speeds = [abs(value) for value in wheel_speeds if pd.notna(value)]
+    reaction_wheel_rpm = max(wheel_speeds) if wheel_speeds else None
 
     if (
         pd.notna(bus_temperature)
@@ -615,7 +651,8 @@ def describe_data_quality(row: pd.Series) -> dict[str, Any]:
         "status": status,
         "missing_model_values": missing_features,
         "preceding_command_available": bool(command_available),
-        "telemetry_adapter_version": row.get("telemetry_adapter_version"),
+        "telemetry_adapter_version": None,
+        "telemetry_contract_version": row.get("telemetry_contract_version"),
         "notes": notes,
     }
 
@@ -687,7 +724,9 @@ def determine_health_trend(
     _, previous_record = max(previous_records, key=lambda item: item[0])
 
     previous_prediction = str(
-        previous_record.get("prediction")
+        (previous_record.get("overall_health") or {}).get(
+            "status", previous_record.get("prediction")
+        )
     )
 
     current_level = severity.get(
@@ -790,6 +829,7 @@ def build_report(
 
     report: list[dict[str, Any]] = []
     trend_history = list(history)
+    previous_telemetry_by_satellite: dict[str, dict[str, Any]] = {}
     report_generated_at = datetime.now(timezone.utc).isoformat()
 
     for index, prediction_value in enumerate(
@@ -805,9 +845,13 @@ def build_report(
             row.get("satellite_id")
         )
 
+        previous_telemetry = previous_telemetry_by_satellite.get(satellite_id)
+        power_health = assess_power_subsystem(row, previous_telemetry)
+        overall_health = aggregate_health(prediction, power_health["status"])
+
         health_trend = determine_health_trend(
             satellite_id=satellite_id,
-            current_prediction=prediction,
+            current_prediction=overall_health["status"],
             current_timestamp=row.get("timestamp"),
             history=trend_history,
         )
@@ -819,6 +863,8 @@ def build_report(
                 row.get("timestamp")
             ),
             "prediction": prediction,
+            "overall_health": overall_health,
+            "subsystem_health": {"power": power_health},
             "recent_command": {
                 "name": make_json_safe(
                     row.get(
@@ -844,43 +890,27 @@ def build_report(
                 ),
             },
             "telemetry": {
-                "solar_panel_current": make_json_safe(
-                    row.get(
-                        "solar_panel_current"
-                    )
+                **{
+                    feature: make_json_safe(row.get(feature))
+                    for feature in MODEL_FEATURES
+                    if feature not in {
+                        "recent_command_name",
+                        "recent_command_status",
+                        "seconds_since_last_command",
+                    }
+                },
+                "battery_state_of_charge_pct": make_json_safe(
+                    row.get("battery_state_of_charge_pct")
                 ),
-                "bus_temperature_c": make_json_safe(
-                    row.get(
-                        "bus_temperature_c"
-                    )
+                "solar_array_voltage_v": make_json_safe(
+                    row.get("solar_array_voltage_v")
                 ),
-                "payload_temperature_c": make_json_safe(
-                    row.get(
-                        "payload_temperature_c"
-                    )
+                "eclipse_state": make_json_safe(row.get("eclipse_state")),
+                "solar_array_configuration": make_json_safe(
+                    row.get("solar_array_configuration")
                 ),
-                "reaction_wheel_rpm": make_json_safe(
-                    row.get(
-                        "reaction_wheel_rpm"
-                    )
-                ),
-                "downlink_rate_kbps": make_json_safe(
-                    row.get(
-                        "downlink_rate_kbps"
-                    )
-                ),
-                "battery_voltage": make_json_safe(
-                    row.get(
-                        "battery_voltage"
-                    )
-                ),
-                "battery_current": make_json_safe(
-                    row.get(
-                        "battery_current"
-                    )
-                ),
-                "mode": make_json_safe(
-                    row.get("mode")
+                "battery_current_sign_convention": make_json_safe(
+                    row.get("battery_current_sign_convention")
                 ),
             },
             "assessment": assess_telemetry(
@@ -889,7 +919,7 @@ def build_report(
             "data_quality": describe_data_quality(row),
             "recommendations": (
                 create_recommendations(
-                    prediction=prediction,
+                    prediction=overall_health["status"],
                     row=row,
                 )
             ),
@@ -934,6 +964,7 @@ def build_report(
             entry
         )
         trend_history.append(entry)
+        previous_telemetry_by_satellite[satellite_id] = row.to_dict()
 
     return report
 
@@ -972,6 +1003,16 @@ def print_report(
         print(
             "Predicted health: "
             f"{result['prediction']}"
+        )
+
+        print(
+            "Overall health: "
+            f"{result['overall_health']['status']}"
+        )
+
+        print(
+            "Power subsystem: "
+            f"{result['subsystem_health']['power']['status']}"
         )
 
         if (
