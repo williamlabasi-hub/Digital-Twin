@@ -16,6 +16,25 @@
       "type": "string",
       "enum": ["nominal", "payload_operations", "communications", "safe", "recovery", "emergency"]
     },
+    "operational_context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["eclipse_state", "solar_array_configuration"],
+      "properties": {
+        "eclipse_state": {
+          "enum": ["sunlight", "eclipse", "transition", "unknown"]
+        },
+        "solar_array_configuration": {
+          "enum": ["deployed", "stowed", "degraded", "unknown"]
+        },
+        "battery_current_sign_convention": {
+          "enum": ["positive_discharge", "positive_charge", "unknown"]
+        },
+        "communications_pass_state": {
+          "enum": ["active", "inactive", "acquiring", "unknown"]
+        }
+      }
+    },
     "telemetry": {
       "type": "object",
       "additionalProperties": false,

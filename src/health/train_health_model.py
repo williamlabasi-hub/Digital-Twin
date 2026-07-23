@@ -1,10 +1,13 @@
 import argparse
 import json
+import platform
 from datetime import datetime, timezone
 from pathlib import Path
 
 import joblib
+import numpy as np
 import pandas as pd
+import sklearn
 
 from sklearn.compose import ColumnTransformer
 from sklearn.ensemble import RandomForestClassifier
@@ -22,13 +25,37 @@ from sklearn.preprocessing import OneHotEncoder
 
 try:
     from .health_features import CATEGORICAL_FEATURES, MODEL_FEATURES, NUMERICAL_FEATURES
+    from .health_monitor import prepare_dataset
 except ImportError:  # Allow direct execution: python src/health/train_health_model.py
     from health_features import CATEGORICAL_FEATURES, MODEL_FEATURES, NUMERICAL_FEATURES
+    from health_monitor import prepare_dataset
 
 
 
 TARGET_COLUMN = "health_status"
 BASE_DIR = Path(__file__).resolve().parent
+REPOSITORY_ROOT = BASE_DIR.parents[1]
+DEFAULT_TELEMETRY_PATH = (
+    REPOSITORY_ROOT / "data" / "raw" / "telemetry" / "HealthTelemetry1.json"
+)
+DEFAULT_COMMAND_HISTORY_PATH = (
+    REPOSITORY_ROOT
+    / "data"
+    / "raw"
+    / "command_history"
+    / "CommandHistory1.json"
+)
+DEFAULT_LABELS_PATH = (
+    REPOSITORY_ROOT / "data" / "raw" / "telemetry" / "HealthLabels1.json"
+)
+DEFAULT_MODEL_PATH = (
+    REPOSITORY_ROOT
+    / "data"
+    / "processed"
+    / "health"
+    / "models"
+    / "satellite_health_model.joblib"
+)
 
 
 
@@ -176,22 +203,22 @@ def integrate_command_history(
 def load_dataset_from_paths(
     telemetry_path: Path,
     command_history_path: Path,
+    labels_path: Path,
 ) -> pd.DataFrame:
-    """Load, validate, and integrate telemetry and command-history data."""
+    """Validate canonical telemetry, integrate commands, and attach labels."""
 
-    telemetry_records = load_json_file(telemetry_path)
-    command_records = load_json_file(command_history_path)
-
-    telemetry_df = pd.DataFrame(telemetry_records)
-    command_df = pd.DataFrame(command_records)
-
-    if telemetry_df.empty:
-        raise ValueError("Telemetry JSON contains no records.")
-
-    if command_df.empty:
-        raise ValueError("Command history JSON contains no records.")
-
-    return integrate_command_history(telemetry_df, command_df)
+    dataset = prepare_dataset(telemetry_path, command_history_path)
+    labels = pd.DataFrame(load_json_file(labels_path))
+    required = {"satellite_id", "timestamp", TARGET_COLUMN}
+    if missing := required - set(labels.columns):
+        raise ValueError(f"Training labels are missing columns: {sorted(missing)}")
+    labels["timestamp"] = pd.to_datetime(labels["timestamp"], errors="raise", utc=True)
+    dataset = dataset.merge(
+        labels[list(required)], on=["satellite_id", "timestamp"], how="left", validate="one_to_one"
+    )
+    if dataset[TARGET_COLUMN].isna().any():
+        raise ValueError("Every canonical telemetry record must have one sidecar label.")
+    return dataset
 
 
 
@@ -204,19 +231,25 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--telemetry",
         type=Path,
-        default=BASE_DIR / "HealthTelemetry1.json",
+        default=DEFAULT_TELEMETRY_PATH,
         help="Path to the telemetry JSON file.",
     )
     parser.add_argument(
         "--command-history",
         type=Path,
-        default=BASE_DIR / "CommandHistory1.json",
+        default=DEFAULT_COMMAND_HISTORY_PATH,
         help="Path to the command history JSON file.",
+    )
+    parser.add_argument(
+        "--labels",
+        type=Path,
+        default=DEFAULT_LABELS_PATH,
+        help="Path to health labels stored separately from canonical telemetry.",
     )
     parser.add_argument(
         "--output-model",
         type=Path,
-        default=BASE_DIR / "satellite_health_model.joblib",
+        default=DEFAULT_MODEL_PATH,
         help="Path to save the trained model.",
     )
     parser.add_argument(
@@ -444,10 +477,12 @@ def main() -> None:
 
     print(f"\nTelemetry file: {args.telemetry}")
     print(f"Command history file: {args.command_history}")
+    print(f"Training labels file: {args.labels}")
 
     dataset = load_dataset_from_paths(
         telemetry_path=args.telemetry,
-        command_history_path=args.command_history
+        command_history_path=args.command_history,
+        labels_path=args.labels,
     )
 
     validate_dataset(dataset)
@@ -511,8 +546,31 @@ def main() -> None:
         "trained_at": datetime.now(timezone.utc).isoformat(),
         "training_record_count": len(dataset),
         "training_data_type": "synthetic_prototype",
+        "telemetry_contract_version": "0.1.0",
+        "training_label_source": args.labels.resolve().relative_to(
+            REPOSITORY_ROOT.resolve()
+        ).as_posix(),
+        "legacy_adapter_required": False,
+        "training_profile": {
+            "numerical": {
+                feature: {
+                    "minimum": float(pd.to_numeric(X[feature]).min()),
+                    "maximum": float(pd.to_numeric(X[feature]).max()),
+                }
+                for feature in NUMERICAL_FEATURES
+            },
+            "categorical": {
+                feature: sorted(str(value) for value in X[feature].dropna().unique())
+                for feature in CATEGORICAL_FEATURES
+            },
+        },
         "random_state": args.random_state,
         "number_of_trees": args.trees,
+        "python_version": platform.python_version(),
+        "pandas_version": pd.__version__,
+        "scikit_learn_version": sklearn.__version__,
+        "joblib_version": joblib.__version__,
+        "numpy_version": np.__version__,
     }
 
     print("\nTraining complete.")

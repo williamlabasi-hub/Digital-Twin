@@ -2,7 +2,7 @@
 
 Status: **Prototype — unvalidated**  
 Dictionary version: **0.1.0**  
-Authoritative machine-readable source: [`config/housekeeping-telemetry.yaml`](../config/housekeeping-telemetry.yaml)
+Authoritative machine-readable source: [`housekeeping-telemetry.yaml`](housekeeping-telemetry.yaml)
 
 ## Purpose and restrictions
 
@@ -31,7 +31,7 @@ software specifications and reviewed by an authorized engineer.
 Each observation uses a common envelope containing `schema_version`,
 `satellite_id`, UTC `timestamp`, `source`, optional `sequence_number`,
 `spacecraft_mode`, and a `telemetry` object. The structural contract is in
-[`schemas/housekeeping-telemetry.schema.json`](../schemas/housekeeping-telemetry.schema.json).
+[`housekeeping-telemetry.schema.json`](housekeeping-telemetry.schema.json).
 
 ## Parameter summary
 

@@ -1,18 +1,25 @@
 """Shared feature contract for health-model training and inference."""
 
 NUMERICAL_FEATURES = [
-    "solar_panel_current",
-    "bus_temperature_c",
+    "battery_state_of_charge_pct",
+    "solar_array_voltage_v",
+    "solar_array_current_a",
+    "flight_computer_temperature_c",
     "payload_temperature_c",
-    "reaction_wheel_rpm",
+    "reaction_wheel_1_speed_rpm",
+    "reaction_wheel_2_speed_rpm",
+    "reaction_wheel_3_speed_rpm",
     "downlink_rate_kbps",
-    "battery_voltage",
-    "battery_current",
+    "battery_voltage_v",
+    "battery_current_a",
     "seconds_since_last_command",
 ]
 
 CATEGORICAL_FEATURES = [
-    "mode",
+    "spacecraft_mode",
+    "eclipse_state",
+    "solar_array_configuration",
+    "battery_current_sign_convention",
     "recent_command_name",
     "recent_command_status",
 ]

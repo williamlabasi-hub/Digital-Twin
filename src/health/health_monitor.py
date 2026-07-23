@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import logging
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -12,23 +13,56 @@ import pandas as pd
 
 try:
     from .health_features import HEALTH_CLASSES, MODEL_FEATURES, NUMERICAL_FEATURES
-    from .telemetry_adapter import validate_and_adapt_housekeeping_record
+    from .health_state import apply_alert_persistence
+    from .fault_isolation import isolate_cross_subsystem_faults
+    from .model_assurance import assess_model_applicability
+    from .power_health import aggregate_all_health, assess_power_subsystem
+    from .subsystem_health import assess_non_power_subsystems
+    from .telemetry_adapter import validate_and_prepare_canonical_record
 except ImportError:  # Allow direct execution: python src/health/health_monitor.py
-    from health_features import HEALTH_CLASSES, MODEL_FEATURES, NUMERICAL_FEATURES
-    from telemetry_adapter import validate_and_adapt_housekeeping_record
+    source_root = Path(__file__).resolve().parents[1]
+    if str(source_root) not in sys.path:
+        sys.path.insert(0, str(source_root))
+    from health.health_features import HEALTH_CLASSES, MODEL_FEATURES, NUMERICAL_FEATURES
+    from health.health_state import apply_alert_persistence
+    from health.fault_isolation import isolate_cross_subsystem_faults
+    from health.model_assurance import assess_model_applicability
+    from health.power_health import aggregate_all_health, assess_power_subsystem
+    from health.subsystem_health import assess_non_power_subsystems
+    from health.telemetry_adapter import validate_and_prepare_canonical_record
 
 
 BASE_DIR = Path(__file__).resolve().parent
+REPOSITORY_ROOT = BASE_DIR.parents[1]
 
-DEFAULT_MODEL_PATH = BASE_DIR / "satellite_health_model.joblib"
-DEFAULT_TELEMETRY_PATH = BASE_DIR / "HealthTelemetry1.json"
-DEFAULT_COMMAND_HISTORY_PATH = BASE_DIR / "CommandHistory1.json"
-DEFAULT_REPORT_PATH = BASE_DIR / "health_predictions.json"
-DEFAULT_HISTORY_PATH = BASE_DIR / "health_history.json"
-DEFAULT_SCHEMA_PATH = BASE_DIR / "health_predictions.schema.json"
+DEFAULT_MODEL_PATH = REPOSITORY_ROOT / "data" / "processed" / "health" / "models" / "satellite_health_model.joblib"
+DEFAULT_TELEMETRY_PATH = REPOSITORY_ROOT / "data" / "raw" / "telemetry" / "HealthTelemetry1.json"
+DEFAULT_COMMAND_HISTORY_PATH = REPOSITORY_ROOT / "data" / "raw" / "command_history" / "CommandHistory1.json"
+DEFAULT_REPORT_PATH = REPOSITORY_ROOT / "data" / "outputs" / "health" / "health_predictions.json"
+DEFAULT_HISTORY_PATH = REPOSITORY_ROOT / "data" / "outputs" / "health" / "health_history.json"
+DEFAULT_SCHEMA_PATH = REPOSITORY_ROOT / "docs" / "requirements" / "health" / "health_predictions.schema.json"
 
 
 OUTPUT_SCHEMA_VERSION = "1.1.0"
+
+REPORT_TELEMETRY_FIELDS = [
+    "battery_voltage_v", "battery_current_a", "battery_state_of_charge_pct",
+    "solar_array_voltage_v", "solar_array_current_a", "rail_3v3_voltage_v",
+    "rail_5v_voltage_v", "rail_12v_voltage_v",
+    "flight_computer_temperature_c", "payload_temperature_c",
+    "radiator_temperature_c", "gyro_x_rate_deg_s", "gyro_y_rate_deg_s",
+    "gyro_z_rate_deg_s", "gyro_bias_x_deg_hr", "magnetometer_x_ut",
+    "magnetometer_y_ut", "magnetometer_z_ut", "magnetic_field_magnitude_ut",
+    "sun_sensor_azimuth_deg", "reaction_wheel_1_speed_rpm",
+    "reaction_wheel_2_speed_rpm", "reaction_wheel_3_speed_rpm",
+    "thruster_firing", "thruster_pulse_width_ms", "memory_usage_pct",
+    "memory_corrected_error_count", "onboard_data_generation_rate_kbps",
+    "downlink_rate_kbps", "propellant_remaining_pct",
+    "propellant_tank_pressure_bar", "clock_drift_us_day",
+    "time_sync_offset_ms", "command_queue_depth", "latest_command_status",
+    "spacecraft_mode", "eclipse_state", "solar_array_configuration",
+    "battery_current_sign_convention", "communications_pass_state",
+]
 
 
 def load_json_records(
@@ -239,12 +273,17 @@ def prepare_dataset(
 
     if all(envelope_flags):
         telemetry_records = [
-            validate_and_adapt_housekeeping_record(
+            validate_and_prepare_canonical_record(
                 record,
                 reference_time=validation_reference_time,
             ).model_record
             for record in telemetry_records
         ]
+    else:
+        raise ValueError(
+            "Legacy flat telemetry is not accepted by the canonical health model. "
+            "Provide Version 0.1 housekeeping envelope records."
+        )
 
     telemetry_df = pd.DataFrame(telemetry_records)
 
@@ -346,27 +385,29 @@ def assess_telemetry(
     assessment: list[str] = []
 
     battery_voltage = row.get(
-        "battery_voltage"
+        "battery_voltage_v"
     )
 
     bus_temperature = row.get(
-        "bus_temperature_c"
+        "flight_computer_temperature_c"
     )
 
     payload_temperature = row.get(
         "payload_temperature_c"
     )
 
-    reaction_wheel_rpm = row.get(
-        "reaction_wheel_rpm"
-    )
+    wheel_speeds = [
+        row.get(f"reaction_wheel_{index}_speed_rpm") for index in range(1, 4)
+    ]
+    wheel_speeds = [abs(value) for value in wheel_speeds if pd.notna(value)]
+    reaction_wheel_rpm = max(wheel_speeds) if wheel_speeds else None
 
     downlink_rate = row.get(
         "downlink_rate_kbps"
     )
 
     solar_current = row.get(
-        "solar_panel_current"
+        "solar_array_current_a"
     )
 
     command_status = str(
@@ -531,8 +572,33 @@ def create_recommendations(
         )
     )
 
+    validation_issues = list(row.get("input_validation_issues") or [])
+    missing_model_values = [
+        feature for feature in MODEL_FEATURES if pd.isna(row.get(feature))
+    ]
+    degraded_input = (
+        row.get("input_data_quality") == "degraded" or bool(missing_model_values)
+    )
+    stale_input = any("seconds old" in str(issue) for issue in validation_issues)
+
+    if degraded_input:
+        quality_recommendations = [
+            "Obtain complete, current telemetry before making an operational decision.",
+            "Do not use this degraded-input prediction as the sole basis for commanding or safe-mode decisions.",
+        ]
+        if stale_input:
+            quality_recommendations.insert(
+                1,
+                "Treat this prediction as historical rather than a current health assessment.",
+            )
+
+        if prediction == "Healthy":
+            recommendations = quality_recommendations
+        else:
+            recommendations = quality_recommendations + recommendations
+
     bus_temperature = row.get(
-        "bus_temperature_c"
+        "flight_computer_temperature_c"
     )
 
     payload_temperature = row.get(
@@ -540,12 +606,14 @@ def create_recommendations(
     )
 
     battery_voltage = row.get(
-        "battery_voltage"
+        "battery_voltage_v"
     )
 
-    reaction_wheel_rpm = row.get(
-        "reaction_wheel_rpm"
-    )
+    wheel_speeds = [
+        row.get(f"reaction_wheel_{index}_speed_rpm") for index in range(1, 4)
+    ]
+    wheel_speeds = [abs(value) for value in wheel_speeds if pd.notna(value)]
+    reaction_wheel_rpm = max(wheel_speeds) if wheel_speeds else None
 
     if (
         pd.notna(bus_temperature)
@@ -610,7 +678,8 @@ def describe_data_quality(row: pd.Series) -> dict[str, Any]:
         "status": status,
         "missing_model_values": missing_features,
         "preceding_command_available": bool(command_available),
-        "telemetry_adapter_version": row.get("telemetry_adapter_version"),
+        "telemetry_adapter_version": None,
+        "telemetry_contract_version": row.get("telemetry_contract_version"),
         "notes": notes,
     }
 
@@ -654,6 +723,7 @@ def determine_health_trend(
     """
 
     severity = {
+        "Unknown": -1,
         "Healthy": 0,
         "Warning": 1,
         "Degraded": 2,
@@ -682,7 +752,9 @@ def determine_health_trend(
     _, previous_record = max(previous_records, key=lambda item: item[0])
 
     previous_prediction = str(
-        previous_record.get("prediction")
+        (previous_record.get("overall_health") or {}).get(
+            "status", previous_record.get("prediction")
+        )
     )
 
     current_level = severity.get(
@@ -785,6 +857,8 @@ def build_report(
 
     report: list[dict[str, Any]] = []
     trend_history = list(history)
+    previous_telemetry_by_satellite: dict[str, dict[str, Any]] = {}
+    alert_state_by_satellite: dict[str, dict[str, dict[str, Any]]] = {}
     report_generated_at = datetime.now(timezone.utc).isoformat()
 
     for index, prediction_value in enumerate(
@@ -800,9 +874,30 @@ def build_report(
             row.get("satellite_id")
         )
 
+        previous_telemetry = previous_telemetry_by_satellite.get(satellite_id)
+        power_health = assess_power_subsystem(row, previous_telemetry)
+        subsystem_health = {
+            "power": power_health,
+            **assess_non_power_subsystems(row, previous_telemetry),
+        }
+        satellite_alert_state = alert_state_by_satellite.setdefault(satellite_id, {})
+        for subsystem_name, subsystem_result in subsystem_health.items():
+            apply_alert_persistence(
+                subsystem_result,
+                row.get("timestamp"),
+                satellite_alert_state.setdefault(subsystem_name, {}),
+            )
+        model_assurance = assess_model_applicability(model, row)
+        overall_health = aggregate_all_health(
+            prediction,
+            subsystem_health,
+            ml_accepted=model_assurance["accepted"],
+        )
+        fault_hypotheses = isolate_cross_subsystem_faults(subsystem_health)
+
         health_trend = determine_health_trend(
             satellite_id=satellite_id,
-            current_prediction=prediction,
+            current_prediction=overall_health["status"],
             current_timestamp=row.get("timestamp"),
             history=trend_history,
         )
@@ -814,6 +909,10 @@ def build_report(
                 row.get("timestamp")
             ),
             "prediction": prediction,
+            "model_assurance": model_assurance,
+            "overall_health": overall_health,
+            "subsystem_health": subsystem_health,
+            "fault_hypotheses": fault_hypotheses,
             "recent_command": {
                 "name": make_json_safe(
                     row.get(
@@ -839,44 +938,8 @@ def build_report(
                 ),
             },
             "telemetry": {
-                "solar_panel_current": make_json_safe(
-                    row.get(
-                        "solar_panel_current"
-                    )
-                ),
-                "bus_temperature_c": make_json_safe(
-                    row.get(
-                        "bus_temperature_c"
-                    )
-                ),
-                "payload_temperature_c": make_json_safe(
-                    row.get(
-                        "payload_temperature_c"
-                    )
-                ),
-                "reaction_wheel_rpm": make_json_safe(
-                    row.get(
-                        "reaction_wheel_rpm"
-                    )
-                ),
-                "downlink_rate_kbps": make_json_safe(
-                    row.get(
-                        "downlink_rate_kbps"
-                    )
-                ),
-                "battery_voltage": make_json_safe(
-                    row.get(
-                        "battery_voltage"
-                    )
-                ),
-                "battery_current": make_json_safe(
-                    row.get(
-                        "battery_current"
-                    )
-                ),
-                "mode": make_json_safe(
-                    row.get("mode")
-                ),
+                field: make_json_safe(row.get(field))
+                for field in REPORT_TELEMETRY_FIELDS
             },
             "assessment": assess_telemetry(
                 row
@@ -884,7 +947,7 @@ def build_report(
             "data_quality": describe_data_quality(row),
             "recommendations": (
                 create_recommendations(
-                    prediction=prediction,
+                    prediction=overall_health["status"],
                     row=row,
                 )
             ),
@@ -929,6 +992,7 @@ def build_report(
             entry
         )
         trend_history.append(entry)
+        previous_telemetry_by_satellite[satellite_id] = row.to_dict()
 
     return report
 
@@ -968,6 +1032,17 @@ def print_report(
             "Predicted health: "
             f"{result['prediction']}"
         )
+
+        print(
+            "Overall health: "
+            f"{result['overall_health']['status']}"
+        )
+
+        for subsystem_name, subsystem_result in result["subsystem_health"].items():
+            print(
+                f"{subsystem_name.replace('_', ' ').title()} subsystem: "
+                f"{subsystem_result['status']}"
+            )
 
         if (
             "predicted_probability"

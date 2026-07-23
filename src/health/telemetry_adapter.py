@@ -11,6 +11,8 @@ from common.telemetry_validation import ValidationResult, validate_telemetry_rec
 
 ADAPTER_VERSION = "0.1.0"
 
+CANONICAL_MODEL_VERSION = "0.2.0"
+
 
 class TelemetryAdapterError(ValueError):
     """Raised when an invalid housekeeping record cannot be adapted."""
@@ -115,4 +117,66 @@ def validate_and_adapt_housekeeping_record(
             "maximum absolute wheel speed is used as the legacy reaction_wheel_rpm feature",
             "absolute battery current is used because the legacy model was trained on unsigned magnitudes",
         ),
+    )
+
+
+def validate_and_prepare_canonical_record(
+    record: dict[str, Any],
+    *,
+    reference_time: datetime | None = None,
+    schema: dict[str, Any] | None = None,
+    dictionary: dict[str, Any] | None = None,
+) -> AdaptedTelemetry:
+    """Validate and flatten canonical fields without legacy transformations."""
+
+    validation = validate_telemetry_record(
+        record,
+        reference_time=reference_time,
+        schema=schema,
+        dictionary=dictionary,
+    )
+    if not validation.valid:
+        raise TelemetryAdapterError(validation)
+
+    telemetry = record["telemetry"]
+    canonical_fields = (
+        "battery_state_of_charge_pct",
+        "solar_array_voltage_v",
+        "solar_array_current_a",
+        "flight_computer_temperature_c",
+        "payload_temperature_c",
+        "reaction_wheel_1_speed_rpm",
+        "reaction_wheel_2_speed_rpm",
+        "reaction_wheel_3_speed_rpm",
+        "downlink_rate_kbps",
+        "battery_voltage_v",
+        "battery_current_a",
+    )
+    model_record = {
+        "satellite_id": record["satellite_id"],
+        "timestamp": record["timestamp"],
+        "spacecraft_mode": record["spacecraft_mode"],
+        **telemetry,
+        "eclipse_state": (record.get("operational_context") or {}).get(
+            "eclipse_state", "unknown"
+        ),
+        "solar_array_configuration": (
+            record.get("operational_context") or {}
+        ).get("solar_array_configuration", "unknown"),
+        "battery_current_sign_convention": (
+            record.get("operational_context") or {}
+        ).get("battery_current_sign_convention", "unknown"),
+        "communications_pass_state": (
+            record.get("operational_context") or {}
+        ).get("communications_pass_state", "unknown"),
+        **{field: telemetry.get(field) for field in canonical_fields},
+        "input_data_quality": validation.data_quality,
+        "input_validation_issues": [issue.message for issue in validation.issues],
+        "telemetry_contract_version": record["schema_version"],
+    }
+    return AdaptedTelemetry(
+        model_record=model_record,
+        validation=validation,
+        adapter_version=CANONICAL_MODEL_VERSION,
+        assumptions=(),
     )

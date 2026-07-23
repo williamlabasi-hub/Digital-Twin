@@ -1,602 +1,602 @@
 [
   {
     "satellite_id": "SAT-001",
-    "timestamp": "2026-01-01T22:09:16Z",
-    "command_name": "maintain_attitude",
-    "command_status": "successful"
-  },
-  {
-    "satellite_id": "SAT-001",
-    "timestamp": "2026-01-02T10:40:28Z",
+    "timestamp": "2026-01-01T21:34:16Z",
     "command_name": "downlink_data",
     "command_status": "successful"
   },
   {
     "satellite_id": "SAT-001",
-    "timestamp": "2026-01-02T15:38:24Z",
-    "command_name": "restart_payload",
+    "timestamp": "2026-01-02T12:08:15Z",
+    "command_name": "downlink_data",
     "command_status": "successful"
   },
   {
     "satellite_id": "SAT-001",
-    "timestamp": "2026-01-03T01:20:37Z",
-    "command_name": "enter_emergency_mode",
-    "command_status": "timed_out"
-  },
-  {
-    "satellite_id": "SAT-001",
-    "timestamp": "2026-01-03T05:16:48Z",
-    "command_name": "reduce_power_consumption",
-    "command_status": "successful"
-  },
-  {
-    "satellite_id": "SAT-001",
-    "timestamp": "2026-01-03T22:58:10Z",
-    "command_name": "reset_flight_computer",
-    "command_status": "failed"
-  },
-  {
-    "satellite_id": "SAT-001",
-    "timestamp": "2026-01-04T02:37:45Z",
+    "timestamp": "2026-01-03T03:43:10Z",
     "command_name": "restart_payload",
     "command_status": "cancelled"
   },
   {
     "satellite_id": "SAT-001",
-    "timestamp": "2026-01-04T04:11:49Z",
-    "command_name": "enter_safe_mode",
-    "command_status": "cancelled"
-  },
-  {
-    "satellite_id": "SAT-001",
-    "timestamp": "2026-01-04T15:26:11Z",
-    "command_name": "isolate_battery",
-    "command_status": "timed_out"
-  },
-  {
-    "satellite_id": "SAT-001",
-    "timestamp": "2026-01-05T11:53:28Z",
-    "command_name": "reduce_payload_load",
-    "command_status": "successful"
-  },
-  {
-    "satellite_id": "SAT-001",
-    "timestamp": "2026-01-06T08:52:52Z",
+    "timestamp": "2026-01-03T11:45:26Z",
     "command_name": "enter_emergency_mode",
     "command_status": "successful"
   },
   {
     "satellite_id": "SAT-001",
-    "timestamp": "2026-01-07T08:11:59Z",
+    "timestamp": "2026-01-04T10:37:33Z",
+    "command_name": "reduce_power_consumption",
+    "command_status": "successful"
+  },
+  {
+    "satellite_id": "SAT-001",
+    "timestamp": "2026-01-05T05:33:46Z",
+    "command_name": "reset_flight_computer",
+    "command_status": "successful"
+  },
+  {
+    "satellite_id": "SAT-001",
+    "timestamp": "2026-01-06T00:05:18Z",
     "command_name": "switch_to_backup_radio",
     "command_status": "successful"
   },
   {
     "satellite_id": "SAT-001",
-    "timestamp": "2026-01-07T16:23:50Z",
-    "command_name": "reduce_payload_load",
-    "command_status": "timed_out"
-  },
-  {
-    "satellite_id": "SAT-001",
-    "timestamp": "2026-01-07T20:13:37Z",
-    "command_name": "reduce_power_consumption",
-    "command_status": "timed_out"
-  },
-  {
-    "satellite_id": "SAT-001",
-    "timestamp": "2026-01-08T05:42:34Z",
-    "command_name": "reduce_power_consumption",
+    "timestamp": "2026-01-06T21:10:46Z",
+    "command_name": "disable_payload",
     "command_status": "failed"
   },
   {
     "satellite_id": "SAT-001",
-    "timestamp": "2026-01-08T09:05:16Z",
-    "command_name": "reduce_payload_load",
-    "command_status": "successful"
-  },
-  {
-    "satellite_id": "SAT-001",
-    "timestamp": "2026-01-09T05:34:11Z",
-    "command_name": "enter_safe_mode",
-    "command_status": "successful"
-  },
-  {
-    "satellite_id": "SAT-001",
-    "timestamp": "2026-01-09T08:14:53Z",
-    "command_name": "enter_emergency_mode",
-    "command_status": "successful"
-  },
-  {
-    "satellite_id": "SAT-001",
-    "timestamp": "2026-01-09T11:34:38Z",
-    "command_name": "maintain_attitude",
-    "command_status": "successful"
-  },
-  {
-    "satellite_id": "SAT-001",
-    "timestamp": "2026-01-09T14:18:19Z",
-    "command_name": "downlink_data",
-    "command_status": "timed_out"
-  },
-  {
-    "satellite_id": "SAT-001",
-    "timestamp": "2026-01-09T23:36:31Z",
+    "timestamp": "2026-01-07T17:05:15Z",
     "command_name": "disable_nonessential_systems",
     "command_status": "failed"
   },
   {
     "satellite_id": "SAT-001",
-    "timestamp": "2026-01-10T20:31:23Z",
-    "command_name": "collect_payload_data",
-    "command_status": "successful"
-  },
-  {
-    "satellite_id": "SAT-001",
-    "timestamp": "2026-01-11T16:02:03Z",
-    "command_name": "collect_payload_data",
-    "command_status": "successful"
-  },
-  {
-    "satellite_id": "SAT-001",
-    "timestamp": "2026-01-11T22:15:52Z",
-    "command_name": "emergency_shutdown",
-    "command_status": "successful"
-  },
-  {
-    "satellite_id": "SAT-001",
-    "timestamp": "2026-01-12T14:02:10Z",
-    "command_name": "maintain_attitude",
-    "command_status": "successful"
-  },
-  {
-    "satellite_id": "SAT-002",
-    "timestamp": "2026-01-01T06:47:46Z",
-    "command_name": "reset_flight_computer",
-    "command_status": "timed_out"
-  },
-  {
-    "satellite_id": "SAT-002",
-    "timestamp": "2026-01-01T11:49:54Z",
-    "command_name": "enter_safe_mode",
+    "timestamp": "2026-01-07T22:57:38Z",
+    "command_name": "switch_to_backup_radio",
     "command_status": "failed"
   },
   {
-    "satellite_id": "SAT-002",
-    "timestamp": "2026-01-02T03:45:21Z",
-    "command_name": "maintain_attitude",
-    "command_status": "successful"
+    "satellite_id": "SAT-001",
+    "timestamp": "2026-01-08T09:37:45Z",
+    "command_name": "emergency_shutdown",
+    "command_status": "failed"
   },
   {
-    "satellite_id": "SAT-002",
-    "timestamp": "2026-01-02T13:29:58Z",
-    "command_name": "enter_emergency_mode",
-    "command_status": "successful"
-  },
-  {
-    "satellite_id": "SAT-002",
-    "timestamp": "2026-01-03T05:46:32Z",
-    "command_name": "downlink_data",
-    "command_status": "successful"
-  },
-  {
-    "satellite_id": "SAT-002",
-    "timestamp": "2026-01-03T11:18:46Z",
-    "command_name": "charge_battery",
-    "command_status": "successful"
-  },
-  {
-    "satellite_id": "SAT-002",
-    "timestamp": "2026-01-03T19:04:56Z",
-    "command_name": "reduce_power_consumption",
-    "command_status": "successful"
-  },
-  {
-    "satellite_id": "SAT-002",
-    "timestamp": "2026-01-04T04:39:46Z",
-    "command_name": "adjust_attitude",
-    "command_status": "successful"
-  },
-  {
-    "satellite_id": "SAT-002",
-    "timestamp": "2026-01-04T12:30:30Z",
+    "satellite_id": "SAT-001",
+    "timestamp": "2026-01-08T21:51:54Z",
     "command_name": "switch_to_backup_radio",
     "command_status": "successful"
   },
   {
-    "satellite_id": "SAT-002",
-    "timestamp": "2026-01-04T23:48:29Z",
-    "command_name": "enter_emergency_mode",
-    "command_status": "cancelled"
+    "satellite_id": "SAT-001",
+    "timestamp": "2026-01-09T05:39:04Z",
+    "command_name": "switch_to_backup_radio",
+    "command_status": "timed_out"
   },
   {
-    "satellite_id": "SAT-002",
-    "timestamp": "2026-01-05T03:33:35Z",
-    "command_name": "charge_battery",
+    "satellite_id": "SAT-001",
+    "timestamp": "2026-01-10T02:59:38Z",
+    "command_name": "reduce_power_consumption",
     "command_status": "successful"
   },
   {
-    "satellite_id": "SAT-002",
-    "timestamp": "2026-01-05T23:27:31Z",
+    "satellite_id": "SAT-001",
+    "timestamp": "2026-01-10T14:34:44Z",
     "command_name": "disable_payload",
     "command_status": "successful"
   },
   {
-    "satellite_id": "SAT-002",
-    "timestamp": "2026-01-06T12:08:11Z",
+    "satellite_id": "SAT-001",
+    "timestamp": "2026-01-11T05:03:40Z",
     "command_name": "switch_to_backup_radio",
     "command_status": "successful"
   },
   {
-    "satellite_id": "SAT-002",
-    "timestamp": "2026-01-06T21:22:01Z",
-    "command_name": "isolate_battery",
-    "command_status": "successful"
+    "satellite_id": "SAT-001",
+    "timestamp": "2026-01-11T20:53:35Z",
+    "command_name": "enter_safe_mode",
+    "command_status": "cancelled"
   },
   {
-    "satellite_id": "SAT-002",
-    "timestamp": "2026-01-07T11:59:57Z",
+    "satellite_id": "SAT-001",
+    "timestamp": "2026-01-12T18:42:25Z",
+    "command_name": "isolate_battery",
+    "command_status": "failed"
+  },
+  {
+    "satellite_id": "SAT-001",
+    "timestamp": "2026-01-13T15:41:04Z",
     "command_name": "charge_battery",
     "command_status": "successful"
   },
   {
-    "satellite_id": "SAT-002",
-    "timestamp": "2026-01-08T02:53:25Z",
-    "command_name": "emergency_shutdown",
-    "command_status": "successful"
-  },
-  {
-    "satellite_id": "SAT-002",
-    "timestamp": "2026-01-08T19:44:44Z",
-    "command_name": "switch_to_backup_radio",
-    "command_status": "successful"
-  },
-  {
-    "satellite_id": "SAT-002",
-    "timestamp": "2026-01-08T22:42:39Z",
-    "command_name": "emergency_shutdown",
-    "command_status": "cancelled"
-  },
-  {
-    "satellite_id": "SAT-002",
-    "timestamp": "2026-01-09T06:56:09Z",
+    "satellite_id": "SAT-001",
+    "timestamp": "2026-01-13T17:56:44Z",
     "command_name": "downlink_data",
     "command_status": "successful"
   },
   {
-    "satellite_id": "SAT-002",
-    "timestamp": "2026-01-10T06:50:42Z",
-    "command_name": "reset_flight_computer",
-    "command_status": "successful"
-  },
-  {
-    "satellite_id": "SAT-002",
-    "timestamp": "2026-01-11T06:46:55Z",
-    "command_name": "disable_nonessential_systems",
-    "command_status": "timed_out"
-  },
-  {
-    "satellite_id": "SAT-002",
-    "timestamp": "2026-01-11T09:31:33Z",
-    "command_name": "adjust_attitude",
-    "command_status": "successful"
-  },
-  {
-    "satellite_id": "SAT-002",
-    "timestamp": "2026-01-12T06:20:19Z",
-    "command_name": "adjust_attitude",
-    "command_status": "timed_out"
-  },
-  {
-    "satellite_id": "SAT-002",
-    "timestamp": "2026-01-12T10:47:38Z",
-    "command_name": "charge_battery",
-    "command_status": "successful"
-  },
-  {
-    "satellite_id": "SAT-002",
-    "timestamp": "2026-01-12T20:33:00Z",
-    "command_name": "reset_flight_computer",
-    "command_status": "failed"
-  },
-  {
-    "satellite_id": "SAT-003",
-    "timestamp": "2026-01-01T10:19:49Z",
-    "command_name": "charge_battery",
-    "command_status": "successful"
-  },
-  {
-    "satellite_id": "SAT-003",
-    "timestamp": "2026-01-02T07:44:47Z",
-    "command_name": "reset_flight_computer",
-    "command_status": "successful"
-  },
-  {
-    "satellite_id": "SAT-003",
-    "timestamp": "2026-01-02T11:12:53Z",
-    "command_name": "switch_to_backup_radio",
-    "command_status": "successful"
-  },
-  {
-    "satellite_id": "SAT-003",
-    "timestamp": "2026-01-02T14:47:07Z",
-    "command_name": "isolate_battery",
-    "command_status": "successful"
-  },
-  {
-    "satellite_id": "SAT-003",
-    "timestamp": "2026-01-03T00:30:17Z",
-    "command_name": "switch_to_backup_radio",
-    "command_status": "successful"
-  },
-  {
-    "satellite_id": "SAT-003",
-    "timestamp": "2026-01-04T00:22:56Z",
-    "command_name": "reduce_payload_load",
-    "command_status": "successful"
-  },
-  {
-    "satellite_id": "SAT-003",
-    "timestamp": "2026-01-04T16:04:21Z",
+    "satellite_id": "SAT-001",
+    "timestamp": "2026-01-14T13:26:34Z",
     "command_name": "enter_emergency_mode",
-    "command_status": "failed"
+    "command_status": "timed_out"
   },
   {
-    "satellite_id": "SAT-003",
-    "timestamp": "2026-01-05T12:30:57Z",
-    "command_name": "emergency_shutdown",
-    "command_status": "failed"
-  },
-  {
-    "satellite_id": "SAT-003",
-    "timestamp": "2026-01-06T00:14:14Z",
-    "command_name": "downlink_data",
-    "command_status": "successful"
-  },
-  {
-    "satellite_id": "SAT-003",
-    "timestamp": "2026-01-06T09:14:19Z",
+    "satellite_id": "SAT-001",
+    "timestamp": "2026-01-15T04:27:30Z",
     "command_name": "collect_payload_data",
     "command_status": "successful"
   },
   {
-    "satellite_id": "SAT-003",
-    "timestamp": "2026-01-07T03:16:22Z",
-    "command_name": "emergency_shutdown",
-    "command_status": "timed_out"
-  },
-  {
-    "satellite_id": "SAT-003",
-    "timestamp": "2026-01-07T16:16:50Z",
-    "command_name": "reduce_payload_load",
-    "command_status": "cancelled"
-  },
-  {
-    "satellite_id": "SAT-003",
-    "timestamp": "2026-01-08T07:20:46Z",
-    "command_name": "reduce_power_consumption",
-    "command_status": "timed_out"
-  },
-  {
-    "satellite_id": "SAT-003",
-    "timestamp": "2026-01-08T15:35:26Z",
-    "command_name": "reset_flight_computer",
+    "satellite_id": "SAT-001",
+    "timestamp": "2026-01-15T15:54:46Z",
+    "command_name": "charge_battery",
     "command_status": "successful"
   },
   {
-    "satellite_id": "SAT-003",
-    "timestamp": "2026-01-08T17:04:18Z",
-    "command_name": "downlink_data",
-    "command_status": "successful"
+    "satellite_id": "SAT-001",
+    "timestamp": "2026-01-16T08:16:49Z",
+    "command_name": "isolate_battery",
+    "command_status": "failed"
   },
   {
-    "satellite_id": "SAT-003",
-    "timestamp": "2026-01-09T03:42:36Z",
-    "command_name": "reduce_payload_load",
-    "command_status": "successful"
-  },
-  {
-    "satellite_id": "SAT-003",
-    "timestamp": "2026-01-09T19:49:03Z",
+    "satellite_id": "SAT-001",
+    "timestamp": "2026-01-17T03:42:47Z",
     "command_name": "collect_payload_data",
+    "command_status": "failed"
+  },
+  {
+    "satellite_id": "SAT-002",
+    "timestamp": "2026-01-01T16:29:42Z",
+    "command_name": "isolate_battery",
+    "command_status": "failed"
+  },
+  {
+    "satellite_id": "SAT-002",
+    "timestamp": "2026-01-02T07:31:00Z",
+    "command_name": "adjust_attitude",
     "command_status": "successful"
   },
   {
-    "satellite_id": "SAT-003",
-    "timestamp": "2026-01-10T15:48:06Z",
-    "command_name": "disable_nonessential_systems",
+    "satellite_id": "SAT-002",
+    "timestamp": "2026-01-02T11:21:30Z",
+    "command_name": "restart_payload",
     "command_status": "successful"
   },
   {
-    "satellite_id": "SAT-003",
-    "timestamp": "2026-01-11T10:14:19Z",
+    "satellite_id": "SAT-002",
+    "timestamp": "2026-01-03T03:59:09Z",
+    "command_name": "disable_payload",
+    "command_status": "failed"
+  },
+  {
+    "satellite_id": "SAT-002",
+    "timestamp": "2026-01-03T15:07:29Z",
     "command_name": "restart_payload",
     "command_status": "timed_out"
   },
   {
-    "satellite_id": "SAT-003",
-    "timestamp": "2026-01-12T02:49:10Z",
+    "satellite_id": "SAT-002",
+    "timestamp": "2026-01-03T23:18:04Z",
+    "command_name": "disable_nonessential_systems",
+    "command_status": "cancelled"
+  },
+  {
+    "satellite_id": "SAT-002",
+    "timestamp": "2026-01-04T14:10:21Z",
+    "command_name": "downlink_data",
+    "command_status": "successful"
+  },
+  {
+    "satellite_id": "SAT-002",
+    "timestamp": "2026-01-04T19:13:29Z",
     "command_name": "reduce_power_consumption",
     "command_status": "failed"
   },
   {
-    "satellite_id": "SAT-003",
-    "timestamp": "2026-01-12T15:10:55Z",
+    "satellite_id": "SAT-002",
+    "timestamp": "2026-01-05T11:08:27Z",
+    "command_name": "switch_to_backup_radio",
+    "command_status": "successful"
+  },
+  {
+    "satellite_id": "SAT-002",
+    "timestamp": "2026-01-05T14:57:55Z",
+    "command_name": "emergency_shutdown",
+    "command_status": "failed"
+  },
+  {
+    "satellite_id": "SAT-002",
+    "timestamp": "2026-01-06T02:09:09Z",
+    "command_name": "disable_nonessential_systems",
+    "command_status": "failed"
+  },
+  {
+    "satellite_id": "SAT-002",
+    "timestamp": "2026-01-06T11:19:04Z",
+    "command_name": "reduce_payload_load",
+    "command_status": "timed_out"
+  },
+  {
+    "satellite_id": "SAT-002",
+    "timestamp": "2026-01-07T08:52:49Z",
+    "command_name": "reset_flight_computer",
+    "command_status": "successful"
+  },
+  {
+    "satellite_id": "SAT-002",
+    "timestamp": "2026-01-07T15:12:43Z",
+    "command_name": "emergency_shutdown",
+    "command_status": "failed"
+  },
+  {
+    "satellite_id": "SAT-002",
+    "timestamp": "2026-01-08T10:40:25Z",
+    "command_name": "disable_payload",
+    "command_status": "successful"
+  },
+  {
+    "satellite_id": "SAT-002",
+    "timestamp": "2026-01-08T15:49:52Z",
+    "command_name": "collect_payload_data",
+    "command_status": "timed_out"
+  },
+  {
+    "satellite_id": "SAT-002",
+    "timestamp": "2026-01-09T05:31:23Z",
+    "command_name": "downlink_data",
+    "command_status": "successful"
+  },
+  {
+    "satellite_id": "SAT-002",
+    "timestamp": "2026-01-10T02:52:29Z",
+    "command_name": "maintain_attitude",
+    "command_status": "successful"
+  },
+  {
+    "satellite_id": "SAT-002",
+    "timestamp": "2026-01-10T03:48:03Z",
+    "command_name": "reduce_power_consumption",
+    "command_status": "failed"
+  },
+  {
+    "satellite_id": "SAT-002",
+    "timestamp": "2026-01-10T05:44:57Z",
+    "command_name": "restart_payload",
+    "command_status": "successful"
+  },
+  {
+    "satellite_id": "SAT-002",
+    "timestamp": "2026-01-10T20:17:33Z",
+    "command_name": "charge_battery",
+    "command_status": "successful"
+  },
+  {
+    "satellite_id": "SAT-002",
+    "timestamp": "2026-01-11T11:22:11Z",
+    "command_name": "disable_payload",
+    "command_status": "failed"
+  },
+  {
+    "satellite_id": "SAT-002",
+    "timestamp": "2026-01-11T17:44:40Z",
+    "command_name": "downlink_data",
+    "command_status": "successful"
+  },
+  {
+    "satellite_id": "SAT-002",
+    "timestamp": "2026-01-12T13:44:42Z",
+    "command_name": "emergency_shutdown",
+    "command_status": "failed"
+  },
+  {
+    "satellite_id": "SAT-002",
+    "timestamp": "2026-01-13T07:43:21Z",
     "command_name": "maintain_attitude",
     "command_status": "successful"
   },
   {
     "satellite_id": "SAT-003",
-    "timestamp": "2026-01-13T02:02:42Z",
-    "command_name": "enter_safe_mode",
+    "timestamp": "2026-01-01T16:40:00Z",
+    "command_name": "enter_emergency_mode",
+    "command_status": "timed_out"
+  },
+  {
+    "satellite_id": "SAT-003",
+    "timestamp": "2026-01-02T15:21:58Z",
+    "command_name": "restart_payload",
     "command_status": "successful"
   },
   {
     "satellite_id": "SAT-003",
-    "timestamp": "2026-01-13T05:42:17Z",
-    "command_name": "disable_nonessential_systems",
-    "command_status": "failed"
-  },
-  {
-    "satellite_id": "SAT-003",
-    "timestamp": "2026-01-13T14:51:23Z",
-    "command_name": "disable_payload",
-    "command_status": "failed"
-  },
-  {
-    "satellite_id": "SAT-003",
-    "timestamp": "2026-01-13T23:06:29Z",
+    "timestamp": "2026-01-03T11:10:31Z",
     "command_name": "charge_battery",
     "command_status": "successful"
   },
   {
-    "satellite_id": "SAT-004",
-    "timestamp": "2026-01-01T22:52:21Z",
-    "command_name": "switch_to_backup_radio",
+    "satellite_id": "SAT-003",
+    "timestamp": "2026-01-03T22:56:25Z",
+    "command_name": "disable_nonessential_systems",
+    "command_status": "timed_out"
+  },
+  {
+    "satellite_id": "SAT-003",
+    "timestamp": "2026-01-04T01:23:28Z",
+    "command_name": "restart_payload",
     "command_status": "successful"
   },
   {
-    "satellite_id": "SAT-004",
-    "timestamp": "2026-01-02T12:41:24Z",
+    "satellite_id": "SAT-003",
+    "timestamp": "2026-01-04T23:30:14Z",
+    "command_name": "collect_payload_data",
+    "command_status": "successful"
+  },
+  {
+    "satellite_id": "SAT-003",
+    "timestamp": "2026-01-05T21:21:29Z",
+    "command_name": "emergency_shutdown",
+    "command_status": "cancelled"
+  },
+  {
+    "satellite_id": "SAT-003",
+    "timestamp": "2026-01-06T11:11:23Z",
+    "command_name": "disable_payload",
+    "command_status": "successful"
+  },
+  {
+    "satellite_id": "SAT-003",
+    "timestamp": "2026-01-07T02:45:17Z",
+    "command_name": "reset_flight_computer",
+    "command_status": "timed_out"
+  },
+  {
+    "satellite_id": "SAT-003",
+    "timestamp": "2026-01-08T01:24:51Z",
+    "command_name": "emergency_shutdown",
+    "command_status": "timed_out"
+  },
+  {
+    "satellite_id": "SAT-003",
+    "timestamp": "2026-01-09T00:44:11Z",
+    "command_name": "reduce_payload_load",
+    "command_status": "failed"
+  },
+  {
+    "satellite_id": "SAT-003",
+    "timestamp": "2026-01-09T12:46:58Z",
+    "command_name": "restart_payload",
+    "command_status": "successful"
+  },
+  {
+    "satellite_id": "SAT-003",
+    "timestamp": "2026-01-10T10:44:29Z",
+    "command_name": "charge_battery",
+    "command_status": "failed"
+  },
+  {
+    "satellite_id": "SAT-003",
+    "timestamp": "2026-01-11T06:55:02Z",
+    "command_name": "reduce_power_consumption",
+    "command_status": "cancelled"
+  },
+  {
+    "satellite_id": "SAT-003",
+    "timestamp": "2026-01-12T06:28:22Z",
     "command_name": "downlink_data",
     "command_status": "successful"
   },
   {
+    "satellite_id": "SAT-003",
+    "timestamp": "2026-01-13T01:17:46Z",
+    "command_name": "reduce_power_consumption",
+    "command_status": "successful"
+  },
+  {
+    "satellite_id": "SAT-003",
+    "timestamp": "2026-01-13T22:34:24Z",
+    "command_name": "maintain_attitude",
+    "command_status": "successful"
+  },
+  {
+    "satellite_id": "SAT-003",
+    "timestamp": "2026-01-14T00:56:01Z",
+    "command_name": "switch_to_backup_radio",
+    "command_status": "successful"
+  },
+  {
+    "satellite_id": "SAT-003",
+    "timestamp": "2026-01-14T23:12:53Z",
+    "command_name": "disable_payload",
+    "command_status": "successful"
+  },
+  {
+    "satellite_id": "SAT-003",
+    "timestamp": "2026-01-15T05:42:54Z",
+    "command_name": "isolate_battery",
+    "command_status": "failed"
+  },
+  {
+    "satellite_id": "SAT-003",
+    "timestamp": "2026-01-15T23:23:08Z",
+    "command_name": "charge_battery",
+    "command_status": "cancelled"
+  },
+  {
+    "satellite_id": "SAT-003",
+    "timestamp": "2026-01-16T09:18:43Z",
+    "command_name": "charge_battery",
+    "command_status": "successful"
+  },
+  {
+    "satellite_id": "SAT-003",
+    "timestamp": "2026-01-17T00:49:07Z",
+    "command_name": "disable_nonessential_systems",
+    "command_status": "successful"
+  },
+  {
+    "satellite_id": "SAT-003",
+    "timestamp": "2026-01-17T16:09:49Z",
+    "command_name": "reset_flight_computer",
+    "command_status": "successful"
+  },
+  {
+    "satellite_id": "SAT-003",
+    "timestamp": "2026-01-18T08:02:49Z",
+    "command_name": "restart_payload",
+    "command_status": "timed_out"
+  },
+  {
     "satellite_id": "SAT-004",
-    "timestamp": "2026-01-02T23:51:45Z",
+    "timestamp": "2026-01-01T17:31:38Z",
+    "command_name": "enter_safe_mode",
+    "command_status": "successful"
+  },
+  {
+    "satellite_id": "SAT-004",
+    "timestamp": "2026-01-02T14:15:04Z",
     "command_name": "collect_payload_data",
     "command_status": "successful"
   },
   {
     "satellite_id": "SAT-004",
-    "timestamp": "2026-01-03T14:23:54Z",
+    "timestamp": "2026-01-03T01:35:20Z",
+    "command_name": "restart_payload",
+    "command_status": "successful"
+  },
+  {
+    "satellite_id": "SAT-004",
+    "timestamp": "2026-01-03T17:16:34Z",
     "command_name": "reduce_power_consumption",
-    "command_status": "timed_out"
-  },
-  {
-    "satellite_id": "SAT-004",
-    "timestamp": "2026-01-04T04:48:23Z",
-    "command_name": "charge_battery",
-    "command_status": "failed"
-  },
-  {
-    "satellite_id": "SAT-004",
-    "timestamp": "2026-01-04T17:20:31Z",
-    "command_name": "switch_to_backup_radio",
     "command_status": "successful"
   },
   {
     "satellite_id": "SAT-004",
-    "timestamp": "2026-01-05T14:45:35Z",
-    "command_name": "disable_payload",
+    "timestamp": "2026-01-04T08:43:06Z",
+    "command_name": "collect_payload_data",
     "command_status": "successful"
   },
   {
     "satellite_id": "SAT-004",
-    "timestamp": "2026-01-06T07:26:02Z",
-    "command_name": "reset_flight_computer",
-    "command_status": "cancelled"
-  },
-  {
-    "satellite_id": "SAT-004",
-    "timestamp": "2026-01-07T01:26:22Z",
-    "command_name": "enter_emergency_mode",
-    "command_status": "failed"
-  },
-  {
-    "satellite_id": "SAT-004",
-    "timestamp": "2026-01-07T09:21:21Z",
-    "command_name": "enter_emergency_mode",
-    "command_status": "successful"
-  },
-  {
-    "satellite_id": "SAT-004",
-    "timestamp": "2026-01-07T11:52:40Z",
-    "command_name": "reduce_payload_load",
-    "command_status": "failed"
-  },
-  {
-    "satellite_id": "SAT-004",
-    "timestamp": "2026-01-08T06:22:02Z",
-    "command_name": "enter_safe_mode",
-    "command_status": "successful"
-  },
-  {
-    "satellite_id": "SAT-004",
-    "timestamp": "2026-01-09T01:38:23Z",
+    "timestamp": "2026-01-04T18:51:14Z",
     "command_name": "adjust_attitude",
     "command_status": "successful"
   },
   {
     "satellite_id": "SAT-004",
-    "timestamp": "2026-01-09T22:16:07Z",
-    "command_name": "collect_payload_data",
-    "command_status": "successful"
-  },
-  {
-    "satellite_id": "SAT-004",
-    "timestamp": "2026-01-10T07:57:16Z",
-    "command_name": "charge_battery",
-    "command_status": "successful"
-  },
-  {
-    "satellite_id": "SAT-004",
-    "timestamp": "2026-01-10T12:05:44Z",
-    "command_name": "enter_safe_mode",
-    "command_status": "successful"
-  },
-  {
-    "satellite_id": "SAT-004",
-    "timestamp": "2026-01-11T05:26:39Z",
+    "timestamp": "2026-01-04T21:57:16Z",
     "command_name": "maintain_attitude",
     "command_status": "successful"
   },
   {
     "satellite_id": "SAT-004",
-    "timestamp": "2026-01-12T01:52:49Z",
+    "timestamp": "2026-01-05T02:07:47Z",
+    "command_name": "reduce_payload_load",
+    "command_status": "successful"
+  },
+  {
+    "satellite_id": "SAT-004",
+    "timestamp": "2026-01-06T01:52:47Z",
+    "command_name": "downlink_data",
+    "command_status": "successful"
+  },
+  {
+    "satellite_id": "SAT-004",
+    "timestamp": "2026-01-06T23:07:30Z",
+    "command_name": "downlink_data",
+    "command_status": "successful"
+  },
+  {
+    "satellite_id": "SAT-004",
+    "timestamp": "2026-01-07T11:55:13Z",
+    "command_name": "reduce_power_consumption",
+    "command_status": "successful"
+  },
+  {
+    "satellite_id": "SAT-004",
+    "timestamp": "2026-01-07T15:23:03Z",
+    "command_name": "collect_payload_data",
+    "command_status": "successful"
+  },
+  {
+    "satellite_id": "SAT-004",
+    "timestamp": "2026-01-08T08:46:08Z",
+    "command_name": "disable_nonessential_systems",
+    "command_status": "successful"
+  },
+  {
+    "satellite_id": "SAT-004",
+    "timestamp": "2026-01-08T14:09:30Z",
+    "command_name": "enter_emergency_mode",
+    "command_status": "failed"
+  },
+  {
+    "satellite_id": "SAT-004",
+    "timestamp": "2026-01-08T21:36:20Z",
+    "command_name": "enter_emergency_mode",
+    "command_status": "successful"
+  },
+  {
+    "satellite_id": "SAT-004",
+    "timestamp": "2026-01-09T08:54:02Z",
+    "command_name": "adjust_attitude",
+    "command_status": "successful"
+  },
+  {
+    "satellite_id": "SAT-004",
+    "timestamp": "2026-01-09T17:07:14Z",
+    "command_name": "emergency_shutdown",
+    "command_status": "failed"
+  },
+  {
+    "satellite_id": "SAT-004",
+    "timestamp": "2026-01-10T05:38:58Z",
+    "command_name": "adjust_attitude",
+    "command_status": "successful"
+  },
+  {
+    "satellite_id": "SAT-004",
+    "timestamp": "2026-01-10T10:27:56Z",
     "command_name": "isolate_battery",
     "command_status": "successful"
   },
   {
     "satellite_id": "SAT-004",
-    "timestamp": "2026-01-12T12:32:47Z",
-    "command_name": "reduce_payload_load",
+    "timestamp": "2026-01-10T20:56:22Z",
+    "command_name": "isolate_battery",
     "command_status": "successful"
   },
   {
     "satellite_id": "SAT-004",
-    "timestamp": "2026-01-13T08:32:38Z",
-    "command_name": "reduce_payload_load",
+    "timestamp": "2026-01-11T00:29:47Z",
+    "command_name": "reduce_power_consumption",
+    "command_status": "cancelled"
+  },
+  {
+    "satellite_id": "SAT-004",
+    "timestamp": "2026-01-11T21:56:03Z",
+    "command_name": "downlink_data",
     "command_status": "successful"
   },
   {
     "satellite_id": "SAT-004",
-    "timestamp": "2026-01-14T09:11:19Z",
-    "command_name": "disable_nonessential_systems",
-    "command_status": "successful"
-  },
-  {
-    "satellite_id": "SAT-004",
-    "timestamp": "2026-01-15T06:53:02Z",
-    "command_name": "reset_flight_computer",
+    "timestamp": "2026-01-12T03:04:26Z",
+    "command_name": "switch_to_backup_radio",
     "command_status": "timed_out"
   },
   {
     "satellite_id": "SAT-004",
-    "timestamp": "2026-01-15T19:54:20Z",
-    "command_name": "charge_battery",
+    "timestamp": "2026-01-12T15:33:35Z",
+    "command_name": "reduce_power_consumption",
     "command_status": "successful"
   },
   {
     "satellite_id": "SAT-004",
-    "timestamp": "2026-01-15T22:21:44Z",
-    "command_name": "disable_nonessential_systems",
-    "command_status": "successful"
-  },
-  {
-    "satellite_id": "SAT-004",
-    "timestamp": "2026-01-16T10:10:12Z",
-    "command_name": "disable_nonessential_systems",
-    "command_status": "failed"
+    "timestamp": "2026-01-13T12:11:54Z",
+    "command_name": "reset_flight_computer",
+    "command_status": "timed_out"
   }
 ]
