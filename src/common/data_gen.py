@@ -1,14 +1,14 @@
 from numpy.testing import verbose
 
-import propagator
+import tle_propagator
 from sgp4.api import Satrec, WGS84
 import numpy as np
 from scipy.optimize import minimize
 
 def orbit_catalog(cat, time):
 
-    tle = propagator.tle_request(cat)
-    orb_data = propagator.propagate(tle, time)
+    tle = tle_propagator.tle_request(cat)
+    orb_data = tle_propagator.propagate(tle, time)
     return orb_data
 
 def createOrbit(cat, epoch, bstar, ndot, nddot, ecco, argp, inclo, mo, no_kozai, nodeo):
