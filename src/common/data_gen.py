@@ -36,9 +36,18 @@ def createOrbit(cat, epoch, bstar, ndot, nddot, ecco, argp, inclo, mo, no_kozai,
 
 def closeApproach(desired_distance):
 
+    # ADD AUTO e, a, AND i BASED ON A DESIRED DISTANCE
+    
     MU_EARTH = 398600.4418  # km^3/s^2
 
     def elems_to_position(elems, nu):
+        # Vectorized position(s) on a Keplerian ellipse in ECI
+
+        # elems: (a, e, i, raan, argp)  -- km, dimensionless, radians
+        # nu:    scalar or ndarray of true anomalies (radians)
+
+        # Returns array of shape (3,) or (3, N) matching nu's shape
+
         a, e, i, raan, argp = elems
         nu = np.asarray(nu, dtype=float)
 
@@ -63,6 +72,14 @@ def closeApproach(desired_distance):
         return R @ pf
 
     def moid(elems1, elems2, grid_n=180, verbose=False):
+        
+        # Geometric MOID between two closed Keplerian orbits (km)
+
+        # vectorized coarse grid over (nu1, nu2) in [0, 2pi)^2 to bracket
+        # local minima of the distance surface, then Nelder-Mead refinement of each
+        # bracket (robust to the non-smooth min() at wraparound and avoids needing
+        # analytic gradients)
+        
 
         nu = np.linspace(0, 2 * np.pi, grid_n, endpoint=False)
 
@@ -110,10 +127,10 @@ def closeApproach(desired_distance):
             vals = [0, np.pi / 2, np.pi, 3 * np.pi / 2]
             seeds = [(r, w) for r in vals for w in vals]
 
-        # --- feasibility pre-scan ---
-        # For fixed (a, e, i), MOID over (raan, argp) has a bounded reachable
-        # range. Sample it coarsely so an unreachable d_desired is reported
-        # clearly instead of the optimizer silently converging to the nearest edge.
+        # feasibility pre-scan
+        # For fixed (a, e, i), MOID over (raan, argp) has a bounded reachable range 
+        # Sample it coarsely so an unreachable d_desired is reported
+        # clearly instead of the optimizer silently converging to the nearest edge
         scan_vals = np.linspace(0, 2 * np.pi, 8, endpoint=False)
         scan_moids = [
             moid((a, e, i, r, w), target_elems, grid_n=grid_n)
@@ -158,6 +175,9 @@ def closeApproach(desired_distance):
         return unique
 
     def tle_to_elements(line1, line2):
+        # Search for (raan, argp) -- with a, e, i fixed -- such that MOID(candidate, target) ~= d_desired.
+        # Runs from multiple seeds (since the cost surface is multimodal) and
+        # returns all distinct converged solutions, sorted by how close they got
 
         sat = Satrec.twoline2rv(line1, line2)
         e = sat.ecco
