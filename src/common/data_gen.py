@@ -1,6 +1,5 @@
-from random import random
-
 import propagator
+from sgp4.api import Satrec, WGS84
 
 def orbit_catalog(cat, time):
 
@@ -8,19 +7,25 @@ def orbit_catalog(cat, time):
     orb_data = propagator.propagate(tle, time)
     return orb_data
 
-# random housekeeping data generation for a satellite using "sunlit" status from json to determine temperature ranges
-# in celsius, battery level and fuel level are generated randomly between 0-100% and 0-80% respectively
-def housekeeping_random(satellite):
+def createOrbit(cat, epoch, bstar, ndot, nddot, ecco, argp, inclo, mo, no_kozai, nodeo):
 
-    name = satellite["name"]
-    battery_level = round(random.uniform(0, 100), 2)
-    bus_temp, payload_temp = 0, 0
-    if satellite["sunlit"] == True:
-        bus_temp = round(random.uniform(100, 150), 2)
-        payload_temp = round(random.uniform(100, 150), 2)
-    else:
-        bus_temp = round(random.uniform(-150, -100), 2)
-        payload_temp = round(random.uniform(-150, -100), 2)
-    fuel_level = round(random.uniform(0, 80), 2)
+    satellite = Satrec()
+    satellite.sgp4init(
+        
+        WGS84,  # WGS84 gravity model
+        'i', # improved mode
+        cat, # satellite catalog number
+        epoch, # epoch: days since 1949 December 31 00:00 UT
+        bstar, # bstar: drag coeffiecient (/earth radii)
+        ndot, # ndot: ballistic coeficient (radians/minute^2)
+        nddot, # nddot: second derivative of mean motion (radians/minute^3)
+        ecco, # ecco: eccentricity
+        argp, # argp: argument of perigee (radians)
+        inclo, # inclo: inclination (radians)
+        mo, # mo: mean anomaly (radians)
+        no_kozai, # no_kozai: mean motion (radians/minute)
+        nodeo, # nodeo: right ascension of ascending node (radians)
 
-    return name, battery_level, bus_temp, payload_temp, fuel_level
+    )
+
+    return satellite
