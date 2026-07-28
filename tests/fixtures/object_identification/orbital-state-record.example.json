@@ -7,6 +7,16 @@
   "coordinate_frame": "ECI",
   "position_km": [6627.9, 1045.6, -421.5],
   "velocity_km_s": [-1.081, 7.309, 1.421],
+  "position_covariance_km2": [
+    [12.5, 0.0, 0.0],
+    [0.0, 12.5, 0.0],
+    [0.0, 0.0, 12.5]
+  ],
+  "velocity_covariance_km2_s2": [
+    [0.00125, 0.0, 0.0],
+    [0.0, 0.00125, 0.0],
+    [0.0, 0.0, 0.00125]
+  ],
   "source": "PROTOTYPE_CATALOG",
   "derivation": {
     "method": "sgp4",

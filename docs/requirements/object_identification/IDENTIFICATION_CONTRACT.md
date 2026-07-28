@@ -108,6 +108,12 @@ The component reports separate measures:
 - **Data quality** - completeness, validity, freshness, and consistency of the
   input evidence.
 
+When both the observation and candidate orbital state provide finite,
+symmetric, positive-definite position and velocity covariance matrices, the
+prototype combines those uncertainties and uses Mahalanobis distance. When any
+required covariance is unavailable, the component falls back to its versioned
+position and velocity scales and reports that fallback in the ranked result.
+
 No value may be presented as a calibrated probability unless calibration has
 been measured on independent representative data. Random Forest vote fractions
 or similarity scores must be labeled by their actual interpretation.

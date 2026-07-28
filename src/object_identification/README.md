@@ -45,6 +45,12 @@ measurement quality. Its score is an uncalibrated similarity value, not a
 probability. The scales and threshold in
 `config/object-identification-association.json` are prototype assumptions.
 
+When both an observation and candidate provide position and velocity
+covariance, scoring uses their combined covariance and Mahalanobis distance.
+Covariance must be a symmetric, positive-definite 3x3 matrix. If either side
+lacks complete covariance, the scorer explicitly falls back to the configured
+position and velocity scales.
+
 One or more candidates can be evaluated. Results are sorted by score, retain
 candidate provenance, and withhold identity when multiple threshold-clearing
 candidates fall within the configured ambiguity margin.

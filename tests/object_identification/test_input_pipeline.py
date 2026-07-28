@@ -58,6 +58,30 @@ class ObjectIdentificationInputPipelineTests(unittest.TestCase):
         ):
             self.prepare()
 
+    def test_asymmetric_covariance_is_rejected(self) -> None:
+        self.observation["position_covariance_km2"] = [
+            [1.0, 0.2, 0.0],
+            [0.1, 1.0, 0.0],
+            [0.0, 0.0, 1.0],
+        ]
+
+        with self.assertRaisesRegex(
+            ObjectIdentificationInputError, "must be symmetric"
+        ):
+            self.prepare()
+
+    def test_non_positive_definite_covariance_is_rejected(self) -> None:
+        self.orbital["velocity_covariance_km2_s2"] = [
+            [1.0, 0.0, 0.0],
+            [0.0, 0.0, 0.0],
+            [0.0, 0.0, 1.0],
+        ]
+
+        with self.assertRaisesRegex(
+            ObjectIdentificationInputError, "must be positive definite"
+        ):
+            self.prepare()
+
     def test_mismatched_canonical_identity_is_rejected(self) -> None:
         self.affiliation["canonical_object_id"] = "CAT-DIFFERENT"
 

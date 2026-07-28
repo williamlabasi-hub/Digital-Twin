@@ -52,6 +52,34 @@ class ObjectAssociationTests(unittest.TestCase):
             generated_at=datetime(2026, 7, 27, 19, 1, tzinfo=timezone.utc),
         )
 
+    def add_covariance(
+        self,
+        *,
+        position_variance_km2: float,
+        velocity_variance_km2_s2: float,
+        include_orbital: bool = True,
+    ) -> None:
+        self.observation["position_covariance_km2"] = [
+            [position_variance_km2, 0, 0],
+            [0, position_variance_km2, 0],
+            [0, 0, position_variance_km2],
+        ]
+        self.observation["velocity_covariance_km2_s2"] = [
+            [velocity_variance_km2_s2, 0, 0],
+            [0, velocity_variance_km2_s2, 0],
+            [0, 0, velocity_variance_km2_s2],
+        ]
+        if include_orbital:
+            self.orbital["position_covariance_km2"] = deepcopy(
+                self.observation["position_covariance_km2"]
+            )
+            self.orbital["velocity_covariance_km2_s2"] = deepcopy(
+                self.observation["velocity_covariance_km2_s2"]
+            )
+        else:
+            self.orbital.pop("position_covariance_km2", None)
+            self.orbital.pop("velocity_covariance_km2_s2", None)
+
     def prepared_candidate(
         self,
         candidate_id: str,
@@ -116,6 +144,58 @@ class ObjectAssociationTests(unittest.TestCase):
         self.assertLessEqual(metrics["match_score"], 1)
         self.assertGreaterEqual(metrics["position_residual_km"], 0)
         self.assertGreaterEqual(metrics["velocity_residual_km_s"], 0)
+
+    def test_complete_covariance_uses_mahalanobis_scoring(self) -> None:
+        self.add_covariance(
+            position_variance_km2=1.0,
+            velocity_variance_km2_s2=0.001,
+        )
+
+        metrics = calculate_association_score(self.prepared(), self.config)
+        prediction = self.prediction()
+
+        self.assertEqual(
+            metrics["scoring_method"],
+            "combined-covariance-mahalanobis-similarity",
+        )
+        self.assertEqual(metrics["uncertainty_status"], "combined_covariance")
+        self.assertEqual(
+            prediction["matching_method"]["name"],
+            "combined-covariance-mahalanobis-similarity",
+        )
+
+    def test_noisy_covariance_penalizes_same_residual_less(self) -> None:
+        self.add_covariance(
+            position_variance_km2=0.01,
+            velocity_variance_km2_s2=0.000001,
+        )
+        precise_score = calculate_association_score(
+            self.prepared(), self.config
+        )["match_score"]
+        self.add_covariance(
+            position_variance_km2=4.0,
+            velocity_variance_km2_s2=0.001,
+        )
+        noisy_score = calculate_association_score(
+            self.prepared(), self.config
+        )["match_score"]
+
+        self.assertGreater(noisy_score, precise_score)
+
+    def test_incomplete_covariance_uses_scale_fallback(self) -> None:
+        self.add_covariance(
+            position_variance_km2=1.0,
+            velocity_variance_km2_s2=0.001,
+            include_orbital=False,
+        )
+
+        metrics = calculate_association_score(self.prepared(), self.config)
+
+        self.assertEqual(
+            metrics["scoring_method"],
+            "position-velocity-gaussian-similarity",
+        )
+        self.assertEqual(metrics["uncertainty_status"], "scale_fallback")
 
     def test_invalid_config_scale_is_rejected(self) -> None:
         path = (

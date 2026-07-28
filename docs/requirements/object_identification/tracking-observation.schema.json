@@ -61,6 +61,12 @@
     "velocity_km_s": {
       "$ref": "#/$defs/vector3"
     },
+    "position_covariance_km2": {
+      "$ref": "#/$defs/covariance3"
+    },
+    "velocity_covariance_km2_s2": {
+      "$ref": "#/$defs/covariance3"
+    },
     "measurement_quality": {
       "type": "number",
       "minimum": 0,
@@ -82,6 +88,19 @@
       "maxItems": 3,
       "items": {
         "type": "number"
+      }
+    },
+    "covariance3": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {
+        "type": "array",
+        "minItems": 3,
+        "maxItems": 3,
+        "items": {
+          "type": "number"
+        }
       }
     }
   }

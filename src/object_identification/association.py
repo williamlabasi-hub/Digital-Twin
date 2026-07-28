@@ -128,10 +128,52 @@ def vector_distance(left: list[float], right: list[float]) -> float:
     return math.sqrt(sum((a - b) ** 2 for a, b in zip(left, right, strict=True)))
 
 
+def _combined_covariance(
+    left: list[list[float]],
+    right: list[list[float]],
+) -> list[list[float]]:
+    return [
+        [left[row][column] + right[row][column] for column in range(3)]
+        for row in range(3)
+    ]
+
+
+def _mahalanobis_squared(
+    residual: list[float],
+    covariance: list[list[float]],
+) -> float:
+    """Calculate r.T @ covariance^-1 @ r using Cholesky decomposition."""
+    lower = [[0.0] * 3 for _ in range(3)]
+    for row in range(3):
+        for column in range(row + 1):
+            value = covariance[row][column] - sum(
+                lower[row][index] * lower[column][index]
+                for index in range(column)
+            )
+            if row == column:
+                if value <= 0:
+                    raise ObjectIdentificationInputError(
+                        "combined covariance must be positive definite"
+                    )
+                lower[row][column] = math.sqrt(value)
+            else:
+                lower[row][column] = value / lower[column][column]
+    whitened = [0.0] * 3
+    for row in range(3):
+        whitened[row] = (
+            residual[row]
+            - sum(
+                lower[row][column] * whitened[column]
+                for column in range(row)
+            )
+        ) / lower[row][row]
+    return sum(value * value for value in whitened)
+
+
 def calculate_association_score(
     prepared: dict[str, Any],
     config: AssociationConfig,
-) -> dict[str, float]:
+) -> dict[str, Any]:
     """Calculate residuals and an uncalibrated similarity score."""
     observation = prepared["observation"]
     orbital = prepared["orbital_state"]
@@ -141,11 +183,58 @@ def calculate_association_score(
     velocity_residual = vector_distance(
         observation["velocity_km_s"], orbital["velocity_km_s"]
     )
-    normalized_distance_squared = (
-        position_residual / config.position_scale_km
-    ) ** 2 + (
-        velocity_residual / config.velocity_scale_km_s
-    ) ** 2
+    position_delta = [
+        observed - expected
+        for observed, expected in zip(
+            observation["position_km"],
+            orbital["position_km"],
+            strict=True,
+        )
+    ]
+    velocity_delta = [
+        observed - expected
+        for observed, expected in zip(
+            observation["velocity_km_s"],
+            orbital["velocity_km_s"],
+            strict=True,
+        )
+    ]
+    covariance_fields = (
+        observation.get("position_covariance_km2"),
+        observation.get("velocity_covariance_km2_s2"),
+        orbital.get("position_covariance_km2"),
+        orbital.get("velocity_covariance_km2_s2"),
+    )
+    if all(matrix is not None for matrix in covariance_fields):
+        (
+            observation_position_covariance,
+            observation_velocity_covariance,
+            orbital_position_covariance,
+            orbital_velocity_covariance,
+        ) = covariance_fields
+        normalized_distance_squared = _mahalanobis_squared(
+            position_delta,
+            _combined_covariance(
+                observation_position_covariance,
+                orbital_position_covariance,
+            ),
+        ) + _mahalanobis_squared(
+            velocity_delta,
+            _combined_covariance(
+                observation_velocity_covariance,
+                orbital_velocity_covariance,
+            ),
+        )
+        scoring_method = "combined-covariance-mahalanobis-similarity"
+        uncertainty_status = "combined_covariance"
+    else:
+        normalized_distance_squared = (
+            position_residual / config.position_scale_km
+        ) ** 2 + (
+            velocity_residual / config.velocity_scale_km_s
+        ) ** 2
+        scoring_method = "position-velocity-gaussian-similarity"
+        uncertainty_status = "scale_fallback"
     geometric_similarity = math.exp(-0.5 * normalized_distance_squared)
     score = geometric_similarity * observation["measurement_quality"]
     return {
@@ -154,6 +243,9 @@ def calculate_association_score(
         "geometric_similarity": geometric_similarity,
         "measurement_quality": observation["measurement_quality"],
         "match_score": max(0.0, min(1.0, score)),
+        "normalized_distance_squared": normalized_distance_squared,
+        "scoring_method": scoring_method,
+        "uncertainty_status": uncertainty_status,
     }
 
 
@@ -263,7 +355,9 @@ def build_ranked_prediction(
         "classification": classification,
         "match_score": best_metrics["match_score"],
         "match_score_interpretation": (
-            "uncalibrated_position_velocity_similarity_times_measurement_quality"
+            "uncalibrated_"
+            f"{best_metrics['scoring_method'].replace('-', '_')}"
+            "_times_measurement_quality"
         ),
         "threshold": {
             "value": config.match_threshold,
@@ -298,7 +392,7 @@ def build_ranked_prediction(
             else None
         ),
         "matching_method": {
-            "name": "position-velocity-gaussian-similarity",
+            "name": best_metrics["scoring_method"],
             "version": config.version,
             "method_type": "similarity",
         },
@@ -323,6 +417,11 @@ def build_ranked_prediction(
                 "velocity_residual_km_s": metrics[
                     "velocity_residual_km_s"
                 ],
+                "normalized_distance_squared": metrics[
+                    "normalized_distance_squared"
+                ],
+                "scoring_method": metrics["scoring_method"],
+                "uncertainty_status": metrics["uncertainty_status"],
                 "catalog_provenance": {
                     "catalog_source": prepared["candidate"]["catalog_source"],
                     "catalog_record_id": prepared["candidate"][
@@ -348,6 +447,10 @@ def build_ranked_prediction(
             (
                 "Velocity residual: "
                 f"{best_metrics['velocity_residual_km_s']:.6f} km/s."
+            ),
+            (
+                f"Scoring method: {best_metrics['scoring_method']} "
+                f"({best_metrics['uncertainty_status']})."
             ),
             (
                 f"Best match score {best_metrics['match_score']:.6f} "

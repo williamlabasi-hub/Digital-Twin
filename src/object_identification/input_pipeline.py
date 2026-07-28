@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -103,6 +104,47 @@ def parse_timestamp(value: str, field_name: str) -> datetime:
     return parsed.astimezone(timezone.utc)
 
 
+def validate_covariance_matrix(
+    matrix: list[list[float]],
+    field_name: str,
+) -> None:
+    """Require a finite, symmetric, positive-definite 3x3 covariance."""
+    values = [[float(value) for value in row] for row in matrix]
+    if not all(math.isfinite(value) for row in values for value in row):
+        raise ObjectIdentificationInputError(
+            f"{field_name}: covariance values must be finite"
+        )
+    tolerance = 1e-12
+    for row in range(3):
+        for column in range(row + 1, 3):
+            if not math.isclose(
+                values[row][column],
+                values[column][row],
+                rel_tol=1e-9,
+                abs_tol=tolerance,
+            ):
+                raise ObjectIdentificationInputError(
+                    f"{field_name}: covariance must be symmetric"
+                )
+    minor_1 = values[0][0]
+    minor_2 = (
+        values[0][0] * values[1][1]
+        - values[0][1] * values[1][0]
+    )
+    determinant = (
+        values[0][0]
+        * (values[1][1] * values[2][2] - values[1][2] * values[2][1])
+        - values[0][1]
+        * (values[1][0] * values[2][2] - values[1][2] * values[2][0])
+        + values[0][2]
+        * (values[1][0] * values[2][1] - values[1][1] * values[2][0])
+    )
+    if minor_1 <= 0 or minor_2 <= 0 or determinant <= 0:
+        raise ObjectIdentificationInputError(
+            f"{field_name}: covariance must be positive definite"
+        )
+
+
 def _validate_cross_record_consistency(
     observation: dict[str, Any],
     catalog: dict[str, Any],
@@ -130,6 +172,19 @@ def _validate_cross_record_consistency(
         raise ObjectIdentificationInputError(
             "observation and orbital state coordinate frames do not match"
         )
+    for record_name, record in (
+        ("observation", observation),
+        ("orbital", orbital),
+    ):
+        for covariance_field in (
+            "position_covariance_km2",
+            "velocity_covariance_km2_s2",
+        ):
+            if covariance_field in record:
+                validate_covariance_matrix(
+                    record[covariance_field],
+                    f"{record_name}.{covariance_field}",
+                )
 
     observed_at = parse_timestamp(
         observation["timestamp"], "observation.timestamp"
@@ -215,6 +270,12 @@ def prepare_identification_input(
             "coordinate_frame": observation["coordinate_frame"],
             "position_km": observation["position_km"],
             "velocity_km_s": observation["velocity_km_s"],
+            "position_covariance_km2": observation.get(
+                "position_covariance_km2"
+            ),
+            "velocity_covariance_km2_s2": observation.get(
+                "velocity_covariance_km2_s2"
+            ),
             "measurement_quality": observation["measurement_quality"],
             "radar_cross_section_m2": observation.get(
                 "radar_cross_section_m2"
@@ -248,6 +309,12 @@ def prepare_identification_input(
             "coordinate_frame": orbital["coordinate_frame"],
             "position_km": orbital["position_km"],
             "velocity_km_s": orbital["velocity_km_s"],
+            "position_covariance_km2": orbital.get(
+                "position_covariance_km2"
+            ),
+            "velocity_covariance_km2_s2": orbital.get(
+                "velocity_covariance_km2_s2"
+            ),
             "source": orbital["source"],
             "derivation": orbital["derivation"],
         },

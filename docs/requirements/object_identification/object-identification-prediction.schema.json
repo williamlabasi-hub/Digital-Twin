@@ -176,6 +176,9 @@
           "meets_threshold",
           "position_residual_km",
           "velocity_residual_km_s",
+          "normalized_distance_squared",
+          "scoring_method",
+          "uncertainty_status",
           "catalog_provenance"
         ],
         "properties": {
@@ -205,6 +208,19 @@
           "velocity_residual_km_s": {
             "type": "number",
             "minimum": 0
+          },
+          "normalized_distance_squared": {
+            "type": "number",
+            "minimum": 0
+          },
+          "scoring_method": {
+            "enum": [
+              "position-velocity-gaussian-similarity",
+              "combined-covariance-mahalanobis-similarity"
+            ]
+          },
+          "uncertainty_status": {
+            "enum": ["combined_covariance", "scale_fallback"]
           },
           "catalog_provenance": {
             "$ref": "#/$defs/catalogProvenance"
