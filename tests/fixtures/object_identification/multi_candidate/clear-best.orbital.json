@@ -1,0 +1,12 @@
+{
+  "schema_version": "0.1.0",
+  "orbital_record_id": "ORB-CAT-CLEAR-BEST",
+  "subject_id": "CAT-CLEAR-BEST",
+  "subject_id_type": "canonical_object_id",
+  "timestamp": "2026-07-27T18:59:30Z",
+  "coordinate_frame": "ECI",
+  "position_km": [6627.9, 1045.6, -421.5],
+  "velocity_km_s": [-1.081, 7.309, 1.421],
+  "source": "PROTOTYPE_CATALOG",
+  "derivation": {"method": "sgp4", "version": "prototype-0.1"}
+}

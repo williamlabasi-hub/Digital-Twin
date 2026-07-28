@@ -68,3 +68,24 @@ python -m src.object_identification.association ^
   --candidate catalog-b.json orbit-b.json affiliation-b.json ^
   --output data\processed\object_identification\ranked-prediction.json
 ```
+
+### Run the clear-match demonstration
+
+```cmd
+python -m src.object_identification.association ^
+  --observation tests\fixtures\object_identification\tracking-observation.example.json ^
+  --candidate tests\fixtures\object_identification\multi_candidate\clear-best.catalog.json tests\fixtures\object_identification\multi_candidate\clear-best.orbital.json tests\fixtures\object_identification\multi_candidate\clear-best.affiliation.json ^
+  --candidate tests\fixtures\object_identification\multi_candidate\clear-mid.catalog.json tests\fixtures\object_identification\multi_candidate\clear-mid.orbital.json tests\fixtures\object_identification\multi_candidate\clear-mid.affiliation.json ^
+  --candidate tests\fixtures\object_identification\multi_candidate\clear-far.catalog.json tests\fixtures\object_identification\multi_candidate\clear-far.orbital.json tests\fixtures\object_identification\multi_candidate\clear-far.affiliation.json ^
+  --output outputs\verification\clear-ranked-prediction.json
+```
+
+### Run the ambiguity demonstration
+
+```cmd
+python -m src.object_identification.association ^
+  --observation tests\fixtures\object_identification\tracking-observation.example.json ^
+  --candidate tests\fixtures\object_identification\multi_candidate\clear-best.catalog.json tests\fixtures\object_identification\multi_candidate\clear-best.orbital.json tests\fixtures\object_identification\multi_candidate\clear-best.affiliation.json ^
+  --candidate tests\fixtures\object_identification\multi_candidate\ambiguous-near.catalog.json tests\fixtures\object_identification\multi_candidate\ambiguous-near.orbital.json tests\fixtures\object_identification\multi_candidate\ambiguous-near.affiliation.json ^
+  --output outputs\verification\ambiguous-ranked-prediction.json
+```

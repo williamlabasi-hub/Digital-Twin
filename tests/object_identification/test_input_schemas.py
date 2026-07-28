@@ -119,6 +119,51 @@ class ObjectIdentificationInputSchemaTests(unittest.TestCase):
             catalog["orbital_record_id"], orbit["orbital_record_id"]
         )
 
+    def test_multi_candidate_demo_records_are_valid_and_consistent(self) -> None:
+        demo_root = FIXTURES_ROOT / "multi_candidate"
+        for catalog_path in demo_root.glob("*.catalog.json"):
+            prefix = catalog_path.name.removesuffix(".catalog.json")
+            orbital_path = demo_root / f"{prefix}.orbital.json"
+            affiliation_path = demo_root / f"{prefix}.affiliation.json"
+            with self.subTest(candidate=prefix):
+                catalog = load_json(catalog_path)
+                orbital = load_json(orbital_path)
+                affiliation = load_json(affiliation_path)
+                self.assertEqual(
+                    list(
+                        self.validator(
+                            "object-catalog-record.schema.json"
+                        ).iter_errors(catalog)
+                    ),
+                    [],
+                )
+                self.assertEqual(
+                    list(
+                        self.validator(
+                            "orbital-state-record.schema.json"
+                        ).iter_errors(orbital)
+                    ),
+                    [],
+                )
+                self.assertEqual(
+                    list(
+                        self.validator(
+                            "affiliation-record.schema.json"
+                        ).iter_errors(affiliation)
+                    ),
+                    [],
+                )
+                self.assertEqual(
+                    catalog["canonical_object_id"], orbital["subject_id"]
+                )
+                self.assertEqual(
+                    catalog["canonical_object_id"],
+                    affiliation["canonical_object_id"],
+                )
+                self.assertEqual(
+                    catalog["orbital_record_id"], orbital["orbital_record_id"]
+                )
+
 
 if __name__ == "__main__":
     unittest.main()
