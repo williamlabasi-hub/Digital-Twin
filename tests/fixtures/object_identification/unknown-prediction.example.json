@@ -1,0 +1,39 @@
+{
+  "schema_version": "0.1.0",
+  "contract_version": "0.1.0",
+  "record_id": "OID-PRED-0001",
+  "generated_at": "2026-07-27T19:00:00Z",
+  "observation_id": "OBS-0001",
+  "observation_timestamp": "2026-07-27T18:59:30Z",
+  "canonical_object_id": null,
+  "identity_status": "unknown",
+  "affiliation": "unknown",
+  "classification": "unknown",
+  "match_score": 0.42,
+  "match_score_interpretation": "prototype_similarity_score_not_a_calibrated_probability",
+  "threshold": {
+    "value": 0.6,
+    "version": "prototype-0.1",
+    "validation_status": "prototype_unvalidated"
+  },
+  "catalog_provenance": null,
+  "affiliation_provenance": null,
+  "matching_method": {
+    "name": "catalog-association-prototype",
+    "version": "0.1.0",
+    "method_type": "similarity"
+  },
+  "data_quality": {
+    "status": "complete",
+    "issues": []
+  },
+  "rationale": [
+    "No catalog association exceeded the unvalidated prototype threshold."
+  ],
+  "artifact_metadata": {
+    "name": "catalog-association-prototype",
+    "version": "0.1.0",
+    "training_data_designation": "not_applicable"
+  },
+  "use_designation": "prototype_non_operational"
+}

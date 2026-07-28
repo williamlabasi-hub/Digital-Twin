@@ -1,0 +1,7 @@
+{
+  "version": "prototype-0.1",
+  "validation_status": "prototype_unvalidated",
+  "position_scale_km": 5.0,
+  "velocity_scale_km_s": 0.05,
+  "match_threshold": 0.6
+}

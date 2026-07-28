@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://digital-twin.local/schemas/orbital-state-record.schema.json",
+  "title": "Orbital State Record",
+  "description": "Observed, cataloged, or propagated state vector used for object association.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "orbital_record_id",
+    "subject_id",
+    "subject_id_type",
+    "timestamp",
+    "coordinate_frame",
+    "position_km",
+    "velocity_km_s",
+    "source",
+    "derivation"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "0.1.0"
+    },
+    "orbital_record_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "subject_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "subject_id_type": {
+      "enum": ["canonical_object_id", "track_id"]
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "coordinate_frame": {
+      "enum": ["ECI", "ECEF", "TEME"]
+    },
+    "position_km": {
+      "$ref": "#/$defs/vector3"
+    },
+    "velocity_km_s": {
+      "$ref": "#/$defs/vector3"
+    },
+    "source": {
+      "type": "string",
+      "minLength": 1
+    },
+    "derivation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["method", "version"],
+      "properties": {
+        "method": {
+          "enum": ["measured", "catalog", "sgp4", "other_propagator"]
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  },
+  "$defs": {
+    "vector3": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {
+        "type": "number"
+      }
+    }
+  }
+}
