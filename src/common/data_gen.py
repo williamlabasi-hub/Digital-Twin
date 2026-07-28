@@ -1,4 +1,4 @@
-import tle_propagator
+from src.preprocessing import tle_propagator
 from sgp4.api import Satrec, WGS84
 import numpy as np
 from scipy.optimize import minimize
