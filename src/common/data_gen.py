@@ -1,5 +1,3 @@
-from numpy.testing import verbose
-
 import tle_propagator
 from sgp4.api import Satrec, WGS84
 import numpy as np
