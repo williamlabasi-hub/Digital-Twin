@@ -131,6 +131,12 @@ transparent association baseline, report false-positive behavior and
 calibration error, preserve the feature contract and dependency versions, and
 abstain to an explainable fallback outside its evaluated input domain.
 
+ML inference must reject artifacts with incompatible artifact versions,
+feature contracts, dependency versions, or use designations. Every prediction
+must identify whether machine learning or the transparent fallback produced the
+decision, whether ML abstained, the reason for abstention, and the artifact and
+model identifiers used for compatibility review.
+
 ## Minimum prediction record
 
 Every prediction record must contain:

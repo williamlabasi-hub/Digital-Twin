@@ -34,9 +34,13 @@ from .association import (
     build_ranked_prediction,
     calculate_association_score,
     load_association_config,
+    validate_prediction,
 )
 from .evaluation import generate_synthetic_cases
-from .input_pipeline import ObjectIdentificationInputError
+from .input_pipeline import (
+    ObjectIdentificationInputError,
+    prepare_identification_input_from_files,
+)
 
 
 FEATURE_NAMES = (
@@ -291,6 +295,11 @@ def train_ml_association(
         "ambiguity_margin": association_config.ambiguity_margin,
         "seed": seed,
         "case_count": case_count,
+        "versions": {
+            "sklearn": sklearn.__version__,
+            "numpy": np.__version__,
+            "joblib": joblib.__version__,
+        },
     }
     report = {
         "report_version": "0.1.0",
@@ -353,45 +362,78 @@ def save_ml_artifacts(
     ).write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
 
 
-def predict_with_ml(
+def load_ml_artifact(path: str | Path) -> dict[str, Any]:
+    source = Path(path)
+    try:
+        artifact = joblib.load(source)
+    except (OSError, ValueError, TypeError) as exc:
+        raise ObjectIdentificationInputError(
+            f"unable to load ML artifact: {source}"
+        ) from exc
+    required = {
+        "artifact_version",
+        "use_designation",
+        "model_name",
+        "model",
+        "calibrator",
+        "feature_names",
+        "feature_minimum",
+        "feature_maximum",
+        "ood_lower_bound",
+        "ood_upper_bound",
+        "probability_threshold",
+        "ambiguity_margin",
+        "seed",
+        "case_count",
+        "versions",
+    }
+    if not isinstance(artifact, dict) or not required.issubset(artifact):
+        raise ObjectIdentificationInputError(
+            "ML artifact is missing required compatibility metadata"
+        )
+    if artifact["artifact_version"] != "0.1.0":
+        raise ObjectIdentificationInputError(
+            "unsupported ML artifact version"
+        )
+    if tuple(artifact["feature_names"]) != FEATURE_NAMES:
+        raise ObjectIdentificationInputError(
+            "ML artifact feature contract is incompatible"
+        )
+    if artifact["use_designation"] != "synthetic_prototype_non_operational":
+        raise ObjectIdentificationInputError(
+            "ML artifact has unsupported use designation"
+        )
+    expected_versions = {
+        "sklearn": sklearn.__version__,
+        "numpy": np.__version__,
+        "joblib": joblib.__version__,
+    }
+    if artifact["versions"] != expected_versions:
+        raise ObjectIdentificationInputError(
+            "ML artifact dependency versions are incompatible"
+        )
+    if not hasattr(artifact["model"], "predict_proba") or not hasattr(
+        artifact["calibrator"], "predict_proba"
+    ):
+        raise ObjectIdentificationInputError(
+            "ML artifact does not expose probability inference"
+        )
+    return artifact
+
+
+def _ml_prediction_record(
     prepared_candidates: list[dict[str, Any]],
     artifact: dict[str, Any],
     config: AssociationConfig,
+    ranked: list[tuple[dict[str, Any], float]],
 ) -> dict[str, Any]:
-    """Predict candidate matches or abstain to the transparent rule fallback."""
-    synthetic_case = {
-        "ground_truth": "unknown",
-        "expected_canonical_object_id": None,
-        "prepared_candidates": prepared_candidates,
+    prediction = build_ranked_prediction(prepared_candidates, config)
+    rule_ranking_by_id = {
+        candidate["canonical_object_id"]: candidate
+        for candidate in prediction["candidate_rankings"]
     }
-    rows, _ = _scenario_rows(synthetic_case, config)
-    features = np.asarray(rows, dtype=float)
-    lower = np.asarray(artifact["ood_lower_bound"], dtype=float)
-    upper = np.asarray(artifact["ood_upper_bound"], dtype=float)
-    outside = np.any((features < lower) | (features > upper), axis=1)
-    if bool(np.any(outside)):
-        return {
-            "mode": "rule_fallback",
-            "abstained": True,
-            "abstention_reason": "feature_outside_synthetic_training_domain",
-            "prediction": build_ranked_prediction(
-                prepared_candidates,
-                config,
-            ),
-        }
-    probability = _calibrated_probability(
-        artifact["model"],
-        artifact["calibrator"],
-        features,
-    )
-    ranked = sorted(
-        zip(prepared_candidates, probability, strict=True),
-        key=lambda item: (
-            -item[1],
-            item[0]["candidate"]["canonical_object_id"],
-        ),
-    )
-    top_probability = float(ranked[0][1])
+    top_prepared, top_probability_value = ranked[0]
+    top_probability = float(top_probability_value)
     second_probability = (
         float(ranked[1][1]) if len(ranked) > 1 else None
     )
@@ -409,38 +451,184 @@ def predict_with_ml(
         and gap <= float(artifact["ambiguity_margin"])
     )
     known = top_probability >= threshold and not ambiguous
+    top_candidate = top_prepared["candidate"]
+    affiliation = top_candidate["affiliation"] if known else "unknown"
+    decision_basis = (
+        "ambiguous"
+        if ambiguous
+        else "clear_match"
+        if known
+        else "no_candidate_above_threshold"
+    )
+    model_method = (
+        f"synthetic-calibrated-{artifact['model_name'].replace('_', '-')}"
+    )
+    prediction.update(
+        {
+            "canonical_object_id": (
+                top_candidate["canonical_object_id"] if known else None
+            ),
+            "identity_status": "known" if known else "unknown",
+            "affiliation": affiliation,
+            "classification": (
+                f"known_{affiliation}" if known else "unknown"
+            ),
+            "match_score": top_probability,
+            "match_score_interpretation": (
+                "synthetic_calibrated_candidate_match_score_non_operational"
+            ),
+            "threshold": {
+                "value": threshold,
+                "version": artifact["artifact_version"],
+                "validation_status": "prototype_unvalidated",
+            },
+            "catalog_provenance": (
+                {
+                    "catalog_source": top_candidate["catalog_source"],
+                    "catalog_record_id": top_candidate["catalog_record_id"],
+                    "catalog_record_valid_at": prediction[
+                        "observation_timestamp"
+                    ],
+                }
+                if known
+                else None
+            ),
+            "affiliation_provenance": (
+                {
+                    "affiliation_authority": top_candidate[
+                        "affiliation_authority"
+                    ],
+                    "affiliation_source_record_id": top_candidate[
+                        "affiliation_source_record_id"
+                    ],
+                    "affiliation_effective_at": top_candidate[
+                        "affiliation_effective_at"
+                    ],
+                    "affiliation_expires_at": top_candidate[
+                        "affiliation_expires_at"
+                    ],
+                }
+                if known
+                else None
+            ),
+            "matching_method": {
+                "name": model_method,
+                "version": artifact["artifact_version"],
+                "method_type": "machine_learning",
+            },
+            "candidate_selection": {
+                "decision_basis": decision_basis,
+                "candidate_count": len(ranked),
+                "ambiguity_margin": float(artifact["ambiguity_margin"]),
+                "best_to_second_score_gap": gap,
+            },
+            "candidate_rankings": [
+                {
+                    **rule_ranking_by_id[
+                        prepared["candidate"]["canonical_object_id"]
+                    ],
+                    "rank": rank,
+                    "match_score": float(candidate_probability),
+                    "meets_threshold": (
+                        float(candidate_probability) >= threshold
+                    ),
+                    "scoring_method": model_method,
+                }
+                for rank, (prepared, candidate_probability) in enumerate(
+                    ranked, start=1
+                )
+            ],
+            "rationale": [
+                f"Selected ML artifact model: {artifact['model_name']}.",
+                (
+                    f"Best synthetic candidate-match score "
+                    f"{top_probability:.6f} "
+                    f"{'>=' if top_probability >= threshold else '<'} "
+                    f"prototype threshold {threshold:.6f}."
+                ),
+                f"Candidate-selection decision: {decision_basis}.",
+                (
+                    "Score is calibrated only on synthetic scenarios and is "
+                    "not an operational probability."
+                ),
+            ],
+            "artifact_metadata": {
+                "name": "synthetic-object-association-ml",
+                "version": artifact["artifact_version"],
+                "training_data_designation": "synthetic_prototype",
+            },
+            "inference_assurance": {
+                "mode": "machine_learning",
+                "abstained": False,
+                "abstention_reason": None,
+                "artifact_version": artifact["artifact_version"],
+                "model_name": artifact["model_name"],
+            },
+        }
+    )
+    validate_prediction(prediction)
+    return prediction
+
+
+def predict_with_ml(
+    prepared_candidates: list[dict[str, Any]],
+    artifact: dict[str, Any],
+    config: AssociationConfig,
+) -> dict[str, Any]:
+    """Predict candidate matches or abstain to the transparent rule fallback."""
+    synthetic_case = {
+        "ground_truth": "unknown",
+        "expected_canonical_object_id": None,
+        "prepared_candidates": prepared_candidates,
+    }
+    rows, _ = _scenario_rows(synthetic_case, config)
+    features = np.asarray(rows, dtype=float)
+    lower = np.asarray(artifact["ood_lower_bound"], dtype=float)
+    upper = np.asarray(artifact["ood_upper_bound"], dtype=float)
+    outside = np.any((features < lower) | (features > upper), axis=1)
+    if bool(np.any(outside)):
+        fallback_prediction = build_ranked_prediction(
+            prepared_candidates,
+            config,
+        )
+        fallback_prediction["inference_assurance"] = {
+            "mode": "rule_fallback",
+            "abstained": True,
+            "abstention_reason": (
+                "feature_outside_synthetic_training_domain"
+            ),
+            "artifact_version": artifact["artifact_version"],
+            "model_name": artifact["model_name"],
+        }
+        validate_prediction(fallback_prediction)
+        return {
+            "mode": "rule_fallback",
+            "abstained": True,
+            "abstention_reason": "feature_outside_synthetic_training_domain",
+            "prediction": fallback_prediction,
+        }
+    probability = _calibrated_probability(
+        artifact["model"],
+        artifact["calibrator"],
+        features,
+    )
+    ranked = sorted(
+        zip(prepared_candidates, probability, strict=True),
+        key=lambda item: (
+            -item[1],
+            item[0]["candidate"]["canonical_object_id"],
+        ),
+    )
+    prediction = _ml_prediction_record(
+        prepared_candidates,
+        artifact,
+        config,
+        ranked,
+    )
     return {
         "mode": "ml",
         "abstained": False,
-        "use_designation": artifact["use_designation"],
-        "identity_status": "known" if known else "unknown",
-        "canonical_object_id": (
-            ranked[0][0]["candidate"]["canonical_object_id"]
-            if known
-            else None
-        ),
-        "decision_basis": (
-            "ambiguous"
-            if ambiguous
-            else "clear_match"
-            if known
-            else "no_candidate_above_threshold"
-        ),
-        "probability_interpretation": (
-            "synthetic_calibrated_candidate_match_score_non_operational"
-        ),
-        "rankings": [
-            {
-                "rank": rank,
-                "canonical_object_id": prepared["candidate"][
-                    "canonical_object_id"
-                ],
-                "synthetic_match_score": float(candidate_probability),
-            }
-            for rank, (prepared, candidate_probability) in enumerate(
-                ranked, start=1
-            )
-        ],
+        "prediction": prediction,
     }
 
 

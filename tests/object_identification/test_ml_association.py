@@ -9,11 +9,13 @@ from src.object_identification.association import load_association_config
 from src.object_identification.evaluation import generate_synthetic_cases
 from src.object_identification.ml_association import (
     FEATURE_NAMES,
+    load_ml_artifact,
     predict_with_ml,
     save_ml_artifacts,
     split_scenarios,
     train_ml_association,
 )
+from src.object_identification.ml_inference import main as inference_main
 
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
@@ -84,8 +86,12 @@ class ObjectIdentificationMlTests(unittest.TestCase):
         self.assertEqual(prediction["mode"], "ml")
         self.assertFalse(prediction["abstained"])
         self.assertEqual(
-            prediction["use_designation"],
-            "synthetic_prototype_non_operational",
+            prediction["prediction"]["inference_assurance"]["mode"],
+            "machine_learning",
+        )
+        self.assertEqual(
+            prediction["prediction"]["matching_method"]["method_type"],
+            "machine_learning",
         )
 
     def test_out_of_domain_prediction_abstains_to_rule_fallback(self) -> None:
@@ -133,9 +139,93 @@ class ObjectIdentificationMlTests(unittest.TestCase):
                 loaded["use_designation"],
                 "synthetic_prototype_non_operational",
             )
+            compatible = load_ml_artifact(artifact_path)
+            self.assertEqual(compatible["artifact_version"], "0.1.0")
         finally:
             artifact_path.unlink(missing_ok=True)
             report_path.unlink(missing_ok=True)
+            if output_directory.exists():
+                output_directory.rmdir()
+
+    def test_inference_cli_writes_schema_valid_prediction(self) -> None:
+        output_directory = (
+            REPOSITORY_ROOT
+            / "tests"
+            / "object_identification"
+            / "_ml_inference_output"
+        )
+        artifact_path = output_directory / "object-identification-ml.joblib"
+        report_path = (
+            output_directory / "object-identification-ml-report.json"
+        )
+        prediction_path = output_directory / "prediction.json"
+        fixtures = (
+            REPOSITORY_ROOT / "tests" / "fixtures" / "object_identification"
+        )
+        multi = fixtures / "multi_candidate"
+        try:
+            save_ml_artifacts(
+                self.artifact,
+                self.report,
+                output_directory,
+            )
+            return_code = inference_main(
+                [
+                    "--artifact",
+                    str(artifact_path),
+                    "--observation",
+                    str(fixtures / "tracking-observation.example.json"),
+                    "--candidate",
+                    str(multi / "clear-best.catalog.json"),
+                    str(multi / "clear-best.orbital.json"),
+                    str(multi / "clear-best.affiliation.json"),
+                    "--candidate",
+                    str(multi / "clear-mid.catalog.json"),
+                    str(multi / "clear-mid.orbital.json"),
+                    str(multi / "clear-mid.affiliation.json"),
+                    "--candidate",
+                    str(multi / "ambiguous-near.catalog.json"),
+                    str(multi / "ambiguous-near.orbital.json"),
+                    str(multi / "ambiguous-near.affiliation.json"),
+                    "--output",
+                    str(prediction_path),
+                ]
+            )
+
+            self.assertEqual(return_code, 0)
+            prediction = json.loads(
+                prediction_path.read_text(encoding="utf-8")
+            )
+            self.assertIn(
+                prediction["inference_assurance"]["mode"],
+                {"machine_learning", "rule_fallback"},
+            )
+        finally:
+            artifact_path.unlink(missing_ok=True)
+            report_path.unlink(missing_ok=True)
+            prediction_path.unlink(missing_ok=True)
+            if output_directory.exists():
+                output_directory.rmdir()
+
+    def test_incompatible_feature_contract_is_rejected(self) -> None:
+        output_directory = (
+            REPOSITORY_ROOT
+            / "tests"
+            / "object_identification"
+            / "_incompatible_ml_output"
+        )
+        artifact_path = output_directory / "object-identification-ml.joblib"
+        incompatible = deepcopy(self.artifact)
+        incompatible["feature_names"] = ("unexpected_feature",)
+        try:
+            output_directory.mkdir(parents=True, exist_ok=True)
+            joblib.dump(incompatible, artifact_path)
+            with self.assertRaisesRegex(
+                ValueError, "feature contract is incompatible"
+            ):
+                load_ml_artifact(artifact_path)
+        finally:
+            artifact_path.unlink(missing_ok=True)
             if output_directory.exists():
                 output_directory.rmdir()
 

@@ -147,3 +147,24 @@ the transparent rule-based prediction as a fallback.
 The calibrated value is a synthetic candidate-match score, not an operational
 probability. Representative independent labeled data is required before model
 approval.
+
+## Run ML inference
+
+After training, run the saved artifact against one observation and one or more
+candidate triplets:
+
+```cmd
+python -m src.object_identification.ml_inference ^
+  --artifact outputs\object_identification\ml\object-identification-ml.joblib ^
+  --observation tests\fixtures\object_identification\tracking-observation.example.json ^
+  --candidate tests\fixtures\object_identification\multi_candidate\clear-best.catalog.json tests\fixtures\object_identification\multi_candidate\clear-best.orbital.json tests\fixtures\object_identification\multi_candidate\clear-best.affiliation.json ^
+  --candidate tests\fixtures\object_identification\multi_candidate\clear-mid.catalog.json tests\fixtures\object_identification\multi_candidate\clear-mid.orbital.json tests\fixtures\object_identification\multi_candidate\clear-mid.affiliation.json ^
+  --candidate tests\fixtures\object_identification\multi_candidate\ambiguous-near.catalog.json tests\fixtures\object_identification\multi_candidate\ambiguous-near.orbital.json tests\fixtures\object_identification\multi_candidate\ambiguous-near.affiliation.json ^
+  --output outputs\object_identification\ml\inference-prediction.json
+```
+
+The artifact loader rejects incompatible artifact, feature-contract, or
+dependency versions. A compatible artifact uses ML only when every candidate
+feature is inside the synthetic training domain. Otherwise, the output remains
+schema-valid and records `rule_fallback`, `abstained: true`, and the abstention
+reason under `inference_assurance`.

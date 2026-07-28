@@ -214,10 +214,8 @@
             "minimum": 0
           },
           "scoring_method": {
-            "enum": [
-              "position-velocity-gaussian-similarity",
-              "combined-covariance-mahalanobis-similarity"
-            ]
+            "type": "string",
+            "minLength": 1
           },
           "uncertainty_status": {
             "enum": ["combined_covariance", "scale_fallback"]
@@ -256,6 +254,36 @@
               }
             }
           }
+        }
+      }
+    },
+    "inference_assurance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mode",
+        "abstained",
+        "abstention_reason",
+        "artifact_version",
+        "model_name"
+      ],
+      "properties": {
+        "mode": {
+          "enum": ["machine_learning", "rule_fallback"]
+        },
+        "abstained": {
+          "type": "boolean"
+        },
+        "abstention_reason": {
+          "type": ["string", "null"]
+        },
+        "artifact_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "model_name": {
+          "type": "string",
+          "minLength": 1
         }
       }
     },
