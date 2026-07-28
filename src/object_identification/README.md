@@ -117,3 +117,33 @@ lowest-false-match configuration retaining at least 70% recall.
 
 This is a reproducible engineering evaluation using synthetic cases. It does
 not constitute operational calibration or validation.
+
+## Train the synthetic ML prototype
+
+The ML trainer generates labeled scenarios, splits complete scenarios before
+candidate feature rows are constructed, compares logistic regression with a
+Random Forest, calibrates each model on a separate scenario split, and evaluates
+the selected artifact on held-out scenarios:
+
+```cmd
+python -m src.object_identification.ml_association ^
+  --cases 300 ^
+  --seed 20260728 ^
+  --output-directory outputs\object_identification\ml
+```
+
+Generated artifacts:
+
+- `object-identification-ml.joblib` - selected model, separate probability
+  calibrator, feature contract, and synthetic-domain bounds;
+- `object-identification-ml-report.json` - split sizes, model comparisons,
+  held-out metrics, versions, selection rule, and limitations.
+
+The model uses residual, covariance-normalized distance, measurement quality,
+rule score, candidate count, rule rank, and score-gap features. Inference
+abstains when any feature is outside the synthetic training domain and returns
+the transparent rule-based prediction as a fallback.
+
+The calibrated value is a synthetic candidate-match score, not an operational
+probability. Representative independent labeled data is required before model
+approval.

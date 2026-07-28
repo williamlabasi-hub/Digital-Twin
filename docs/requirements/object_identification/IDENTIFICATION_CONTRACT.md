@@ -124,6 +124,13 @@ false-match rate, missed-match rate, unknown accuracy, and ambiguity accuracy.
 Synthetic results must remain explicitly designated non-operational and cannot
 replace evaluation on independent representative labeled data.
 
+Any ML prototype must split complete observation/candidate scenarios before
+constructing candidate-level feature rows. Training, calibration, and test
+scenarios must be disjoint. Model selection must compare against the
+transparent association baseline, report false-positive behavior and
+calibration error, preserve the feature contract and dependency versions, and
+abstain to an explainable fallback outside its evaluated input domain.
+
 ## Minimum prediction record
 
 Every prediction record must contain:
