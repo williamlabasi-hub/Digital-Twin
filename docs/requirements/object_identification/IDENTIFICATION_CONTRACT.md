@@ -118,6 +118,12 @@ No value may be presented as a calibrated probability unless calibration has
 been measured on independent representative data. Random Forest vote fractions
 or similarity scores must be labeled by their actual interpretation.
 
+Prototype threshold evaluation may use deterministic synthetic scenarios to
+exercise known, unknown, and ambiguous decisions and report precision, recall,
+false-match rate, missed-match rate, unknown accuracy, and ambiguity accuracy.
+Synthetic results must remain explicitly designated non-operational and cannot
+replace evaluation on independent representative labeled data.
+
 ## Minimum prediction record
 
 Every prediction record must contain:

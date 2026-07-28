@@ -95,3 +95,25 @@ python -m src.object_identification.association ^
   --candidate tests\fixtures\object_identification\multi_candidate\ambiguous-near.catalog.json tests\fixtures\object_identification\multi_candidate\ambiguous-near.orbital.json tests\fixtures\object_identification\multi_candidate\ambiguous-near.affiliation.json ^
   --output outputs\verification\ambiguous-ranked-prediction.json
 ```
+
+## Evaluate prototype thresholds
+
+The deterministic synthetic evaluation generates balanced known, unknown, and
+ambiguous scenarios, sweeps match thresholds and ambiguity margins, and writes
+JSON and CSV reports:
+
+```cmd
+python -m src.object_identification.evaluation ^
+  --cases 60 ^
+  --seed 20260728 ^
+  --output-directory outputs\object_identification\evaluation
+```
+
+The report includes precision, recall, false-match rate, missed-match rate,
+unknown accuracy, and ambiguity accuracy. Recommendation logic first checks a
+1% maximum false-match-rate and 80% minimum-recall target. If no evaluated
+configuration meets both, it reports that limitation and selects the
+lowest-false-match configuration retaining at least 70% recall.
+
+This is a reproducible engineering evaluation using synthetic cases. It does
+not constitute operational calibration or validation.
