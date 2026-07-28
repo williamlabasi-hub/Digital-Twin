@@ -36,6 +36,8 @@ def closeApproach(desired_distance):
 
     # ADD AUTO e, a, AND i BASED ON A DESIRED DISTANCE
     # ADD ALLOW OPERATOR TO PICK CANDIDATE SUGGESTION TO RERUN FOR HIGHER FIDELITY RESULTS
+    # FACTOR CODE TO WORK WITHIN THE SYSTEM AS A WHOLE (E.G. ADDING A FUNCTION TO CALL THIS FUNCTION WITH
+    # A DESIRED DISTANCE AND RETURN RESULTS TO THE USER)
     
     MU_EARTH = 398600.4418  # km^3/s^2
 
@@ -311,7 +313,7 @@ def closeApproach(desired_distance):
     a_new = a_t + 20.0        # km, slightly higher altitude
     e_new = e_t
     i_new = i_t + np.radians(5.0)
-    d_desired = 15.0          # km (within the reachable range for this a,e,i)
+    d_desired = 50.0          # km (within the reachable range for this a,e,i)
 
     print(f"Designing orbit: a={a_new:.1f} km, e={e_new:.5f}, "
           f"i={np.degrees(i_new):.3f} deg, target MOID={d_desired} km\n")
