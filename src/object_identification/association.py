@@ -43,6 +43,8 @@ class AssociationConfig:
     position_scale_km: float
     velocity_scale_km_s: float
     match_threshold: float
+    ambiguity_margin: float
+    max_ranked_candidates: int
 
 
 def load_association_config(
@@ -61,6 +63,8 @@ def load_association_config(
         "position_scale_km",
         "velocity_scale_km_s",
         "match_threshold",
+        "ambiguity_margin",
+        "max_ranked_candidates",
     }
     missing = sorted(required - set(value)) if isinstance(value, dict) else []
     if not isinstance(value, dict) or missing:
@@ -88,6 +92,23 @@ def load_association_config(
         raise ObjectIdentificationInputError(
             "association config match_threshold must be between zero and one"
         )
+    ambiguity_margin = value["ambiguity_margin"]
+    if (
+        not isinstance(ambiguity_margin, (int, float))
+        or not 0 <= ambiguity_margin <= 1
+    ):
+        raise ObjectIdentificationInputError(
+            "association config ambiguity_margin must be between zero and one"
+        )
+    max_ranked_candidates = value["max_ranked_candidates"]
+    if (
+        not isinstance(max_ranked_candidates, int)
+        or isinstance(max_ranked_candidates, bool)
+        or max_ranked_candidates < 1
+    ):
+        raise ObjectIdentificationInputError(
+            "association config max_ranked_candidates must be a positive integer"
+        )
     if not isinstance(value["version"], str) or not value["version"]:
         raise ObjectIdentificationInputError(
             "association config version must be a non-empty string"
@@ -98,6 +119,8 @@ def load_association_config(
         position_scale_km=float(value["position_scale_km"]),
         velocity_scale_km_s=float(value["velocity_scale_km_s"]),
         match_threshold=float(threshold),
+        ambiguity_margin=float(ambiguity_margin),
+        max_ranked_candidates=max_ranked_candidates,
     )
 
 
@@ -141,11 +164,80 @@ def build_prediction(
     generated_at: datetime | None = None,
 ) -> dict[str, Any]:
     """Score one candidate and build a schema-valid prediction record."""
-    metrics = calculate_association_score(prepared, config)
-    candidate = prepared["candidate"]
-    observation = prepared["observation"]
-    is_known = metrics["match_score"] >= config.match_threshold
-    affiliation = candidate["affiliation"] if is_known else "unknown"
+    return build_ranked_prediction(
+        [prepared],
+        config,
+        generated_at=generated_at,
+    )
+
+
+def build_ranked_prediction(
+    prepared_candidates: list[dict[str, Any]],
+    config: AssociationConfig,
+    *,
+    generated_at: datetime | None = None,
+) -> dict[str, Any]:
+    """Rank candidates and build a prediction with an ambiguity-safe decision."""
+    if not prepared_candidates:
+        raise ObjectIdentificationInputError(
+            "at least one prepared candidate is required"
+        )
+
+    observation = prepared_candidates[0]["observation"]
+    observation_id = observation["observation_id"]
+    observation_timestamp = observation["timestamp"]
+    scored: list[tuple[dict[str, Any], dict[str, float]]] = []
+    seen_candidate_ids: set[str] = set()
+    for prepared in prepared_candidates:
+        current_observation = prepared["observation"]
+        if (
+            current_observation["observation_id"] != observation_id
+            or current_observation["timestamp"] != observation_timestamp
+        ):
+            raise ObjectIdentificationInputError(
+                "all candidates must be prepared for the same observation"
+            )
+        candidate_id = prepared["candidate"]["canonical_object_id"]
+        if candidate_id in seen_candidate_ids:
+            raise ObjectIdentificationInputError(
+                f"duplicate candidate canonical_object_id: {candidate_id}"
+            )
+        seen_candidate_ids.add(candidate_id)
+        scored.append(
+            (prepared, calculate_association_score(prepared, config))
+        )
+
+    scored.sort(
+        key=lambda item: (
+            -item[1]["match_score"],
+            item[0]["candidate"]["canonical_object_id"],
+        )
+    )
+    best_prepared, best_metrics = scored[0]
+    best_candidate = best_prepared["candidate"]
+    second_score = scored[1][1]["match_score"] if len(scored) > 1 else None
+    score_gap = (
+        best_metrics["match_score"] - second_score
+        if second_score is not None
+        else None
+    )
+    above_threshold = best_metrics["match_score"] >= config.match_threshold
+    ambiguous = bool(
+        above_threshold
+        and len(scored) > 1
+        and second_score is not None
+        and second_score >= config.match_threshold
+        and score_gap is not None
+        and score_gap <= config.ambiguity_margin
+    )
+    is_known = above_threshold and not ambiguous
+    if ambiguous:
+        decision_basis = "ambiguous"
+    elif is_known:
+        decision_basis = "clear_match"
+    else:
+        decision_basis = "no_candidate_above_threshold"
+    affiliation = best_candidate["affiliation"] if is_known else "unknown"
     classification = f"known_{affiliation}" if is_known else "unknown"
 
     created = generated_at or datetime.now(timezone.utc)
@@ -164,12 +256,12 @@ def build_prediction(
         "observation_id": observation["observation_id"],
         "observation_timestamp": observation["timestamp"],
         "canonical_object_id": (
-            candidate["canonical_object_id"] if is_known else None
+            best_candidate["canonical_object_id"] if is_known else None
         ),
         "identity_status": "known" if is_known else "unknown",
         "affiliation": affiliation,
         "classification": classification,
-        "match_score": metrics["match_score"],
+        "match_score": best_metrics["match_score"],
         "match_score_interpretation": (
             "uncalibrated_position_velocity_similarity_times_measurement_quality"
         ),
@@ -180,8 +272,8 @@ def build_prediction(
         },
         "catalog_provenance": (
             {
-                "catalog_source": candidate["catalog_source"],
-                "catalog_record_id": candidate["catalog_record_id"],
+                "catalog_source": best_candidate["catalog_source"],
+                "catalog_record_id": best_candidate["catalog_record_id"],
                 "catalog_record_valid_at": observation["timestamp"],
             }
             if is_known
@@ -189,14 +281,16 @@ def build_prediction(
         ),
         "affiliation_provenance": (
             {
-                "affiliation_authority": candidate["affiliation_authority"],
-                "affiliation_source_record_id": candidate[
+                "affiliation_authority": best_candidate[
+                    "affiliation_authority"
+                ],
+                "affiliation_source_record_id": best_candidate[
                     "affiliation_source_record_id"
                 ],
-                "affiliation_effective_at": candidate[
+                "affiliation_effective_at": best_candidate[
                     "affiliation_effective_at"
                 ],
-                "affiliation_expires_at": candidate[
+                "affiliation_expires_at": best_candidate[
                     "affiliation_expires_at"
                 ],
             }
@@ -208,22 +302,63 @@ def build_prediction(
             "version": config.version,
             "method_type": "similarity",
         },
+        "candidate_selection": {
+            "decision_basis": decision_basis,
+            "candidate_count": len(scored),
+            "ambiguity_margin": config.ambiguity_margin,
+            "best_to_second_score_gap": score_gap,
+        },
+        "candidate_rankings": [
+            {
+                "rank": rank,
+                "canonical_object_id": prepared["candidate"][
+                    "canonical_object_id"
+                ],
+                "affiliation": prepared["candidate"]["affiliation"],
+                "match_score": metrics["match_score"],
+                "meets_threshold": (
+                    metrics["match_score"] >= config.match_threshold
+                ),
+                "position_residual_km": metrics["position_residual_km"],
+                "velocity_residual_km_s": metrics[
+                    "velocity_residual_km_s"
+                ],
+                "catalog_provenance": {
+                    "catalog_source": prepared["candidate"]["catalog_source"],
+                    "catalog_record_id": prepared["candidate"][
+                        "catalog_record_id"
+                    ],
+                    "catalog_record_valid_at": observation["timestamp"],
+                },
+            }
+            for rank, (prepared, metrics) in enumerate(
+                scored[: config.max_ranked_candidates],
+                start=1,
+            )
+        ],
         "data_quality": {
             "status": "complete",
             "issues": [],
         },
         "rationale": [
             (
-                f"Position residual: {metrics['position_residual_km']:.6f} km."
+                "Best-candidate position residual: "
+                f"{best_metrics['position_residual_km']:.6f} km."
             ),
             (
                 "Velocity residual: "
-                f"{metrics['velocity_residual_km_s']:.6f} km/s."
+                f"{best_metrics['velocity_residual_km_s']:.6f} km/s."
             ),
             (
-                f"Match score {metrics['match_score']:.6f} "
-                f"{'>=' if is_known else '<'} prototype threshold "
+                f"Best match score {best_metrics['match_score']:.6f} "
+                f"{'>=' if above_threshold else '<'} prototype threshold "
                 f"{config.match_threshold:.6f}."
+            ),
+            (
+                "Identity withheld because multiple candidates are within the "
+                f"{config.ambiguity_margin:.6f} ambiguity margin."
+                if ambiguous
+                else f"Candidate-selection decision: {decision_basis}."
             ),
         ],
         "artifact_metadata": {
@@ -256,9 +391,20 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         description="Run prototype object-to-catalog association."
     )
     parser.add_argument("--observation", type=Path, required=True)
-    parser.add_argument("--catalog", type=Path, required=True)
-    parser.add_argument("--orbital", type=Path, required=True)
-    parser.add_argument("--affiliation", type=Path, required=True)
+    parser.add_argument("--catalog", type=Path)
+    parser.add_argument("--orbital", type=Path)
+    parser.add_argument("--affiliation", type=Path)
+    parser.add_argument(
+        "--candidate",
+        nargs=3,
+        action="append",
+        metavar=("CATALOG", "ORBITAL", "AFFILIATION"),
+        type=Path,
+        help=(
+            "Candidate evidence triplet; repeat to rank multiple candidates. "
+            "Cannot be combined with the legacy single-candidate flags."
+        ),
+    )
     parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG_PATH)
     parser.add_argument("--output", type=Path)
     return parser.parse_args(argv)
@@ -267,14 +413,32 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     try:
-        prepared = prepare_identification_input_from_files(
-            args.observation,
-            args.catalog,
-            args.orbital,
-            args.affiliation,
-        )
-        prediction = build_prediction(
-            prepared,
+        legacy_paths = (args.catalog, args.orbital, args.affiliation)
+        if args.candidate and any(path is not None for path in legacy_paths):
+            raise ObjectIdentificationInputError(
+                "--candidate cannot be combined with --catalog, --orbital, "
+                "or --affiliation"
+            )
+        if args.candidate:
+            candidate_paths = args.candidate
+        elif all(path is not None for path in legacy_paths):
+            candidate_paths = [legacy_paths]
+        else:
+            raise ObjectIdentificationInputError(
+                "provide either repeated --candidate groups or all of "
+                "--catalog, --orbital, and --affiliation"
+            )
+        prepared_candidates = [
+            prepare_identification_input_from_files(
+                args.observation,
+                catalog_path,
+                orbital_path,
+                affiliation_path,
+            )
+            for catalog_path, orbital_path, affiliation_path in candidate_paths
+        ]
+        prediction = build_ranked_prediction(
+            prepared_candidates,
             load_association_config(args.config),
         )
     except ObjectIdentificationInputError as exc:

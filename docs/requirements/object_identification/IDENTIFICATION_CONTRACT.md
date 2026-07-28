@@ -75,6 +75,12 @@ If the evidence is insufficient, stale beyond an approved limit, internally
 inconsistent, or below the approved match threshold, identity status is
 `unknown`.
 
+When multiple catalog candidates are evaluated, they must be ranked using the
+same versioned method and threshold. Identity must also remain `unknown` when
+two or more threshold-clearing candidates fall within the configured ambiguity
+margin. Ranked alternatives retain their catalog provenance so an operator can
+review the decision without treating an ambiguous top score as a known match.
+
 ## Affiliation authority
 
 Affiliation is catalog or policy metadata applied only after identity is
@@ -121,6 +127,8 @@ Every prediction record must contain:
 - threshold and threshold version;
 - catalog and affiliation provenance;
 - matching method and version;
+- candidate-selection basis and ranked alternatives when catalog-wide matching
+  is performed;
 - data-quality status and issues;
 - human-readable rationale;
 - model or rule artifact metadata;

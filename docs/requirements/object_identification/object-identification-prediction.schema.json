@@ -129,6 +129,89 @@
         }
       }
     },
+    "candidate_selection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "decision_basis",
+        "candidate_count",
+        "ambiguity_margin",
+        "best_to_second_score_gap"
+      ],
+      "properties": {
+        "decision_basis": {
+          "enum": [
+            "clear_match",
+            "ambiguous",
+            "no_candidate_above_threshold"
+          ]
+        },
+        "candidate_count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "ambiguity_margin": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "best_to_second_score_gap": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    },
+    "candidate_rankings": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "rank",
+          "canonical_object_id",
+          "affiliation",
+          "match_score",
+          "meets_threshold",
+          "position_residual_km",
+          "velocity_residual_km_s",
+          "catalog_provenance"
+        ],
+        "properties": {
+          "rank": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "canonical_object_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "affiliation": {
+            "enum": ["blue", "red", "other"]
+          },
+          "match_score": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "meets_threshold": {
+            "type": "boolean"
+          },
+          "position_residual_km": {
+            "type": "number",
+            "minimum": 0
+          },
+          "velocity_residual_km_s": {
+            "type": "number",
+            "minimum": 0
+          },
+          "catalog_provenance": {
+            "$ref": "#/$defs/catalogProvenance"
+          }
+        }
+      }
+    },
     "data_quality": {
       "type": "object",
       "additionalProperties": false,

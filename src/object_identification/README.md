@@ -45,6 +45,10 @@ measurement quality. Its score is an uncalibrated similarity value, not a
 probability. The scales and threshold in
 `config/object-identification-association.json` are prototype assumptions.
 
+One or more candidates can be evaluated. Results are sorted by score, retain
+candidate provenance, and withhold identity when multiple threshold-clearing
+candidates fall within the configured ambiguity margin.
+
 ```cmd
 python -m src.object_identification.association ^
   --observation tests\fixtures\object_identification\tracking-observation.example.json ^
@@ -52,4 +56,15 @@ python -m src.object_identification.association ^
   --orbital tests\fixtures\object_identification\orbital-state-record.example.json ^
   --affiliation tests\fixtures\object_identification\affiliation-record.example.json ^
   --output data\processed\object_identification\prediction.json
+```
+
+For catalog-wide ranking, repeat `--candidate` with each catalog, orbital, and
+affiliation record triplet:
+
+```cmd
+python -m src.object_identification.association ^
+  --observation tests\fixtures\object_identification\tracking-observation.example.json ^
+  --candidate catalog-a.json orbit-a.json affiliation-a.json ^
+  --candidate catalog-b.json orbit-b.json affiliation-b.json ^
+  --output data\processed\object_identification\ranked-prediction.json
 ```
