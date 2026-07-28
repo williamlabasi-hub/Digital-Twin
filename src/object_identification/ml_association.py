@@ -295,6 +295,7 @@ def train_ml_association(
         "ambiguity_margin": association_config.ambiguity_margin,
         "seed": seed,
         "case_count": case_count,
+        "allowed_uncertainty_statuses": ("combined_covariance",),
         "versions": {
             "sklearn": sklearn.__version__,
             "numpy": np.__version__,
@@ -385,6 +386,7 @@ def load_ml_artifact(path: str | Path) -> dict[str, Any]:
         "ambiguity_margin",
         "seed",
         "case_count",
+        "allowed_uncertainty_statuses",
         "versions",
     }
     if not isinstance(artifact, dict) or not required.issubset(artifact):
@@ -402,6 +404,12 @@ def load_ml_artifact(path: str | Path) -> dict[str, Any]:
     if artifact["use_designation"] != "synthetic_prototype_non_operational":
         raise ObjectIdentificationInputError(
             "ML artifact has unsupported use designation"
+        )
+    if tuple(artifact["allowed_uncertainty_statuses"]) != (
+        "combined_covariance",
+    ):
+        raise ObjectIdentificationInputError(
+            "ML artifact uncertainty-mode contract is incompatible"
         )
     expected_versions = {
         "sklearn": sklearn.__version__,
@@ -576,6 +584,44 @@ def predict_with_ml(
     config: AssociationConfig,
 ) -> dict[str, Any]:
     """Predict candidate matches or abstain to the transparent rule fallback."""
+    candidate_metrics = [
+        calculate_association_score(prepared, config)
+        for prepared in prepared_candidates
+    ]
+    observed_uncertainty_statuses = {
+        metrics["uncertainty_status"] for metrics in candidate_metrics
+    }
+    allowed_uncertainty_statuses = set(
+        artifact["allowed_uncertainty_statuses"]
+    )
+    unsupported_uncertainty = (
+        observed_uncertainty_statuses - allowed_uncertainty_statuses
+    )
+    if unsupported_uncertainty:
+        fallback_prediction = build_ranked_prediction(
+            prepared_candidates,
+            config,
+        )
+        reason = "uncertainty_status_outside_synthetic_training_domain"
+        fallback_prediction["inference_assurance"] = {
+            "mode": "rule_fallback",
+            "abstained": True,
+            "abstention_reason": reason,
+            "artifact_version": artifact["artifact_version"],
+            "model_name": artifact["model_name"],
+        }
+        fallback_prediction["rationale"].append(
+            "ML abstained because candidate uncertainty mode(s) "
+            f"{sorted(unsupported_uncertainty)} were not present during "
+            "synthetic training."
+        )
+        validate_prediction(fallback_prediction)
+        return {
+            "mode": "rule_fallback",
+            "abstained": True,
+            "abstention_reason": reason,
+            "prediction": fallback_prediction,
+        }
     synthetic_case = {
         "ground_truth": "unknown",
         "expected_canonical_object_id": None,

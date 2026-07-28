@@ -139,6 +139,10 @@ class ObjectIdentificationMlTests(unittest.TestCase):
                 loaded["use_designation"],
                 "synthetic_prototype_non_operational",
             )
+            self.assertEqual(
+                tuple(loaded["allowed_uncertainty_statuses"]),
+                ("combined_covariance",),
+            )
             compatible = load_ml_artifact(artifact_path)
             self.assertEqual(compatible["artifact_version"], "0.1.0")
         finally:
@@ -196,9 +200,16 @@ class ObjectIdentificationMlTests(unittest.TestCase):
             prediction = json.loads(
                 prediction_path.read_text(encoding="utf-8")
             )
-            self.assertIn(
+            self.assertEqual(
                 prediction["inference_assurance"]["mode"],
-                {"machine_learning", "rule_fallback"},
+                "rule_fallback",
+            )
+            self.assertTrue(
+                prediction["inference_assurance"]["abstained"]
+            )
+            self.assertEqual(
+                prediction["inference_assurance"]["abstention_reason"],
+                "uncertainty_status_outside_synthetic_training_domain",
             )
         finally:
             artifact_path.unlink(missing_ok=True)

@@ -137,6 +137,11 @@ must identify whether machine learning or the transparent fallback produced the
 decision, whether ML abstained, the reason for abstention, and the artifact and
 model identifiers used for compatibility review.
 
+Numeric feature-range checks are insufficient by themselves. Inference must
+also abstain when the uncertainty/scoring mode was not represented during
+training, even when the resulting numeric feature values fall inside the
+training ranges.
+
 ## Minimum prediction record
 
 Every prediction record must contain:

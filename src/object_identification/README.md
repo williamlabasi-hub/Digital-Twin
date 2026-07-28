@@ -165,6 +165,6 @@ python -m src.object_identification.ml_inference ^
 
 The artifact loader rejects incompatible artifact, feature-contract, or
 dependency versions. A compatible artifact uses ML only when every candidate
-feature is inside the synthetic training domain. Otherwise, the output remains
-schema-valid and records `rule_fallback`, `abstained: true`, and the abstention
-reason under `inference_assurance`.
+feature and uncertainty mode are inside the synthetic training domain.
+Otherwise, the output remains schema-valid and records `rule_fallback`,
+`abstained: true`, and the abstention reason under `inference_assurance`.
