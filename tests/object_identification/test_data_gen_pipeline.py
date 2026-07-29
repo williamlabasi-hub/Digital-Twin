@@ -1,8 +1,10 @@
 import json
 import unittest
 from copy import deepcopy
+from datetime import datetime
 from pathlib import Path
 
+from src.object_identification.evaluation import generate_synthetic_cases
 from src.object_identification.data_gen_pipeline import (
     build_data_gen_prediction,
     load_candidate_manifest,
@@ -10,6 +12,10 @@ from src.object_identification.data_gen_pipeline import (
 )
 from src.object_identification.input_pipeline import (
     ObjectIdentificationInputError,
+)
+from src.object_identification.ml_association import (
+    save_ml_artifacts,
+    train_ml_association,
 )
 
 
@@ -255,6 +261,171 @@ class DataGenPipelineTests(unittest.TestCase):
             )
         finally:
             output_path.unlink(missing_ok=True)
+
+
+class DataGenPipelineMlTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.output_directory = TEST_ROOT / "_pipeline_ml_artifact"
+        cls.artifact_path = (
+            cls.output_directory / "object-identification-ml.joblib"
+        )
+        artifact, report = train_ml_association(
+            case_count=60,
+            seed=20260728,
+        )
+        save_ml_artifacts(artifact, report, cls.output_directory)
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        for path in cls.output_directory.glob("*"):
+            path.unlink(missing_ok=True)
+        if cls.output_directory.exists():
+            cls.output_directory.rmdir()
+
+    @staticmethod
+    def _time_parts(timestamp: str) -> dict:
+        parsed = datetime.fromisoformat(timestamp.replace("Z", "+00:00"))
+        return {
+            "year": parsed.year,
+            "month": parsed.month,
+            "day": parsed.day,
+            "hour": parsed.hour,
+            "minute": parsed.minute,
+            "second": (
+                parsed.second + parsed.microsecond / 1_000_000
+            ),
+        }
+
+    def _generated_inputs_from_synthetic_case(
+        self,
+    ) -> tuple[dict, list[dict], dict]:
+        case = generate_synthetic_cases(
+            case_count=30,
+            seed=20260728,
+        )[0]
+        prepared_candidates = case["prepared_candidates"]
+        observation = prepared_candidates[0]["observation"]
+        observation_propagation = {
+            "name": "SYNTHETIC OBSERVATION",
+            "catalog": 90001,
+            "coordinate_frame": observation["coordinate_frame"],
+            "position_km": observation["position_km"],
+            "cartesian_velocity_km_s": observation["velocity_km_s"],
+            "position_covariance_km2": observation[
+                "position_covariance_km2"
+            ],
+            "velocity_covariance_km2_s2": observation[
+                "velocity_covariance_km2_s2"
+            ],
+            "time": self._time_parts(observation["timestamp"]),
+        }
+        candidates = []
+        for index, prepared in enumerate(prepared_candidates, start=1):
+            candidate_metadata = prepared["candidate"]
+            orbital = prepared["orbital_state"]
+            candidates.append(
+                {
+                    "propagation": {
+                        "name": candidate_metadata.get("object_name"),
+                        "catalog": index,
+                        "coordinate_frame": orbital[
+                            "coordinate_frame"
+                        ],
+                        "position_km": orbital["position_km"],
+                        "cartesian_velocity_km_s": orbital[
+                            "velocity_km_s"
+                        ],
+                        "position_covariance_km2": orbital[
+                            "position_covariance_km2"
+                        ],
+                        "velocity_covariance_km2_s2": orbital[
+                            "velocity_covariance_km2_s2"
+                        ],
+                        "time": self._time_parts(orbital["timestamp"]),
+                    },
+                    "catalog_source": candidate_metadata[
+                        "catalog_source"
+                    ],
+                    "object_type": candidate_metadata["object_type"],
+                    "affiliation": candidate_metadata["affiliation"],
+                    "affiliation_authority": candidate_metadata[
+                        "affiliation_authority"
+                    ],
+                    "affiliation_source_record_id": candidate_metadata[
+                        "affiliation_source_record_id"
+                    ],
+                    "canonical_object_id": candidate_metadata[
+                        "canonical_object_id"
+                    ],
+                }
+            )
+        return observation_propagation, candidates, observation
+
+    def test_in_domain_generated_data_uses_ml(self) -> None:
+        (
+            observation_propagation,
+            candidates,
+            observation,
+        ) = self._generated_inputs_from_synthetic_case()
+
+        bundle = build_data_gen_prediction(
+            observation_propagation,
+            candidates,
+            observation_id=observation["observation_id"],
+            track_id=observation["track_id"],
+            sensor_id=observation["sensor_id"],
+            sensor_type=observation["sensor_type"],
+            data_source=observation["data_source"],
+            measurement_quality=observation["measurement_quality"],
+            ml_artifact_path=self.artifact_path,
+        )
+
+        self.assertEqual(
+            bundle["inference_assurance"]["mode"],
+            "ml",
+        )
+        self.assertFalse(
+            bundle["inference_assurance"]["abstained"]
+        )
+        self.assertEqual(
+            bundle["prediction"]["matching_method"]["method_type"],
+            "machine_learning",
+        )
+
+    def test_missing_covariance_abstains_to_rule_fallback(self) -> None:
+        observation = propagation(
+            90001,
+            [6628.1, 1045.2, -421.7],
+            [-1.08, 7.31, 1.42],
+        )
+        candidates = [
+            candidate(
+                25544,
+                [6627.9, 1045.6, -421.5],
+                [-1.081, 7.309, 1.421],
+            )
+        ]
+
+        bundle = build_data_gen_prediction(
+            observation,
+            candidates,
+            observation_id="OBS-ML-FALLBACK",
+            track_id="TRACK-ML-FALLBACK",
+            sensor_id="SIMULATED-SENSOR",
+            sensor_type="other",
+            data_source="DATA_GEN_TEST",
+            measurement_quality=0.9,
+            ml_artifact_path=self.artifact_path,
+        )
+
+        assurance = bundle["inference_assurance"]
+        self.assertEqual(assurance["mode"], "rule_fallback")
+        self.assertTrue(assurance["abstained"])
+        self.assertEqual(
+            assurance["abstention_reason"],
+            "uncertainty_status_outside_synthetic_training_domain",
+        )
 
 
 if __name__ == "__main__":

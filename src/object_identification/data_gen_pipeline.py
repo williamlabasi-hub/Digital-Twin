@@ -11,6 +11,7 @@ from typing import Any
 from .association import build_ranked_prediction, load_association_config
 from .data_gen_adapter import build_identification_records
 from .input_pipeline import ObjectIdentificationInputError
+from .ml_association import load_ml_artifact, predict_with_ml
 from .uncertainty import (
     DEFAULT_UNCERTAINTY_CONFIG_PATH,
     apply_uncertainty_model,
@@ -116,6 +117,7 @@ def build_data_gen_prediction(
     uncertainty_config_path: str | Path = (
         DEFAULT_UNCERTAINTY_CONFIG_PATH
     ),
+    ml_artifact_path: str | Path | None = None,
 ) -> dict[str, Any]:
     """Adapt, validate, rank, and classify generated candidate states."""
     if not candidates:
@@ -192,14 +194,45 @@ def build_data_gen_prediction(
         if config_path is not None
         else load_association_config()
     )
-    prediction = build_ranked_prediction(
-        [records["prepared"] for records in candidate_records],
-        config,
-    )
+    prepared_candidates = [
+        records["prepared"] for records in candidate_records
+    ]
+    if ml_artifact_path is None:
+        prediction = build_ranked_prediction(
+            prepared_candidates,
+            config,
+        )
+        inference_assurance = {
+            "requested_mode": "rule",
+            "mode": "rule",
+            "abstained": False,
+            "abstention_reason": None,
+            "artifact_version": None,
+            "model_name": None,
+            "use_designation": "prototype_non_operational",
+        }
+    else:
+        artifact = load_ml_artifact(ml_artifact_path)
+        ml_result = predict_with_ml(
+            prepared_candidates,
+            artifact,
+            config,
+        )
+        prediction = ml_result["prediction"]
+        inference_assurance = {
+            "requested_mode": "machine_learning",
+            "mode": ml_result["mode"],
+            "abstained": ml_result["abstained"],
+            "abstention_reason": ml_result.get("abstention_reason"),
+            "artifact_version": artifact["artifact_version"],
+            "model_name": artifact["model_name"],
+            "use_designation": artifact["use_designation"],
+        }
     return {
         "pipeline_version": PIPELINE_VERSION,
         "use_designation": "prototype_non_operational",
         "uncertainty_assurance": uncertainty_assurance,
+        "inference_assurance": inference_assurance,
         "observation": candidate_records[0]["observation"],
         "candidates": [
             {
@@ -252,6 +285,14 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         type=Path,
         default=DEFAULT_UNCERTAINTY_CONFIG_PATH,
     )
+    parser.add_argument(
+        "--ml-artifact",
+        type=Path,
+        help=(
+            "Optional compatible synthetic ML artifact. Inference safely "
+            "falls back to the rule model when outside its domain."
+        ),
+    )
     return parser.parse_args(argv)
 
 
@@ -273,6 +314,7 @@ def main(argv: list[str] | None = None) -> int:
             config_path=args.config,
             estimate_uncertainty=args.estimate_uncertainty,
             uncertainty_config_path=args.uncertainty_config,
+            ml_artifact_path=args.ml_artifact,
         )
     except ObjectIdentificationInputError as exc:
         print(f"Data-generation pipeline error: {exc}", file=sys.stderr)
@@ -291,6 +333,12 @@ def main(argv: list[str] | None = None) -> int:
         f"(identity_status={prediction['identity_status']}, "
         f"candidate_count="
         f"{prediction['candidate_selection']['candidate_count']})"
+    )
+    inference = bundle["inference_assurance"]
+    print(
+        "Inference: "
+        f"{inference['mode']} "
+        f"(abstained={str(inference['abstained']).lower()})"
     )
     return 0
 

@@ -113,6 +113,31 @@ canonical identities are rejected. When multiple threshold-clearing candidates
 fall within the configured ambiguity margin, the pipeline withholds identity
 and returns an `ambiguous` decision.
 
+After training an artifact, the same generated-data command can request safe ML
+inference:
+
+```cmd
+python -m src.object_identification.data_gen_pipeline ^
+  --observation-input observation.json ^
+  --candidate-manifest candidate-manifest.json ^
+  --output ml-prediction.json ^
+  --observation-id OBS-1 ^
+  --track-id TRACK-1 ^
+  --sensor-id SENSOR-1 ^
+  --sensor-type radar ^
+  --data-source DATA_GEN ^
+  --measurement-quality 0.8 ^
+  --estimate-uncertainty ^
+  --ml-artifact outputs\object_identification\ml\object-identification-ml.joblib
+```
+
+The bundle-level `inference_assurance` records the requested mode, actual mode,
+artifact version, model name, abstention state, and abstention reason. ML is
+used only when the artifact is compatible, covariance mode is supported, and
+every feature is within the synthetic training domain. Otherwise the same
+command returns a schema-valid rule prediction with explicit
+`rule_fallback`.
+
 ## Prepare identification evidence
 
 The first executable layer validates the four inputs, checks identifiers,
