@@ -1,0 +1,25 @@
+{
+  "name": "ISS (ZARYA)",
+  "catalog": 25544,
+  "coordinate_frame": "ECI",
+  "position_km": [6627.9, 1045.6, -421.5],
+  "cartesian_velocity_km_s": [-1.081, 7.309, 1.421],
+  "altitude": 419.8,
+  "latitude": 1.1,
+  "longitude": 2.1,
+  "velocity_km_s": {
+    "radial": 0.009,
+    "along": 7.599,
+    "cross": 0.021
+  },
+  "speed_km_s": 7.599,
+  "sunlit": true,
+  "time": {
+    "year": 2026,
+    "month": 7,
+    "day": 29,
+    "hour": 16,
+    "minute": 0,
+    "second": 0
+  }
+}

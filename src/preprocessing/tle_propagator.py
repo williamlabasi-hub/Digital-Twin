@@ -1,10 +1,16 @@
-import requests
 import numpy as np
 from sgp4.api import jday
 from skyfield.api import load, EarthSatellite
 from skyfield.toposlib import wgs84
 
 def tle_request(cat):
+    try:
+        import requests
+    except ModuleNotFoundError as exc:
+        raise RuntimeError(
+            "TLE retrieval requires the optional runtime dependency "
+            "'requests'; install the project dependencies first"
+        ) from exc
 
     headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
     "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0"}
@@ -54,6 +60,9 @@ def propagate(tle, time):
     orbital = {
     "name": name,
     "catalog": sat.model.satnum,
+    "coordinate_frame": "ECI",
+    "position_km": [float(component) for component in r],
+    "cartesian_velocity_km_s": [float(component) for component in v],
     "altitude": s_subpoint.elevation.km,
     "latitude": s_subpoint.latitude.degrees,
     "longitude": s_subpoint.longitude.degrees,

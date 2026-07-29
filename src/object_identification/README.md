@@ -7,10 +7,10 @@ evidence contract:
 
 [`docs/requirements/object_identification/IDENTIFICATION_CONTRACT.md`](../../docs/requirements/object_identification/IDENTIFICATION_CONTRACT.md)
 
-A prototype position-and-velocity association rule is implemented for contract
-and pipeline integration testing. It is uncalibrated and non-operational; no
-trained classifier, synthetic generator, or operational prediction interface
-is implemented yet.
+A prototype position-and-velocity association rule, synthetic evaluation
+pipeline, synthetic ML classifier, safe inference interface, and data-generation
+adapter are implemented for contract and integration testing. They remain
+uncalibrated and non-operational.
 
 Version `0.1.0` JSON Schemas now define:
 
@@ -21,6 +21,68 @@ Version `0.1.0` JSON Schemas now define:
 - object-identification predictions.
 
 Validated examples are stored under `tests/fixtures/object_identification/`.
+
+## Adapt generated orbital data
+
+`preprocessing.tle_propagator.propagate` now retains Cartesian position and
+velocity in the ECI frame in addition to its existing altitude, location, and
+radial/along-track/cross-track velocity fields. The adapter converts an
+observation propagation and a candidate propagation into the four validated
+object-identification records plus normalized prepared evidence.
+
+Affiliation, authority, object type, sensor provenance, and measurement quality
+must be supplied explicitly. They are not inferred from orbital motion.
+
+```cmd
+python -m src.object_identification.data_gen_adapter ^
+  --observation-input data\generated\observation.json ^
+  --candidate-input data\generated\candidate.json ^
+  --output data\processed\object_identification\generated-records.json ^
+  --observation-id OBS-DATA-GEN-1 ^
+  --track-id TRACK-DATA-GEN-1 ^
+  --sensor-id SIMULATED-SENSOR ^
+  --sensor-type other ^
+  --data-source DATA_GEN ^
+  --measurement-quality 0.8 ^
+  --catalog-source TLE_API ^
+  --object-type payload ^
+  --affiliation other ^
+  --affiliation-authority PROTOTYPE_OPERATOR ^
+  --affiliation-source-record-id AFF-25544
+```
+
+The input JSON objects are the dictionaries returned by
+`src.common.data_gen.orbit_catalog`. The output bundle contains `observation`,
+`catalog`, `orbital`, `affiliation`, and `prepared` records. Covariance is
+accepted by the Python API and omitted by the CLI unless supplied by a future
+sensor or uncertainty model.
+
+## Run the generated-data identification pipeline
+
+The unified pipeline adapts one generated observation, loads any number of
+generated catalog candidates from a manifest, validates each record set, ranks
+all candidates, applies ambiguity protection, and writes the complete evidence
+and prediction bundle:
+
+```cmd
+python -m src.object_identification.data_gen_pipeline ^
+  --observation-input tests\fixtures\object_identification\data_gen\observation-propagation.example.json ^
+  --candidate-manifest tests\fixtures\object_identification\data_gen\candidate-manifest.example.json ^
+  --output outputs\verification\data-gen-pipeline-demo.json ^
+  --observation-id OBS-PIPELINE-DEMO-1 ^
+  --track-id TRACK-PIPELINE-DEMO-1 ^
+  --sensor-id SIMULATED-SENSOR ^
+  --sensor-type other ^
+  --data-source DATA_GEN_DEMO ^
+  --measurement-quality 0.9
+```
+
+Candidate input paths in the manifest are resolved relative to the manifest
+file. Each entry supplies the catalog, object-type, and authority-controlled
+affiliation metadata associated with one propagation record. Duplicate
+canonical identities are rejected. When multiple threshold-clearing candidates
+fall within the configured ambiguity margin, the pipeline withholds identity
+and returns an `ambiguous` decision.
 
 ## Prepare identification evidence
 

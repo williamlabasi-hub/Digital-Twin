@@ -1,0 +1,15 @@
+{
+  "name": "NEAR CANDIDATE",
+  "catalog": 40002,
+  "coordinate_frame": "ECI",
+  "position_km": [6632.1, 1045.2, -421.7],
+  "cartesian_velocity_km_s": [-1.08, 7.31, 1.42],
+  "time": {
+    "year": 2026,
+    "month": 7,
+    "day": 29,
+    "hour": 16,
+    "minute": 0,
+    "second": 0
+  }
+}
