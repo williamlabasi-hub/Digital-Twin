@@ -60,6 +60,32 @@ the association pipeline uses combined-covariance Mahalanobis scoring. Missing
 or incomplete covariance remains explicit as `scale_fallback`; the adapter
 never invents covariance values.
 
+When covariance is unavailable, the unified pipeline can explicitly apply the
+versioned transparent prototype model in
+`config/object-identification-uncertainty.json`:
+
+```cmd
+python -m src.object_identification.data_gen_pipeline ^
+  --observation-input observation.json ^
+  --candidate-manifest candidate-manifest.json ^
+  --output modeled-uncertainty-prediction.json ^
+  --observation-id OBS-1 ^
+  --track-id TRACK-1 ^
+  --sensor-id SENSOR-1 ^
+  --sensor-type radar ^
+  --data-source DATA_GEN ^
+  --measurement-quality 0.8 ^
+  --estimate-uncertainty
+```
+
+The model fills only missing matrices. Supplied covariance always takes
+precedence. Sensor sigma is selected by sensor type and scaled inversely by
+measurement quality; SGP4 catalog sigma grows linearly with propagation age.
+The output bundle records whether each matrix was `supplied` or `modeled`, the
+configuration version, assumptions, and `prototype_unvalidated` status. These
+values are architectural placeholders pending calibration against real sensor
+and orbit-determination performance.
+
 ## Run the generated-data identification pipeline
 
 The unified pipeline adapts one generated observation, loads any number of

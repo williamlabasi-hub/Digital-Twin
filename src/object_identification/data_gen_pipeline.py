@@ -11,6 +11,11 @@ from typing import Any
 from .association import build_ranked_prediction, load_association_config
 from .data_gen_adapter import build_identification_records
 from .input_pipeline import ObjectIdentificationInputError
+from .uncertainty import (
+    DEFAULT_UNCERTAINTY_CONFIG_PATH,
+    apply_uncertainty_model,
+    load_uncertainty_config,
+)
 
 
 PIPELINE_VERSION = "0.1.0"
@@ -107,12 +112,40 @@ def build_data_gen_prediction(
     data_source: str,
     measurement_quality: float,
     config_path: str | Path | None = None,
+    estimate_uncertainty: bool = False,
+    uncertainty_config_path: str | Path = (
+        DEFAULT_UNCERTAINTY_CONFIG_PATH
+    ),
 ) -> dict[str, Any]:
     """Adapt, validate, rank, and classify generated candidate states."""
     if not candidates:
         raise ObjectIdentificationInputError(
             "at least one generated candidate is required"
         )
+
+    if estimate_uncertainty:
+        (
+            observation_propagation,
+            candidates,
+            uncertainty_assurance,
+        ) = apply_uncertainty_model(
+            observation_propagation,
+            candidates,
+            sensor_type=sensor_type,
+            measurement_quality=measurement_quality,
+            config=load_uncertainty_config(uncertainty_config_path),
+        )
+    else:
+        uncertainty_assurance = {
+            "mode": "input_only",
+            "model_name": None,
+            "model_version": None,
+            "validation_status": "not_applied",
+            "assumptions": [
+                "Covariance was accepted only when supplied in input data.",
+                "Incomplete covariance uses configured scale fallback.",
+            ],
+        }
 
     candidate_records: list[dict[str, Any]] = []
     for index, candidate in enumerate(candidates, start=1):
@@ -166,6 +199,7 @@ def build_data_gen_prediction(
     return {
         "pipeline_version": PIPELINE_VERSION,
         "use_designation": "prototype_non_operational",
+        "uncertainty_assurance": uncertainty_assurance,
         "observation": candidate_records[0]["observation"],
         "candidates": [
             {
@@ -205,6 +239,19 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         required=True,
     )
     parser.add_argument("--config", type=Path)
+    parser.add_argument(
+        "--estimate-uncertainty",
+        action="store_true",
+        help=(
+            "Fill missing covariance with the configured transparent "
+            "prototype uncertainty model."
+        ),
+    )
+    parser.add_argument(
+        "--uncertainty-config",
+        type=Path,
+        default=DEFAULT_UNCERTAINTY_CONFIG_PATH,
+    )
     return parser.parse_args(argv)
 
 
@@ -224,6 +271,8 @@ def main(argv: list[str] | None = None) -> int:
             data_source=args.data_source,
             measurement_quality=args.measurement_quality,
             config_path=args.config,
+            estimate_uncertainty=args.estimate_uncertainty,
+            uncertainty_config_path=args.uncertainty_config,
         )
     except ObjectIdentificationInputError as exc:
         print(f"Data-generation pipeline error: {exc}", file=sys.stderr)

@@ -1,0 +1,33 @@
+{
+  "version": "prototype-0.1",
+  "validation_status": "prototype_unvalidated",
+  "measurement_quality_floor": 0.25,
+  "sensor_profiles": {
+    "radar": {
+      "position_sigma_km": 1.0,
+      "velocity_sigma_km_s": 0.01
+    },
+    "optical": {
+      "position_sigma_km": 5.0,
+      "velocity_sigma_km_s": 0.02
+    },
+    "space_based": {
+      "position_sigma_km": 0.5,
+      "velocity_sigma_km_s": 0.005
+    },
+    "fused": {
+      "position_sigma_km": 0.25,
+      "velocity_sigma_km_s": 0.0025
+    },
+    "other": {
+      "position_sigma_km": 2.0,
+      "velocity_sigma_km_s": 0.02
+    }
+  },
+  "sgp4_catalog_profile": {
+    "base_position_sigma_km": 0.5,
+    "base_velocity_sigma_km_s": 0.005,
+    "position_sigma_growth_km_per_hour": 0.1,
+    "velocity_sigma_growth_km_s_per_hour": 0.001
+  }
+}

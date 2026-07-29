@@ -146,6 +146,38 @@ class DataGenPipelineTests(unittest.TestCase):
         self.assertEqual(prediction["identity_status"], "unknown")
         self.assertIsNone(prediction["canonical_object_id"])
 
+    def test_opt_in_uncertainty_model_enables_covariance_scoring(
+        self,
+    ) -> None:
+        candidates = [
+            candidate(
+                25544,
+                [6627.9, 1045.6, -421.5],
+                [-1.081, 7.309, 1.421],
+            )
+        ]
+
+        bundle = build_data_gen_prediction(
+            self.observation,
+            candidates,
+            estimate_uncertainty=True,
+            **self.arguments,
+        )
+
+        self.assertEqual(
+            bundle["uncertainty_assurance"]["mode"],
+            "modeled",
+        )
+        ranking = bundle["prediction"]["candidate_rankings"][0]
+        self.assertEqual(
+            ranking["uncertainty_status"],
+            "combined_covariance",
+        )
+        self.assertEqual(
+            ranking["scoring_method"],
+            "combined-covariance-mahalanobis-similarity",
+        )
+
     def test_rejects_duplicate_generated_candidate_identities(self) -> None:
         repeated = candidate(
             25544,
