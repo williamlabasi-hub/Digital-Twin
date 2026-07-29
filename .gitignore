@@ -182,4 +182,8 @@ cython_debug/
 
 # Generated health-system runtime outputs
 data/outputs/health/*.json
+# Ignore generated orbital JSON outputs but keep the folder itself
+/data/outputs/orbital/*
+!/data/outputs/orbital/
+!/data/outputs/orbital/README.md
 src/common/test.py

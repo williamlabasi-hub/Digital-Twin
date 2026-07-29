@@ -1,3 +1,4 @@
+import json
 import sys
 from pathlib import Path
 
@@ -41,7 +42,67 @@ def createOrbit(cat, epoch, bstar, ndot, nddot, ecco, argp, inclo, mo, no_kozai,
 
     return satellite
 
-def closeApproach():
+def _resolve_target_elements(target, mu_earth=398600.4418):
+    """Resolve a target specification into orbital elements.
+
+    Supported inputs:
+    - None: use the built-in sample ISS TLE
+    - tuple/list of 5 orbital elements: (a, e, i, raan, argp)
+    - tuple/list of 3 items: (name, line1, line2)
+    - dict with line1/line2 or catalog data
+    - str/Path to a JSON file containing any of the above
+    """
+    if target is None:
+        return None, None
+
+    if isinstance(target, (str, Path)):
+        path = Path(target)
+        if not path.exists():
+            raise FileNotFoundError(f"Target file not found: {path}")
+        with path.open("r", encoding="utf-8") as fh:
+            target = json.load(fh)
+
+    if isinstance(target, dict):
+        if "line1" in target and "line2" in target:
+            line1 = target["line1"]
+            line2 = target["line2"]
+        elif "catalog" in target:
+            catalog = int(target["catalog"])
+            tle = tle_propagator.tle_request(catalog)
+            line1 = tle["line1"]
+            line2 = tle["line2"]
+        else:
+            raise ValueError("Dictionary input must contain 'line1'/'line2' or 'catalog'.")
+
+        sat = Satrec.twoline2rv(line1, line2)
+        e = sat.ecco
+        i = sat.inclo
+        raan = sat.nodeo
+        argp = sat.argpo
+        n = sat.no_kozai / 60.0
+        a = (mu_earth / n**2) ** (1 / 3)
+        return (a, e, i, raan, argp), target.get("name")
+
+    if isinstance(target, (tuple, list)):
+        if len(target) == 5 and all(np.isscalar(x) for x in target):
+            return tuple(target), None
+        if len(target) == 3:
+            _, line1, line2 = target
+            sat = Satrec.twoline2rv(line1, line2)
+            e = sat.ecco
+            i = sat.inclo
+            raan = sat.nodeo
+            argp = sat.argpo
+            n = sat.no_kozai / 60.0
+            a = (mu_earth / n**2) ** (1 / 3)
+            return (a, e, i, raan, argp), None
+
+    raise TypeError("Unsupported target type for orbit design.")
+
+
+def closeApproach(target_elems=None, a0=None, e0=None, i0=None, d_desired=None,
+                  verbose=True, use_auto=True, grid_n=90, n_seeds=4,
+                  auto_grid_n=50):
 
     # ADD AUTO e, a, AND i BASED ON A DESIRED DISTANCE
     # ADD ALLOW OPERATOR TO PICK CANDIDATE SUGGESTION TO RERUN FOR HIGHER FIDELITY RESULTS
@@ -304,52 +365,129 @@ def closeApproach():
         return (a, e, i, raan, argp)
 
     SAMPLE_TLE = (
-    "ISS (ZARYA)",
-    "1 25544U 98067A   24001.50000000  .00016717  00000-0  10270-3 0  9000",
-    "2 25544  51.6416 339.6058 0007976  35.9128 324.2381 15.50232710000010",
+        "ISS (ZARYA)",
+        "1 25544U 98067A   24001.50000000  .00016717  00000-0  10270-3 0  9000",
+        "2 25544  51.6416 339.6058 0007976  35.9128 324.2381 15.50232710000010",
     )
 
-    name, l1, l2 = SAMPLE_TLE
-    target = tle_to_elements(l1, l2)
-    a_t, e_t, i_t, raan_t, argp_t = target
+    if target_elems is None:
+        name, l1, l2 = SAMPLE_TLE
+        target_elems = tle_to_elements(l1, l2)
+    else:
+        resolved_elems, resolved_name = _resolve_target_elements(target_elems)
+        if resolved_elems is not None:
+            target_elems = resolved_elems
+            if resolved_name is not None:
+                name = resolved_name
+            else:
+                name = "provided target"
+        else:
+            name = "provided target"
 
-    print(f"Target orbit ({name}):")
-    print(f"  a={a_t:.1f} km, e={e_t:.5f}, i={np.degrees(i_t):.3f} deg, "
-          f"raan={np.degrees(raan_t):.3f} deg, argp={np.degrees(argp_t):.3f} deg\n")
+    if d_desired is None:
+        d_desired = 50.0
+    if a0 is None:
+        a0 = target_elems[0] + 20.0
+    if e0 is None:
+        e0 = target_elems[1]
+    if i0 is None:
+        i0 = target_elems[2] + np.radians(5.0)
 
-    # Design a new orbit: similar altitude/eccentricity, inclination raised by
-    # 5 deg, searching (raan, argp) to achieve a MOID of ~50 km.
-    a_new = a_t + 20.0        # km, slightly higher altitude
-    e_new = e_t
-    i_new = i_t + np.radians(5.0)
-    d_desired = 50.0          # km (within the reachable range for this a,e,i)
+    a_t, e_t, i_t, raan_t, argp_t = target_elems
 
-    print(f"Designing orbit: a={a_new:.1f} km, e={e_new:.5f}, "
-          f"i={np.degrees(i_new):.3f} deg, target MOID={d_desired} km\n")
+    if verbose:
+        print(f"Target orbit ({name}):")
+        print(f"  a={a_t:.1f} km, e={e_t:.5f}, i={np.degrees(i_t):.3f} deg, "
+              f"raan={np.degrees(raan_t):.3f} deg, argp={np.degrees(argp_t):.3f} deg\n")
+        print(f"Designing orbit: a={a0:.1f} km, e={e0:.5f}, "
+              f"i={np.degrees(i0):.3f} deg, target MOID={d_desired} km\n")
 
-    solutions = design_orbit(target, a_new, e_new, i_new, d_desired, grid_n=90)
+    solutions = design_orbit(target_elems, a0, e0, i0, d_desired, grid_n=grid_n)
 
-    print(f"Found {len(solutions)} distinct solution(s):\n")
-    for s in solutions:
-        print(f"  raan={s['raan_deg']:7.3f} deg  argp={s['argp_deg']:7.3f} deg  "
-              f"achieved MOID={s['achieved_moid_km']:8.3f} km  "
-              f"error={s['error_km']:+.3f} km")
+    result = {
+        "target_elems": target_elems,
+        "a0": a0,
+        "e0": e0,
+        "i0": i0,
+        "d_desired": d_desired,
+        "solutions": solutions,
+    }
 
-    # --- automatic a/e/i adjustment demo ---
-    # Ask for 50 km, which the earlier (raan, argp)-only run showed is out of reach for this altitude/inclination offset. 
-    # design_orbit_auto should detect that and relax a/e/i as needed
-    
-    print("\n--- design_orbit_auto: requesting a distance out of reach for "
-          "nominal (a, e, i) ---\n")
-    d_hard = 50.0
-    auto_result = design_orbit_auto(target, a_new, e_new, i_new, d_hard,
-                                     grid_n=50, n_seeds=4)
-    print(f"\nBest auto solution for d_desired={d_hard} km:")
-    print(f"  a={auto_result['a']:.2f} km (Δ={auto_result['delta_a_km']:+.2f}), "
-          f"e={auto_result['e']:.5f} (Δ={auto_result['delta_e']:+.5f}), "
-          f"i={np.degrees(auto_result['i']):.3f} deg "
-          f"(Δ={auto_result['delta_i_deg']:+.3f} deg)")
-    print(f"  raan={auto_result['raan_deg']:.3f} deg, "
-          f"argp={auto_result['argp_deg']:.3f} deg")
-    print(f"  achieved MOID={auto_result['achieved_moid_km']:.3f} km "
-          f"(error={auto_result['error_km']:+.3f} km)")
+    if verbose:
+        print(f"Found {len(solutions)} distinct solution(s):\n")
+        for s in solutions:
+            print(f"  raan={s['raan_deg']:7.3f} deg  argp={s['argp_deg']:7.3f} deg  "
+                  f"achieved MOID={s['achieved_moid_km']:8.3f} km  "
+                  f"error={s['error_km']:+.3f} km")
+
+    if use_auto:
+        auto_result = design_orbit_auto(target_elems, a0, e0, i0, d_desired,
+                                        grid_n=auto_grid_n, n_seeds=n_seeds)
+        result["auto_result"] = auto_result
+        if verbose:
+            print("\n--- design_orbit_auto: requesting a distance out of reach for "
+                  "nominal (a, e, i) ---\n")
+            print(f"\nBest auto solution for d_desired={d_desired} km:")
+            print(f"  a={auto_result['a']:.2f} km (Δ={auto_result['delta_a_km']:+.2f}), "
+                  f"e={auto_result['e']:.5f} (Δ={auto_result['delta_e']:+.5f}), "
+                  f"i={np.degrees(auto_result['i']):.3f} deg "
+                  f"(Δ={auto_result['delta_i_deg']:+.2f} deg)")
+            print(f"  raan={auto_result['raan_deg']:.3f} deg, "
+                  f"argp={auto_result['argp_deg']:.3f} deg")
+            print(f"  achieved MOID={auto_result['achieved_moid_km']:.3f} km "
+                  f"(error={auto_result['error_km']:+.3f} km)")
+
+    return result
+
+
+def design_close_approach_orbit(target, desired_distance_km=None,
+                                a_offset_km=None, inclination_offset_deg=None,
+                                verbose=True, use_auto=True):
+    """Convenience wrapper for other scripts to design a close-approach orbit.
+
+    Parameters
+    ----------
+    target : dict or tuple
+        Either a TLE-style dict from tle_propagator (with keys like "name",
+        "line1", and "line2") or a 3-item tuple of (name, line1, line2).
+    desired_distance_km : float
+        Desired MOID between the candidate and target orbit in kilometers.
+    a_offset_km : float
+        Offset added to the target semimajor axis for the candidate orbit.
+    inclination_offset_deg : float
+        Offset added to the target inclination for the candidate orbit.
+    verbose : bool
+        Whether to print the search summary.
+    use_auto : bool
+        Whether to run the automatic a/e/i-adjustment search.
+
+    Returns
+    -------
+    dict
+        A dictionary containing the target elements, candidate orbit settings,
+        the direct search solutions, and optional auto-adjustment result.
+    """
+    target_elems, _ = _resolve_target_elements(target)
+    if target_elems is None:
+        raise ValueError("The target input could not be resolved to orbital elements.")
+
+    if desired_distance_km is None:
+        desired_distance_km = 50.0
+    if a_offset_km is None:
+        a_offset_km = 20.0
+    if inclination_offset_deg is None:
+        inclination_offset_deg = 5.0
+
+    a0 = target_elems[0] + a_offset_km
+    e0 = target_elems[1]
+    i0 = target_elems[2] + np.radians(inclination_offset_deg)
+
+    return closeApproach(
+        target_elems=target_elems,
+        a0=a0,
+        e0=e0,
+        i0=i0,
+        d_desired=desired_distance_km,
+        verbose=verbose,
+        use_auto=use_auto,
+    )
