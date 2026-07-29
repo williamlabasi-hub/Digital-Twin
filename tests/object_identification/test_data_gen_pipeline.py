@@ -215,6 +215,12 @@ class DataGenPipelineTests(unittest.TestCase):
                 bundle["prediction"]["canonical_object_id"],
                 "CAT-25544",
             )
+            self.assertEqual(
+                bundle["prediction"]["candidate_rankings"][0][
+                    "uncertainty_status"
+                ],
+                "combined_covariance",
+            )
         finally:
             output_path.unlink(missing_ok=True)
 

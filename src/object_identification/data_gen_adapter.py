@@ -85,6 +85,24 @@ def _catalog_identifier(propagation: dict[str, Any]) -> str:
     return rendered
 
 
+def _covariance(
+    propagation: dict[str, Any],
+    field: str,
+    override: list[list[float]] | None,
+) -> list[list[float]] | None:
+    """Use an explicit covariance override or the propagated record value."""
+    if override is not None:
+        return override
+    value = propagation.get(field)
+    if value is None:
+        return None
+    if not isinstance(value, list):
+        raise ObjectIdentificationInputError(
+            f"propagation.{field} must be a 3x3 covariance matrix"
+        )
+    return value
+
+
 def propagation_to_tracking_observation(
     propagation: dict[str, Any],
     *,
@@ -126,12 +144,20 @@ def propagation_to_tracking_observation(
         ),
         "measurement_quality": quality,
     }
-    if position_covariance_km2 is not None:
-        observation["position_covariance_km2"] = position_covariance_km2
-    if velocity_covariance_km2_s2 is not None:
-        observation["velocity_covariance_km2_s2"] = (
-            velocity_covariance_km2_s2
-        )
+    position_covariance = _covariance(
+        propagation,
+        "position_covariance_km2",
+        position_covariance_km2,
+    )
+    velocity_covariance = _covariance(
+        propagation,
+        "velocity_covariance_km2_s2",
+        velocity_covariance_km2_s2,
+    )
+    if position_covariance is not None:
+        observation["position_covariance_km2"] = position_covariance
+    if velocity_covariance is not None:
+        observation["velocity_covariance_km2_s2"] = velocity_covariance
     return observation
 
 
@@ -172,12 +198,20 @@ def propagation_to_candidate_records(
             "version": f"data-gen-adapter-{ADAPTER_VERSION}",
         },
     }
-    if position_covariance_km2 is not None:
-        orbital["position_covariance_km2"] = position_covariance_km2
-    if velocity_covariance_km2_s2 is not None:
-        orbital["velocity_covariance_km2_s2"] = (
-            velocity_covariance_km2_s2
-        )
+    position_covariance = _covariance(
+        propagation,
+        "position_covariance_km2",
+        position_covariance_km2,
+    )
+    velocity_covariance = _covariance(
+        propagation,
+        "velocity_covariance_km2_s2",
+        velocity_covariance_km2_s2,
+    )
+    if position_covariance is not None:
+        orbital["position_covariance_km2"] = position_covariance
+    if velocity_covariance is not None:
+        orbital["velocity_covariance_km2_s2"] = velocity_covariance
 
     catalog = {
         "schema_version": "0.1.0",

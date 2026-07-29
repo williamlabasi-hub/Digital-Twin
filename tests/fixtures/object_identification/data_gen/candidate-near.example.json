@@ -4,6 +4,16 @@
   "coordinate_frame": "ECI",
   "position_km": [6632.1, 1045.2, -421.7],
   "cartesian_velocity_km_s": [-1.08, 7.31, 1.42],
+  "position_covariance_km2": [
+    [1.0, 0.0, 0.0],
+    [0.0, 1.0, 0.0],
+    [0.0, 0.0, 1.0]
+  ],
+  "velocity_covariance_km2_s2": [
+    [0.0001, 0.0, 0.0],
+    [0.0, 0.0001, 0.0],
+    [0.0, 0.0, 0.0001]
+  ],
   "time": {
     "year": 2026,
     "month": 7,

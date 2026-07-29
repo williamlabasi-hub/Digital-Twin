@@ -4,6 +4,16 @@
   "coordinate_frame": "ECI",
   "position_km": [6627.9, 1045.6, -421.5],
   "cartesian_velocity_km_s": [-1.081, 7.309, 1.421],
+  "position_covariance_km2": [
+    [1.0, 0.0, 0.0],
+    [0.0, 1.0, 0.0],
+    [0.0, 0.0, 1.0]
+  ],
+  "velocity_covariance_km2_s2": [
+    [0.0001, 0.0, 0.0],
+    [0.0, 0.0001, 0.0],
+    [0.0, 0.0, 0.0001]
+  ],
   "altitude": 419.8,
   "latitude": 1.1,
   "longitude": 2.1,

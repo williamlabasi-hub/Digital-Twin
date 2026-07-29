@@ -56,6 +56,14 @@ def propagation(
     }
 
 
+def diagonal_covariance(variance: float) -> list[list[float]]:
+    return [
+        [variance, 0.0, 0.0],
+        [0.0, variance, 0.0],
+        [0.0, 0.0, variance],
+    ]
+
+
 class DataGenAdapterTests(unittest.TestCase):
     def test_data_gen_is_importable_from_repository_package(self) -> None:
         self.assertTrue(callable(orbit_catalog))
@@ -183,6 +191,50 @@ class DataGenAdapterTests(unittest.TestCase):
         self.assertEqual(
             prediction["candidate_rankings"][0]["canonical_object_id"],
             "CAT-25544",
+        )
+        self.assertEqual(
+            prediction["candidate_rankings"][0]["uncertainty_status"],
+            "scale_fallback",
+        )
+
+    def test_propagation_covariance_enables_mahalanobis_scoring(
+        self,
+    ) -> None:
+        self.observation["position_covariance_km2"] = (
+            diagonal_covariance(1.0)
+        )
+        self.observation["velocity_covariance_km2_s2"] = (
+            diagonal_covariance(0.0001)
+        )
+        self.candidate["position_covariance_km2"] = (
+            diagonal_covariance(1.0)
+        )
+        self.candidate["velocity_covariance_km2_s2"] = (
+            diagonal_covariance(0.0001)
+        )
+
+        records = self.build()
+        prediction = build_ranked_prediction(
+            [records["prepared"]],
+            load_association_config(),
+        )
+
+        ranking = prediction["candidate_rankings"][0]
+        self.assertEqual(
+            ranking["uncertainty_status"],
+            "combined_covariance",
+        )
+        self.assertEqual(
+            ranking["scoring_method"],
+            "combined-covariance-mahalanobis-similarity",
+        )
+        self.assertEqual(
+            records["observation"]["position_covariance_km2"],
+            diagonal_covariance(1.0),
+        )
+        self.assertEqual(
+            records["orbital"]["velocity_covariance_km2_s2"],
+            diagonal_covariance(0.0001),
         )
 
     def test_rejects_radial_velocity_in_place_of_cartesian_vector(self) -> None:

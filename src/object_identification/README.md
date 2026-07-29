@@ -53,9 +53,12 @@ python -m src.object_identification.data_gen_adapter ^
 
 The input JSON objects are the dictionaries returned by
 `src.common.data_gen.orbit_catalog`. The output bundle contains `observation`,
-`catalog`, `orbital`, `affiliation`, and `prepared` records. Covariance is
-accepted by the Python API and omitted by the CLI unless supplied by a future
-sensor or uncertainty model.
+`catalog`, `orbital`, `affiliation`, and `prepared` records. Generated
+observation and candidate JSON may include `position_covariance_km2` and
+`velocity_covariance_km2_s2` 3x3 matrices. When all four matrices are present,
+the association pipeline uses combined-covariance Mahalanobis scoring. Missing
+or incomplete covariance remains explicit as `scale_fallback`; the adapter
+never invents covariance values.
 
 ## Run the generated-data identification pipeline
 
