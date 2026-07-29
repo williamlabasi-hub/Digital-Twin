@@ -1,6 +1,8 @@
 import json
+import sys
 import unittest
 from pathlib import Path
+from unittest.mock import Mock, patch
 
 from src.object_identification.data_gen_adapter import (
     build_identification_records,
@@ -14,6 +16,11 @@ from src.object_identification.input_pipeline import (
     ObjectIdentificationInputError,
 )
 from src.common.data_gen import orbit_catalog
+from src.preprocessing.tle_propagator import (
+    TLE_REQUEST_TIMEOUT_SECONDS,
+    propagate,
+    tle_request,
+)
 
 
 def propagation(
@@ -52,6 +59,64 @@ def propagation(
 class DataGenAdapterTests(unittest.TestCase):
     def test_data_gen_is_importable_from_repository_package(self) -> None:
         self.assertTrue(callable(orbit_catalog))
+
+    def test_static_tle_propagation_uses_requested_utc_instant(self) -> None:
+        tle = {
+            "name": "ISS (ZARYA)",
+            "line1": (
+                "1 25544U 98067A   24001.50000000  .00016717  "
+                "00000-0  10270-3 0  9000"
+            ),
+            "line2": (
+                "2 25544  51.6416 339.6058 0007976  35.9128 "
+                "324.2381 15.50232710000010"
+            ),
+        }
+        state = propagate(
+            tle,
+            {
+                "year": 2024,
+                "month": 1,
+                "day": 1,
+                "hour": 12,
+                "minute": 0,
+                "second": 0,
+            },
+        )
+
+        expected_position_km = [
+            6352.032354816216,
+            -2400.573448630982,
+            -14.805308427854303,
+        ]
+        for actual, expected in zip(
+            state["position_km"],
+            expected_position_km,
+            strict=True,
+        ):
+            self.assertAlmostEqual(actual, expected, places=6)
+
+    def test_tle_request_enforces_timeout_and_http_success(self) -> None:
+        response = Mock()
+        response.json.return_value = {
+            "name": "ISS",
+            "line1": "line 1",
+            "line2": "line 2",
+        }
+        requests_module = Mock()
+        requests_module.get.return_value = response
+
+        with patch.dict(sys.modules, {"requests": requests_module}):
+            result = tle_request(25544)
+
+        self.assertEqual(result["name"], "ISS")
+        requests_module.get.assert_called_once()
+        _, kwargs = requests_module.get.call_args
+        self.assertEqual(
+            kwargs["timeout"],
+            TLE_REQUEST_TIMEOUT_SECONDS,
+        )
+        response.raise_for_status.assert_called_once_with()
 
     def setUp(self) -> None:
         self.observation = propagation(

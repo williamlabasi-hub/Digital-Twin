@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "digital-twin"
 version = "0.1.0"
 description = "Digital Twin satellite modeling package"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 dependencies = [
     "joblib>=1.3",
     "jsonschema>=4.21",
