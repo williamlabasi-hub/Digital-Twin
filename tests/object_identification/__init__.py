@@ -1,0 +1,1 @@
+"""Object-identification contract tests."""

@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://digital-twin.local/schemas/tracking-observation.schema.json",
+  "title": "Tracking Observation",
+  "description": "Sensor observation presented to the object-identification component.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "observation_id",
+    "track_id",
+    "timestamp",
+    "sensor",
+    "data_source",
+    "coordinate_frame",
+    "position_km",
+    "velocity_km_s",
+    "measurement_quality"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "0.1.0"
+    },
+    "observation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "track_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Sensor or fusion track identifier; not an authoritative catalog identity."
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "sensor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sensor_id", "sensor_type"],
+      "properties": {
+        "sensor_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sensor_type": {
+          "enum": ["radar", "optical", "space_based", "fused", "other"]
+        }
+      }
+    },
+    "data_source": {
+      "type": "string",
+      "minLength": 1
+    },
+    "coordinate_frame": {
+      "enum": ["ECI", "ECEF", "TEME"]
+    },
+    "position_km": {
+      "$ref": "#/$defs/vector3"
+    },
+    "velocity_km_s": {
+      "$ref": "#/$defs/vector3"
+    },
+    "position_covariance_km2": {
+      "$ref": "#/$defs/covariance3"
+    },
+    "velocity_covariance_km2_s2": {
+      "$ref": "#/$defs/covariance3"
+    },
+    "measurement_quality": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "radar_cross_section_m2": {
+      "type": ["number", "null"],
+      "minimum": 0
+    },
+    "estimated_size_m": {
+      "type": ["number", "null"],
+      "minimum": 0
+    }
+  },
+  "$defs": {
+    "vector3": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {
+        "type": "number"
+      }
+    },
+    "covariance3": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {
+        "type": "array",
+        "minItems": 3,
+        "maxItems": 3,
+        "items": {
+          "type": "number"
+        }
+      }
+    }
+  }
+}

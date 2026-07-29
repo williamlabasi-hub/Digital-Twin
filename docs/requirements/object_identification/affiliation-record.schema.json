@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://digital-twin.local/schemas/affiliation-record.schema.json",
+  "title": "Object Affiliation Record",
+  "description": "Authority-controlled affiliation applied only after identity is established.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "canonical_object_id",
+    "affiliation",
+    "affiliation_authority",
+    "affiliation_source_record_id",
+    "affiliation_effective_at",
+    "affiliation_expires_at",
+    "designation_status"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "0.1.0"
+    },
+    "canonical_object_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "affiliation": {
+      "enum": ["blue", "red", "other"]
+    },
+    "affiliation_authority": {
+      "type": "string",
+      "minLength": 1
+    },
+    "affiliation_source_record_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "affiliation_effective_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "affiliation_expires_at": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "designation_status": {
+      "enum": ["prototype_unvalidated", "authority_approved"]
+    },
+    "review_notes": {
+      "type": ["string", "null"]
+    }
+  }
+}

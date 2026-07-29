@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://digital-twin.local/schemas/object-catalog-record.schema.json",
+  "title": "Object Catalog Record",
+  "description": "Time-valid authoritative identity record used for association.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "canonical_object_id",
+    "catalog_source",
+    "catalog_record_id",
+    "valid_from",
+    "valid_to",
+    "object_type",
+    "orbital_record_id"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "0.1.0"
+    },
+    "canonical_object_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "catalog_source": {
+      "type": "string",
+      "minLength": 1
+    },
+    "catalog_record_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "valid_from": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "valid_to": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "object_name": {
+      "type": ["string", "null"]
+    },
+    "object_type": {
+      "enum": ["payload", "rocket_body", "debris", "unknown"]
+    },
+    "orbital_record_id": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

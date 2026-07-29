@@ -1,0 +1,11 @@
+{
+  "schema_version": "0.1.0",
+  "canonical_object_id": "CAT-2001",
+  "affiliation": "other",
+  "affiliation_authority": "PROTOTYPE_AUTHORITY",
+  "affiliation_source_record_id": "AFF-2001",
+  "affiliation_effective_at": "2026-01-01T00:00:00Z",
+  "affiliation_expires_at": null,
+  "designation_status": "prototype_unvalidated",
+  "review_notes": "Synthetic fixture for interface development only."
+}

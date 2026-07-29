@@ -1,0 +1,11 @@
+{
+  "schema_version": "0.1.0",
+  "canonical_object_id": "CAT-CLEAR-BEST",
+  "catalog_source": "PROTOTYPE_CATALOG",
+  "catalog_record_id": "PROTOTYPE-CAT-CLEAR-BEST",
+  "valid_from": "2026-07-27T18:00:00Z",
+  "valid_to": "2026-07-28T18:00:00Z",
+  "object_name": "CLEAR MATCH CANDIDATE",
+  "object_type": "payload",
+  "orbital_record_id": "ORB-CAT-CLEAR-BEST"
+}
