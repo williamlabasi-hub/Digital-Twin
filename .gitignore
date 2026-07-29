@@ -187,3 +187,9 @@ data/outputs/health/*.json
 !/data/outputs/orbital/
 !/data/outputs/orbital/README.md
 src/common/test.py
+
+# Local generated reports, verification artifacts, and scratch exports
+/outputs/
+
+# Legacy standalone health prototype; maintained code lives under src/health
+/health_prediction/
