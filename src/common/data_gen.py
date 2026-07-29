@@ -101,8 +101,9 @@ def _resolve_target_elements(target, mu_earth=398600.4418):
 
 
 def closeApproach(target_elems=None, a0=None, e0=None, i0=None, d_desired=None,
-                  verbose=True, use_auto=True, grid_n=90, n_seeds=4,
-                  auto_grid_n=50):
+                  verbose=True, use_auto=True, grid_n=72, n_seeds=4,
+                  auto_grid_n=40, direct_seed_count=3,
+                  max_refine_candidates=8):
 
     # ADD AUTO e, a, AND i BASED ON A DESIRED DISTANCE
     # ADD ALLOW OPERATOR TO PICK CANDIDATE SUGGESTION TO RERUN FOR HIGHER FIDELITY RESULTS
@@ -111,38 +112,31 @@ def closeApproach(target_elems=None, a0=None, e0=None, i0=None, d_desired=None,
     
     MU_EARTH = 398600.4418  # km^3/s^2
 
-    def elems_to_position(elems, nu):
-        # Vectorized position(s) on a Keplerian ellipse in ECI
-
-        # elems: (a, e, i, raan, argp)  -- km, dimensionless, radians
-        # nu:    scalar or ndarray of true anomalies (radians)
-
-        # Returns array of shape (3,) or (3, N) matching nu's shape
-
+    def _build_position_fn(elems):
+        # Build a lightweight position evaluator for a fixed orbit.
         a, e, i, raan, argp = elems
-        nu = np.asarray(nu, dtype=float)
-
-        r = a * (1 - e**2) / (1 + e * np.cos(nu))
-        # perifocal coordinates
-        x_pf = r * np.cos(nu)
-        y_pf = r * np.sin(nu)
-        z_pf = np.zeros_like(nu)
-
         cO, sO = np.cos(raan), np.sin(raan)
         ci, si = np.cos(i), np.sin(i)
         cw, sw = np.cos(argp), np.sin(argp)
 
-        # Combined perifocal -> ECI rotation matrix (3-1-3: Rz(raan) Rx(i) Rz(argp))
         R = np.array([
             [cO*cw - sO*sw*ci,  -cO*sw - sO*cw*ci,   sO*si],
             [sO*cw + cO*sw*ci,  -sO*sw + cO*cw*ci,  -cO*si],
             [sw*si,              cw*si,               ci  ],
         ])
-        pf = np.stack([x_pf, y_pf, z_pf], axis=0)  # (3, N) or (3,)
 
-        return R @ pf
+        def position(nu):
+            nu = np.asarray(nu, dtype=float)
+            r = a * (1 - e**2) / (1 + e * np.cos(nu))
+            x_pf = r * np.cos(nu)
+            y_pf = r * np.sin(nu)
+            z_pf = np.zeros_like(nu)
+            pf = np.stack([x_pf, y_pf, z_pf], axis=0)
+            return R @ pf
 
-    def moid(elems1, elems2, grid_n=180, verbose=False):
+        return position
+
+    def moid(elems1, elems2, grid_n=180, verbose=False, max_refine=8):
         
         # Geometric MOID between two closed Keplerian orbits (km)
 
@@ -154,8 +148,11 @@ def closeApproach(target_elems=None, a0=None, e0=None, i0=None, d_desired=None,
 
         nu = np.linspace(0, 2 * np.pi, grid_n, endpoint=False)
 
-        P1 = elems_to_position(elems1, nu)  # (3, N)
-        P2 = elems_to_position(elems2, nu)  # (3, N)
+        pos1 = _build_position_fn(elems1)
+        pos2 = _build_position_fn(elems2)
+
+        P1 = pos1(nu)  # (3, N)
+        P2 = pos2(nu)  # (3, N)
 
         # Pairwise distance matrix D[i, j] = |P1[:,i] - P2[:,j]|
         diff = P1[:, :, None] - P2[:, None, :]      # (3, N, N)
@@ -169,6 +166,8 @@ def closeApproach(target_elems=None, a0=None, e0=None, i0=None, d_desired=None,
         )
         idx_i, idx_j = np.nonzero(is_min)
         candidates = [(nu[i], nu[j], D[i, j]) for i, j in zip(idx_i, idx_j)]
+        if len(candidates) > max_refine:
+            candidates = sorted(candidates, key=lambda c: c[2])[:max_refine]
 
         if not candidates:
             # fallback: just take the global grid minimum
@@ -176,8 +175,8 @@ def closeApproach(target_elems=None, a0=None, e0=None, i0=None, d_desired=None,
             candidates = [(nu[i], nu[j], D[i, j])]
 
         def dist_fn(x):
-            p1 = elems_to_position(elems1, x[0])
-            p2 = elems_to_position(elems2, x[1])
+            p1 = pos1(x[0])
+            p2 = pos2(x[1])
             return np.linalg.norm(p1 - p2)
 
         refined = []
@@ -191,19 +190,22 @@ def closeApproach(target_elems=None, a0=None, e0=None, i0=None, d_desired=None,
             print(f"  {len(candidates)} local minima found, best = {best:.3f} km")
         return best
 
-    def feasible_moid_range(target_elems, a, e, i, grid_n=90, n_scan=8):
+    def feasible_moid_range(target_elems, a, e, i, grid_n=72, n_scan=6,
+                            max_refine=4):
 
         # Coarse estimate of the achievable MOID range against target_elems for
         # fixed (a, e, i), scanning over (raan, argp). Returns (lo, hi) in km
 
         scan_vals = np.linspace(0, 2 * np.pi, n_scan, endpoint=False)
         scan_moids = [
-            moid((a, e, i, r, w), target_elems, grid_n=grid_n)
+            moid((a, e, i, r, w), target_elems, grid_n=grid_n,
+                 max_refine=max_refine)
             for r in scan_vals for w in scan_vals
         ]
         return min(scan_moids), max(scan_moids)
 
-    def design_orbit(target_elems, a, e, i, d_desired, seeds=None, grid_n=120):
+    def design_orbit(target_elems, a, e, i, d_desired, seeds=None,
+                     grid_n=90, seed_count=4, max_refine=8):
         
         # Search for (raan, argp) with a, e, i fixed such that MOID(candidate, target) ~= d_desired
 
@@ -212,10 +214,18 @@ def closeApproach(target_elems=None, a0=None, e0=None, i0=None, d_desired=None,
         
         if seeds is None:
             # spread seeds across the (raan, argp) torus
-            vals = [0, np.pi / 2, np.pi, 3 * np.pi / 2]
+            vals = np.linspace(0, 2 * np.pi, max(2, int(seed_count)),
+                               endpoint=False)
             seeds = [(r, w) for r in vals for w in vals]
 
-        feas_lo, feas_hi = feasible_moid_range(target_elems, a, e, i, grid_n=grid_n)
+        feas_lo, feas_hi = feasible_moid_range(
+            target_elems,
+            a,
+            e,
+            i,
+            grid_n=grid_n,
+            max_refine=max(2, max_refine // 2),
+        )
         if not (feas_lo - 0.1 * (feas_hi - feas_lo) <= d_desired <=
                 feas_hi + 0.1 * (feas_hi - feas_lo)):
             print(f"  [warning] d_desired={d_desired} km looks outside the "
@@ -225,7 +235,8 @@ def closeApproach(target_elems=None, a0=None, e0=None, i0=None, d_desired=None,
 
         def cost(p):
             candidate = (a, e, i, p[0], p[1])
-            m = moid(candidate, target_elems, grid_n=grid_n)
+            m = moid(candidate, target_elems, grid_n=grid_n,
+                     max_refine=max_refine)
             return (m - d_desired) ** 2
 
         results = []
@@ -233,7 +244,8 @@ def closeApproach(target_elems=None, a0=None, e0=None, i0=None, d_desired=None,
             res = minimize(cost, x0=p0, method='Nelder-Mead',
                             options={'xatol': 1e-3, 'fatol': 1e-4, 'maxiter': 200})
             raan, argp = res.x[0] % (2 * np.pi), res.x[1] % (2 * np.pi)
-            achieved = moid((a, e, i, raan, argp), target_elems, grid_n=grid_n)
+            achieved = moid((a, e, i, raan, argp), target_elems, grid_n=grid_n,
+                            max_refine=max_refine)
             results.append({
                 'raan_deg': np.degrees(raan),
                 'argp_deg': np.degrees(argp),
@@ -256,7 +268,8 @@ def closeApproach(target_elems=None, a0=None, e0=None, i0=None, d_desired=None,
     def design_orbit_auto(target_elems, a0, e0, i0, d_desired,
                        a_bounds=None, e_bounds=None, i_bounds=None,
                        weight_a=1.0, weight_e=1.0, weight_i=1.0,
-                       n_seeds=8, grid_n=90, force_full_search=False):
+                       n_seeds=8, grid_n=72, max_refine=6,
+                       force_full_search=False):
         """
         Like design_orbit, but automatically relaxes a, e, and/or i away from
         their nominal values (a0, e0, i0) if -- and only if -- (raan, argp)
@@ -294,13 +307,14 @@ def closeApproach(target_elems=None, a0=None, e0=None, i0=None, d_desired=None,
         # Only pay for the full 5D search if the cheap 2D search can't do it.
         if not force_full_search:
             feas_lo, feas_hi = feasible_moid_range(target_elems, a0, e0, i0,
-                                                    grid_n=grid_n)
+                                                    grid_n=grid_n,
+                                                    max_refine=max(2, max_refine // 2))
             if feas_lo <= d_desired <= feas_hi:
                 print(f"  d_desired={d_desired} km is reachable with nominal "
                       f"(a, e, i) alone [{feas_lo:.1f}, {feas_hi:.1f}] km -- "
                       f"running the cheaper (raan, argp)-only search.")
                 sols = design_orbit(target_elems, a0, e0, i0, d_desired,
-                                     grid_n=grid_n)
+                                     grid_n=grid_n, max_refine=max_refine)
                 best = sols[0]
                 return {
                     'a': a0, 'e': e0, 'i': i0,
@@ -317,7 +331,8 @@ def closeApproach(target_elems=None, a0=None, e0=None, i0=None, d_desired=None,
 
         def cost(p):
             a, e, i, raan, argp = p
-            m = moid((a, e, i, raan, argp), target_elems, grid_n=grid_n)
+            m = moid((a, e, i, raan, argp), target_elems, grid_n=grid_n,
+                     max_refine=max_refine)
             return (
                 (m - d_desired) ** 2
                 + weight_a * ((a - a0) / a_scale) ** 2
@@ -335,7 +350,8 @@ def closeApproach(target_elems=None, a0=None, e0=None, i0=None, d_desired=None,
                             options={'xatol': 1e-2, 'fatol': 1e-3, 'maxiter': 150})
             a, e, i, raan, argp = res.x
             raan, argp = raan % (2 * np.pi), argp % (2 * np.pi)
-            achieved = moid((a, e, i, raan, argp), target_elems, grid_n=grid_n)
+            achieved = moid((a, e, i, raan, argp), target_elems, grid_n=grid_n,
+                            max_refine=max_refine)
             results.append({
                 'a': a, 'e': e, 'i': i,
                 'raan_deg': np.degrees(raan), 'argp_deg': np.degrees(argp),
@@ -402,7 +418,16 @@ def closeApproach(target_elems=None, a0=None, e0=None, i0=None, d_desired=None,
         print(f"Designing orbit: a={a0:.1f} km, e={e0:.5f}, "
               f"i={np.degrees(i0):.3f} deg, target MOID={d_desired} km\n")
 
-    solutions = design_orbit(target_elems, a0, e0, i0, d_desired, grid_n=grid_n)
+    solutions = design_orbit(
+        target_elems,
+        a0,
+        e0,
+        i0,
+        d_desired,
+        grid_n=grid_n,
+        seed_count=direct_seed_count,
+        max_refine=max_refine_candidates,
+    )
 
     result = {
         "target_elems": target_elems,
@@ -422,7 +447,8 @@ def closeApproach(target_elems=None, a0=None, e0=None, i0=None, d_desired=None,
 
     if use_auto:
         auto_result = design_orbit_auto(target_elems, a0, e0, i0, d_desired,
-                                        grid_n=auto_grid_n, n_seeds=n_seeds)
+                                        grid_n=auto_grid_n, n_seeds=n_seeds,
+                                        max_refine=max(4, max_refine_candidates - 2))
         result["auto_result"] = auto_result
         if verbose:
             print("\n--- design_orbit_auto: requesting a distance out of reach for "
@@ -442,7 +468,10 @@ def closeApproach(target_elems=None, a0=None, e0=None, i0=None, d_desired=None,
 
 def design_close_approach_orbit(target, desired_distance_km=None,
                                 a_offset_km=None, inclination_offset_deg=None,
-                                verbose=True, use_auto=True):
+                                verbose=True, use_auto=False,
+                                grid_n=72, auto_grid_n=40,
+                                direct_seed_count=3,
+                                max_refine_candidates=8):
     """Convenience wrapper for other scripts to design a close-approach orbit.
 
     Parameters
@@ -490,4 +519,8 @@ def design_close_approach_orbit(target, desired_distance_km=None,
         d_desired=desired_distance_km,
         verbose=verbose,
         use_auto=use_auto,
+        grid_n=grid_n,
+        auto_grid_n=auto_grid_n,
+        direct_seed_count=direct_seed_count,
+        max_refine_candidates=max_refine_candidates,
     )
