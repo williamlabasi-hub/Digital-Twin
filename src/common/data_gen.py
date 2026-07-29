@@ -1,3 +1,9 @@
+import sys
+from pathlib import Path
+
+if __package__ in {None, ""}:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
 import preprocessing.tle_propagator as tle_propagator
 from sgp4.api import Satrec, WGS84
 import numpy as np
