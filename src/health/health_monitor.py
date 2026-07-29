@@ -5,6 +5,7 @@ import json
 import logging
 import sys
 from datetime import datetime, timezone
+from importlib.resources import files
 from pathlib import Path
 from typing import Any
 
@@ -40,7 +41,9 @@ DEFAULT_TELEMETRY_PATH = REPOSITORY_ROOT / "data" / "raw" / "telemetry" / "Healt
 DEFAULT_COMMAND_HISTORY_PATH = REPOSITORY_ROOT / "data" / "raw" / "command_history" / "CommandHistory1.json"
 DEFAULT_REPORT_PATH = REPOSITORY_ROOT / "data" / "outputs" / "health" / "health_predictions.json"
 DEFAULT_HISTORY_PATH = REPOSITORY_ROOT / "data" / "outputs" / "health" / "health_history.json"
-DEFAULT_SCHEMA_PATH = REPOSITORY_ROOT / "docs" / "requirements" / "health" / "health_predictions.schema.json"
+DEFAULT_SCHEMA_PATH = files(__package__ or "health").joinpath(
+    "schemas", "health_predictions.schema.json"
+)
 
 
 OUTPUT_SCHEMA_VERSION = "1.1.0"
@@ -1213,7 +1216,7 @@ def save_json(
 
 def validate_json_file(
     file_path: Path,
-    schema_path: Path,
+    schema_path: Any,
 ) -> None:
     """
     Validate a JSON file against a JSON Schema (Draft-07).
@@ -1368,39 +1371,67 @@ def parse_args() -> argparse.Namespace:
             "Random Forest model."
         )
     )
+    model_default = (
+        DEFAULT_MODEL_PATH if DEFAULT_MODEL_PATH.is_file() else None
+    )
+    telemetry_default = (
+        DEFAULT_TELEMETRY_PATH if DEFAULT_TELEMETRY_PATH.is_file() else None
+    )
+    command_history_default = (
+        DEFAULT_COMMAND_HISTORY_PATH
+        if DEFAULT_COMMAND_HISTORY_PATH.is_file()
+        else None
+    )
+    checkout_defaults_available = all(
+        value is not None
+        for value in (
+            model_default,
+            telemetry_default,
+            command_history_default,
+        )
+    )
 
     parser.add_argument(
         "--model",
         type=Path,
-        default=DEFAULT_MODEL_PATH,
+        default=model_default,
+        required=model_default is None,
         help=(
             "Path to the trained "
-            "satellite-health model."
+            "satellite-health model. Required outside a source checkout."
         ),
     )
 
     parser.add_argument(
         "--telemetry",
         type=Path,
-        default=DEFAULT_TELEMETRY_PATH,
+        default=telemetry_default,
+        required=telemetry_default is None,
         help=(
-            "Path to the new telemetry JSON file."
+            "Path to the new telemetry JSON file. Required outside a source "
+            "checkout."
         ),
     )
 
     parser.add_argument(
         "--command-history",
         type=Path,
-        default=DEFAULT_COMMAND_HISTORY_PATH,
+        default=command_history_default,
+        required=command_history_default is None,
         help=(
-            "Path to the command-history JSON file."
+            "Path to the command-history JSON file. Required outside a source "
+            "checkout."
         ),
     )
 
     parser.add_argument(
         "--output",
         type=Path,
-        default=DEFAULT_REPORT_PATH,
+        default=(
+            DEFAULT_REPORT_PATH
+            if checkout_defaults_available
+            else Path.cwd() / "health_predictions.json"
+        ),
         help=(
             "Path where the current prediction report (JSON) will be written."
         ),
@@ -1415,7 +1446,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--history",
         type=Path,
-        default=DEFAULT_HISTORY_PATH,
+        default=(
+            DEFAULT_HISTORY_PATH
+            if checkout_defaults_available
+            else Path.cwd() / "health_history.json"
+        ),
         help=(
             "Path where cumulative prediction "
             "history will be stored."

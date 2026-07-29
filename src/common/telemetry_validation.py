@@ -13,6 +13,7 @@ import json
 import math
 from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta, timezone
+from importlib.resources import files
 from pathlib import Path
 from typing import Any, Iterable
 
@@ -20,13 +21,10 @@ import yaml
 from jsonschema import Draft202012Validator, FormatChecker
 
 
-REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
-
 TELEMETRY_REQUIREMENTS_DIR = (
-    REPOSITORY_ROOT
-    / "docs"
-    / "requirements"
-    / "telemetry"
+    files(__package__).joinpath("telemetry_contracts")
+    if __package__
+    else Path(__file__).resolve().parent / "telemetry_contracts"
 )
 
 DEFAULT_SCHEMA_PATH = (
@@ -81,7 +79,7 @@ class ValidationResult:
         }
 
 
-def load_json(path: Path) -> Any:
+def load_json(path: Any) -> Any:
     """Load JSON from disk with a useful file-not-found error."""
 
     if not path.exists():
@@ -91,8 +89,8 @@ def load_json(path: Path) -> Any:
 
 
 def load_contracts(
-    schema_path: Path = DEFAULT_SCHEMA_PATH,
-    dictionary_path: Path = DEFAULT_DICTIONARY_PATH,
+    schema_path: Any = DEFAULT_SCHEMA_PATH,
+    dictionary_path: Any = DEFAULT_DICTIONARY_PATH,
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     """Load and perform basic checks on the schema and YAML dictionary."""
 

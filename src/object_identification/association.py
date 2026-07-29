@@ -12,6 +12,7 @@ import math
 import sys
 from dataclasses import dataclass
 from datetime import datetime, timezone
+from importlib.resources import files
 from pathlib import Path
 from typing import Any
 
@@ -19,20 +20,16 @@ from jsonschema import Draft202012Validator, FormatChecker
 
 from .input_pipeline import (
     ObjectIdentificationInputError,
-    REPOSITORY_ROOT,
     prepare_identification_input_from_files,
 )
 
 
-DEFAULT_CONFIG_PATH = (
-    REPOSITORY_ROOT / "config" / "object-identification-association.json"
+PACKAGE_ROOT = files(__package__)
+DEFAULT_CONFIG_PATH = PACKAGE_ROOT.joinpath(
+    "config", "object-identification-association.json"
 )
-PREDICTION_SCHEMA_PATH = (
-    REPOSITORY_ROOT
-    / "docs"
-    / "requirements"
-    / "object_identification"
-    / "object-identification-prediction.schema.json"
+PREDICTION_SCHEMA_PATH = PACKAGE_ROOT.joinpath(
+    "schemas", "object-identification-prediction.schema.json"
 )
 
 
@@ -48,9 +45,9 @@ class AssociationConfig:
 
 
 def load_association_config(
-    path: str | Path = DEFAULT_CONFIG_PATH,
+    path: Any = DEFAULT_CONFIG_PATH,
 ) -> AssociationConfig:
-    source = Path(path)
+    source = path if hasattr(path, "read_text") else Path(path)
     try:
         value = json.loads(source.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:

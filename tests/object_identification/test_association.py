@@ -6,6 +6,7 @@ from pathlib import Path
 
 from src.object_identification.association import (
     AssociationConfig,
+    DEFAULT_CONFIG_PATH,
     build_prediction,
     build_ranked_prediction,
     calculate_association_score,
@@ -204,13 +205,7 @@ class ObjectAssociationTests(unittest.TestCase):
             / "object_identification"
             / "_invalid_association_config.json"
         )
-        value = json.loads(
-            (
-                REPOSITORY_ROOT
-                / "config"
-                / "object-identification-association.json"
-            ).read_text(encoding="utf-8")
-        )
+        value = json.loads(DEFAULT_CONFIG_PATH.read_text(encoding="utf-8"))
         value["position_scale_km"] = 0
         try:
             path.write_text(json.dumps(value), encoding="utf-8")

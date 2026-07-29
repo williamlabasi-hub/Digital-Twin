@@ -2,7 +2,10 @@ import json
 import subprocess
 import sys
 import unittest
+from contextlib import redirect_stderr
+from io import StringIO
 from pathlib import Path
+from unittest.mock import patch
 
 import joblib
 import pandas as pd
@@ -12,19 +15,77 @@ REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPOSITORY_ROOT / "src"))
 
 from health.health_features import MODEL_FEATURES
+import health.health_monitor as health_monitor_module
 from health.health_monitor import (
+    DEFAULT_SCHEMA_PATH,
     build_ml_records,
     build_report,
     create_recommendations,
     determine_health_trend,
     integrate_command_history,
     prepare_dataset,
+    parse_args,
     save_report,
     validate_features,
 )
 
 
 class HealthMonitorTests(unittest.TestCase):
+    def test_installed_cli_requires_external_runtime_inputs(self) -> None:
+        missing = REPOSITORY_ROOT / "_not_installed_with_wheel"
+        with (
+            patch.object(health_monitor_module, "DEFAULT_MODEL_PATH", missing),
+            patch.object(
+                health_monitor_module,
+                "DEFAULT_TELEMETRY_PATH",
+                missing,
+            ),
+            patch.object(
+                health_monitor_module,
+                "DEFAULT_COMMAND_HISTORY_PATH",
+                missing,
+            ),
+            patch.object(sys, "argv", ["health-monitor"]),
+            redirect_stderr(StringIO()),
+            self.assertRaises(SystemExit) as context,
+        ):
+            parse_args()
+
+        self.assertEqual(context.exception.code, 2)
+
+    def test_installed_cli_accepts_explicit_runtime_inputs(self) -> None:
+        missing = REPOSITORY_ROOT / "_not_installed_with_wheel"
+        arguments = [
+            "health-monitor",
+            "--model",
+            "model.joblib",
+            "--telemetry",
+            "telemetry.json",
+            "--command-history",
+            "commands.json",
+        ]
+        with (
+            patch.object(health_monitor_module, "DEFAULT_MODEL_PATH", missing),
+            patch.object(
+                health_monitor_module,
+                "DEFAULT_TELEMETRY_PATH",
+                missing,
+            ),
+            patch.object(
+                health_monitor_module,
+                "DEFAULT_COMMAND_HISTORY_PATH",
+                missing,
+            ),
+            patch.object(sys, "argv", arguments),
+        ):
+            parsed = parse_args()
+
+        self.assertEqual(parsed.model, Path("model.joblib"))
+        self.assertEqual(parsed.telemetry, Path("telemetry.json"))
+        self.assertEqual(parsed.command_history, Path("commands.json"))
+        self.assertEqual(parsed.output, Path.cwd() / "health_predictions.json")
+        self.assertEqual(parsed.history, Path.cwd() / "health_history.json")
+
     def test_stale_healthy_prediction_does_not_recommend_nominal_operations(self) -> None:
         row = pd.Series(
             {
@@ -55,9 +116,8 @@ class HealthMonitorTests(unittest.TestCase):
         self.assertIn("satellite health predictions", completed.stdout.lower())
 
     def test_committed_example_output_matches_health_schema(self) -> None:
-        schema_path = REPOSITORY_ROOT / "docs" / "requirements" / "health" / "health_predictions.schema.json"
         output_path = REPOSITORY_ROOT / "data" / "outputs" / "health" / "health_predictions.json"
-        schema = json.loads(schema_path.read_text(encoding="utf-8"))
+        schema = json.loads(DEFAULT_SCHEMA_PATH.read_text(encoding="utf-8"))
         output = json.loads(output_path.read_text(encoding="utf-8"))
 
         self.assertFalse(list(Draft7Validator(schema).iter_errors(output)))
@@ -143,13 +203,6 @@ class HealthMonitorTests(unittest.TestCase):
             / "models"
             / "satellite_health_model.joblib"
         )
-        schema_path = (
-            REPOSITORY_ROOT
-            / "docs"
-            / "requirements"
-            / "health"
-            / "health_predictions.schema.json"
-        )
         if not model_path.exists():
             self.skipTest("Versioned model artifact is not present.")
 
@@ -173,7 +226,7 @@ class HealthMonitorTests(unittest.TestCase):
             )
             output = json.loads(output_path.read_text(encoding="utf-8"))
             schema = json.loads(
-                schema_path.read_text(encoding="utf-8")
+                DEFAULT_SCHEMA_PATH.read_text(encoding="utf-8")
             )
         finally:
             output_path.unlink(missing_ok=True)

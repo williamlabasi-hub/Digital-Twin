@@ -11,22 +11,24 @@ import json
 import math
 import sys
 from datetime import datetime, timezone
+from importlib.resources import files
 from pathlib import Path
 from typing import Any
 
 from jsonschema import Draft202012Validator, FormatChecker
 
 
-REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
-REQUIREMENTS_ROOT = (
-    REPOSITORY_ROOT / "docs" / "requirements" / "object_identification"
+SCHEMA_ROOT = (
+    files(__package__).joinpath("schemas")
+    if __package__
+    else Path(__file__).resolve().parent / "schemas"
 )
 
 SCHEMA_PATHS = {
-    "observation": REQUIREMENTS_ROOT / "tracking-observation.schema.json",
-    "catalog": REQUIREMENTS_ROOT / "object-catalog-record.schema.json",
-    "orbital": REQUIREMENTS_ROOT / "orbital-state-record.schema.json",
-    "affiliation": REQUIREMENTS_ROOT / "affiliation-record.schema.json",
+    "observation": SCHEMA_ROOT.joinpath("tracking-observation.schema.json"),
+    "catalog": SCHEMA_ROOT.joinpath("object-catalog-record.schema.json"),
+    "orbital": SCHEMA_ROOT.joinpath("orbital-state-record.schema.json"),
+    "affiliation": SCHEMA_ROOT.joinpath("affiliation-record.schema.json"),
 }
 
 

@@ -190,7 +190,7 @@ def build_data_gen_prediction(
         candidate_records.append(records)
 
     config = (
-        load_association_config(Path(config_path))
+        load_association_config(config_path)
         if config_path is not None
         else load_association_config()
     )

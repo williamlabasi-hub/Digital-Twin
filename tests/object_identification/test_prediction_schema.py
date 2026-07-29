@@ -5,15 +5,10 @@ from pathlib import Path
 
 from jsonschema import Draft202012Validator, FormatChecker
 
+from src.object_identification.association import PREDICTION_SCHEMA_PATH
+
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
-SCHEMA_PATH = (
-    REPOSITORY_ROOT
-    / "docs"
-    / "requirements"
-    / "object_identification"
-    / "object-identification-prediction.schema.json"
-)
 EXAMPLE_PATH = (
     REPOSITORY_ROOT
     / "tests"
@@ -26,7 +21,9 @@ EXAMPLE_PATH = (
 class ObjectIdentificationPredictionSchemaTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
-        cls.schema = json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
+        cls.schema = json.loads(
+            PREDICTION_SCHEMA_PATH.read_text(encoding="utf-8")
+        )
         cls.example = json.loads(EXAMPLE_PATH.read_text(encoding="utf-8"))
         cls.validator = Draft202012Validator(
             cls.schema,

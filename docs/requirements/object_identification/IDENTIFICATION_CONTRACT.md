@@ -8,6 +8,11 @@ Review date: **2026-07-27**
 Review outcome: **Approved as the baseline for schema and prototype software
 development. Operational approval remains pending.**
 
+Canonical machine-readable schemas are packaged under
+[`src/object_identification/schemas`](../../../src/object_identification/schemas),
+and prototype configuration is packaged under
+[`src/object_identification/config`](../../../src/object_identification/config).
+
 ## Purpose
 
 This contract defines what the digital twin means by object identity and

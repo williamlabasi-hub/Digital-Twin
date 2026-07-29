@@ -62,7 +62,7 @@ never invents covariance values.
 
 When covariance is unavailable, the unified pipeline can explicitly apply the
 versioned transparent prototype model in
-`config/object-identification-uncertainty.json`:
+`src/object_identification/config/object-identification-uncertainty.json`:
 
 ```cmd
 python -m src.object_identification.data_gen_pipeline ^
@@ -159,7 +159,8 @@ python -m src.object_identification.input_pipeline ^
 The first association method uses position and velocity residuals plus
 measurement quality. Its score is an uncalibrated similarity value, not a
 probability. The scales and threshold in
-`config/object-identification-association.json` are prototype assumptions.
+`src/object_identification/config/object-identification-association.json` are
+prototype assumptions.
 
 When both an observation and candidate provide position and velocity
 covariance, scoring uses their combined covariance and Mahalanobis distance.

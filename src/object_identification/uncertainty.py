@@ -6,15 +6,15 @@ import json
 import math
 from copy import deepcopy
 from datetime import datetime, timedelta, timezone
+from importlib.resources import files
 from pathlib import Path
 from typing import Any
 
 from .input_pipeline import ObjectIdentificationInputError
 
 
-REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_UNCERTAINTY_CONFIG_PATH = (
-    REPOSITORY_ROOT / "config" / "object-identification-uncertainty.json"
+DEFAULT_UNCERTAINTY_CONFIG_PATH = files(__package__).joinpath(
+    "config", "object-identification-uncertainty.json"
 )
 COVARIANCE_FIELDS = (
     "position_covariance_km2",
@@ -37,9 +37,9 @@ def _positive_number(value: Any, field: str) -> float:
 
 
 def load_uncertainty_config(
-    path: str | Path = DEFAULT_UNCERTAINTY_CONFIG_PATH,
+    path: Any = DEFAULT_UNCERTAINTY_CONFIG_PATH,
 ) -> dict[str, Any]:
-    source = Path(path)
+    source = path if hasattr(path, "read_text") else Path(path)
     try:
         config = json.loads(source.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:

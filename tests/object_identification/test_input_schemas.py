@@ -4,11 +4,10 @@ from pathlib import Path
 
 from jsonschema import Draft202012Validator, FormatChecker
 
+from src.object_identification.input_pipeline import SCHEMA_ROOT
+
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
-REQUIREMENTS_ROOT = (
-    REPOSITORY_ROOT / "docs" / "requirements" / "object_identification"
-)
 FIXTURES_ROOT = (
     REPOSITORY_ROOT / "tests" / "fixtures" / "object_identification"
 )
@@ -27,7 +26,7 @@ def load_json(path: Path):
 
 class ObjectIdentificationInputSchemaTests(unittest.TestCase):
     def validator(self, schema_name: str) -> Draft202012Validator:
-        schema = load_json(REQUIREMENTS_ROOT / schema_name)
+        schema = load_json(SCHEMA_ROOT.joinpath(schema_name))
         Draft202012Validator.check_schema(schema)
         return Draft202012Validator(schema, format_checker=FormatChecker())
 
