@@ -1,0 +1,241 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://digital-twin.local/schemas/coa-evidence.schema.json",
+  "title": "Course of Action Evidence",
+  "description": "Prototype, non-operational evidence supplied to a future COA component. This contract does not authorize or recommend an action.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "contract_version",
+    "evidence_id",
+    "generated_at",
+    "evidence_type",
+    "subject",
+    "observation_timestamp",
+    "source",
+    "decision_support",
+    "data_quality",
+    "payload",
+    "use_designation"
+  ],
+  "properties": {
+    "schema_version": {"const": "0.1.0"},
+    "contract_version": {"const": "0.1.0"},
+    "evidence_id": {"type": "string", "minLength": 1},
+    "generated_at": {"type": "string", "format": "date-time"},
+    "evidence_type": {"enum": ["health", "object_identification"]},
+    "subject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["subject_id", "subject_type", "identity_status"],
+      "properties": {
+        "subject_id": {"type": "string", "minLength": 1},
+        "subject_type": {
+          "enum": ["spacecraft", "space_object", "observed_track"]
+        },
+        "identity_status": {"enum": ["known", "unknown"]}
+      }
+    },
+    "observation_timestamp": {"type": "string", "format": "date-time"},
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "component",
+        "source_record_id",
+        "source_schema_version",
+        "source_generated_at"
+      ],
+      "properties": {
+        "component": {"enum": ["health", "object_identification"]},
+        "source_record_id": {"type": "string", "minLength": 1},
+        "source_schema_version": {"type": "string", "minLength": 1},
+        "source_generated_at": {"type": "string", "format": "date-time"}
+      }
+    },
+    "decision_support": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "usability",
+        "confidence",
+        "confidence_interpretation",
+        "withheld_reason"
+      ],
+      "properties": {
+        "usability": {"enum": ["usable", "degraded", "withheld"]},
+        "confidence": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "maximum": 1
+        },
+        "confidence_interpretation": {"type": "string", "minLength": 1},
+        "withheld_reason": {"type": ["string", "null"]}
+      }
+    },
+    "data_quality": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "issues"],
+      "properties": {
+        "status": {"enum": ["complete", "degraded", "invalid"]},
+        "issues": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "payload": {"type": "object"},
+    "use_designation": {"const": "prototype_non_operational"}
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {"evidence_type": {"const": "health"}},
+        "required": ["evidence_type"]
+      },
+      "then": {
+        "properties": {
+          "payload": {"$ref": "#/$defs/healthPayload"},
+          "source": {
+            "properties": {"component": {"const": "health"}}
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "evidence_type": {"const": "object_identification"}
+        },
+        "required": ["evidence_type"]
+      },
+      "then": {
+        "properties": {
+          "payload": {"$ref": "#/$defs/objectIdentificationPayload"},
+          "source": {
+            "properties": {
+              "component": {"const": "object_identification"}
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "decision_support": {
+            "properties": {"usability": {"const": "withheld"}},
+            "required": ["usability"]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "decision_support": {
+            "properties": {
+              "withheld_reason": {"type": "string", "minLength": 1}
+            }
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "decision_support": {
+            "properties": {"withheld_reason": {"type": "null"}}
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "healthStatus": {
+      "enum": ["Unknown", "Healthy", "Warning", "Degraded", "Critical"]
+    },
+    "healthPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "overall_status",
+        "ml_status",
+        "ml_accepted",
+        "ml_assurance",
+        "subsystem_statuses",
+        "subsystem_confidences",
+        "fault_codes",
+        "fault_hypotheses",
+        "health_trend",
+        "preliminary_advisories",
+        "recommendation_scope"
+      ],
+      "properties": {
+        "overall_status": {"$ref": "#/$defs/healthStatus"},
+        "ml_status": {
+          "enum": ["Healthy", "Warning", "Degraded", "Critical"]
+        },
+        "ml_accepted": {"type": "boolean"},
+        "ml_assurance": {"type": "object"},
+        "subsystem_statuses": {
+          "type": "object",
+          "additionalProperties": {"$ref": "#/$defs/healthStatus"}
+        },
+        "subsystem_confidences": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          }
+        },
+        "fault_codes": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1},
+          "uniqueItems": true
+        },
+        "fault_hypotheses": {"type": "array", "items": {"type": "object"}},
+        "health_trend": {"type": ["object", "null"]},
+        "preliminary_advisories": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "recommendation_scope": {
+          "const": "preliminary_health_advisory_not_operator_coa"
+        }
+      }
+    },
+    "objectIdentificationPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "canonical_object_id",
+        "identity_status",
+        "affiliation",
+        "classification",
+        "candidate_selection",
+        "candidate_rankings",
+        "catalog_provenance",
+        "affiliation_provenance",
+        "inference_assurance",
+        "rationale"
+      ],
+      "properties": {
+        "canonical_object_id": {"type": ["string", "null"]},
+        "identity_status": {"enum": ["known", "unknown"]},
+        "affiliation": {"enum": ["blue", "red", "other", "unknown"]},
+        "classification": {
+          "enum": ["known_blue", "known_red", "known_other", "unknown"]
+        },
+        "candidate_selection": {"type": ["object", "null"]},
+        "candidate_rankings": {"type": "array", "items": {"type": "object"}},
+        "catalog_provenance": {"type": ["object", "null"]},
+        "affiliation_provenance": {"type": ["object", "null"]},
+        "inference_assurance": {"type": ["object", "null"]},
+        "rationale": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      }
+    }
+  }
+}

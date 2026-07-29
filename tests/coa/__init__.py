@@ -1,0 +1,1 @@
+"""COA integration contract tests."""
