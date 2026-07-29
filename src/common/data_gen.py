@@ -1,4 +1,4 @@
-from src.preprocessing import tle_propagator
+import preprocessing.tle_propagator as tle_propagator
 from sgp4.api import Satrec, WGS84
 import numpy as np
 from scipy.optimize import minimize
@@ -32,7 +32,7 @@ def createOrbit(cat, epoch, bstar, ndot, nddot, ecco, argp, inclo, mo, no_kozai,
 
     return satellite
 
-def closeApproach(desired_distance):
+def closeApproach():
 
     # ADD AUTO e, a, AND i BASED ON A DESIRED DISTANCE
     # ADD ALLOW OPERATOR TO PICK CANDIDATE SUGGESTION TO RERUN FOR HIGHER FIDELITY RESULTS

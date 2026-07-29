@@ -182,3 +182,4 @@ cython_debug/
 
 # Generated health-system runtime outputs
 data/outputs/health/*.json
+src/common/test.py
