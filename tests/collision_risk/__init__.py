@@ -1,0 +1,1 @@
+"""Collision-risk contract tests."""

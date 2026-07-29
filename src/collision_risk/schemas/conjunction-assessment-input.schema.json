@@ -1,0 +1,150 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://digital-twin.local/schemas/conjunction-assessment-input.schema.json",
+  "title": "Conjunction Assessment Input",
+  "description": "Prototype, non-operational input contract for screening two space objects.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "contract_version",
+    "request_id",
+    "generated_at",
+    "analysis_window",
+    "primary",
+    "secondary",
+    "use_designation"
+  ],
+  "properties": {
+    "schema_version": {"const": "0.1.0"},
+    "contract_version": {"const": "0.1.0"},
+    "request_id": {"type": "string", "minLength": 1},
+    "generated_at": {"type": "string", "format": "date-time"},
+    "analysis_window": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["start", "end"],
+      "properties": {
+        "start": {"type": "string", "format": "date-time"},
+        "end": {"type": "string", "format": "date-time"}
+      }
+    },
+    "primary": {"$ref": "#/$defs/objectState"},
+    "secondary": {"$ref": "#/$defs/objectState"},
+    "use_designation": {"const": "prototype_non_operational"}
+  },
+  "$defs": {
+    "vector3": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {"type": "number"}
+    },
+    "covariance6": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6,
+      "items": {
+        "type": "array",
+        "minItems": 6,
+        "maxItems": 6,
+        "items": {"type": "number"}
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source",
+        "source_record_id",
+        "source_record_valid_at"
+      ],
+      "properties": {
+        "source": {"type": "string", "minLength": 1},
+        "source_record_id": {"type": "string", "minLength": 1},
+        "source_record_valid_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "propagation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["method", "version", "propagated_at"],
+      "properties": {
+        "method": {"type": "string", "minLength": 1},
+        "version": {"type": "string", "minLength": 1},
+        "propagated_at": {"type": "string", "format": "date-time"}
+      }
+    },
+    "covarianceMetadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "frame",
+        "state_order",
+        "source",
+        "validation_status"
+      ],
+      "properties": {
+        "frame": {"enum": ["ECI", "TEME", "RTN"]},
+        "state_order": {
+          "type": "array",
+          "prefixItems": [
+            {"const": "x"},
+            {"const": "y"},
+            {"const": "z"},
+            {"const": "vx"},
+            {"const": "vy"},
+            {"const": "vz"}
+          ],
+          "items": false,
+          "minItems": 6,
+          "maxItems": 6
+        },
+        "source": {
+          "enum": ["supplied", "modeled", "mixed"]
+        },
+        "validation_status": {
+          "enum": ["prototype_unvalidated", "operationally_validated"]
+        }
+      }
+    },
+    "objectState": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "object_id",
+        "identity_status",
+        "epoch",
+        "coordinate_frame",
+        "position_km",
+        "velocity_km_s",
+        "hard_body_radius_m",
+        "provenance",
+        "propagation"
+      ],
+      "properties": {
+        "object_id": {"type": "string", "minLength": 1},
+        "identity_status": {"enum": ["known", "unknown"]},
+        "epoch": {"type": "string", "format": "date-time"},
+        "coordinate_frame": {"enum": ["ECI", "TEME"]},
+        "position_km": {"$ref": "#/$defs/vector3"},
+        "velocity_km_s": {"$ref": "#/$defs/vector3"},
+        "state_covariance": {"$ref": "#/$defs/covariance6"},
+        "covariance_metadata": {"$ref": "#/$defs/covarianceMetadata"},
+        "hard_body_radius_m": {
+          "type": ["number", "null"],
+          "exclusiveMinimum": 0
+        },
+        "provenance": {"$ref": "#/$defs/provenance"},
+        "propagation": {"$ref": "#/$defs/propagation"}
+      },
+      "dependentRequired": {
+        "state_covariance": ["covariance_metadata"],
+        "covariance_metadata": ["state_covariance"]
+      }
+    }
+  }
+}

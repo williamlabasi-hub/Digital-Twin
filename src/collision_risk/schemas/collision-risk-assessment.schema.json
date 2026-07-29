@@ -1,0 +1,317 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://digital-twin.local/schemas/collision-risk-assessment.schema.json",
+  "title": "Collision Risk Assessment",
+  "description": "Prototype, non-operational conjunction geometry and collision-risk evidence.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "contract_version",
+    "assessment_id",
+    "request_id",
+    "generated_at",
+    "assessment_status",
+    "primary_object_id",
+    "secondary_object_id",
+    "closest_approach",
+    "probability",
+    "risk",
+    "uncertainty_assurance",
+    "data_quality",
+    "abstention_reason",
+    "rationale",
+    "artifact_metadata",
+    "use_designation"
+  ],
+  "properties": {
+    "schema_version": {"const": "0.1.0"},
+    "contract_version": {"const": "0.1.0"},
+    "assessment_id": {"type": "string", "minLength": 1},
+    "request_id": {"type": "string", "minLength": 1},
+    "generated_at": {"type": "string", "format": "date-time"},
+    "assessment_status": {
+      "enum": ["complete", "geometric_only", "abstained"]
+    },
+    "primary_object_id": {"type": "string", "minLength": 1},
+    "secondary_object_id": {"type": "string", "minLength": 1},
+    "closest_approach": {
+      "oneOf": [
+        {"type": "null"},
+        {"$ref": "#/$defs/closestApproach"}
+      ]
+    },
+    "probability": {"$ref": "#/$defs/probability"},
+    "risk": {"$ref": "#/$defs/risk"},
+    "uncertainty_assurance": {"$ref": "#/$defs/uncertaintyAssurance"},
+    "data_quality": {"$ref": "#/$defs/dataQuality"},
+    "abstention_reason": {"type": ["string", "null"]},
+    "rationale": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "artifact_metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "version",
+        "validation_status"
+      ],
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "version": {"type": "string", "minLength": 1},
+        "validation_status": {
+          "enum": ["prototype_unvalidated", "operationally_validated"]
+        }
+      }
+    },
+    "use_designation": {"const": "prototype_non_operational"}
+  },
+  "$defs": {
+    "vector3": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {"type": "number"}
+    },
+    "closestApproach": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "time_of_closest_approach",
+        "miss_distance_km",
+        "relative_velocity_km_s",
+        "relative_position_km",
+        "relative_velocity_vector_km_s",
+        "method"
+      ],
+      "properties": {
+        "time_of_closest_approach": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "miss_distance_km": {"type": "number", "minimum": 0},
+        "relative_velocity_km_s": {"type": "number", "minimum": 0},
+        "relative_position_km": {"$ref": "#/$defs/vector3"},
+        "relative_velocity_vector_km_s": {"$ref": "#/$defs/vector3"},
+        "method": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["name", "version"],
+          "properties": {
+            "name": {"type": "string", "minLength": 1},
+            "version": {"type": "string", "minLength": 1}
+          }
+        }
+      }
+    },
+    "probability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "collision_probability",
+        "method",
+        "hard_body_radius_m",
+        "interpretation"
+      ],
+      "properties": {
+        "status": {"enum": ["computed", "unavailable"]},
+        "collision_probability": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "maximum": 1
+        },
+        "method": {
+          "oneOf": [
+            {"type": "null"},
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["name", "version", "validation_status"],
+              "properties": {
+                "name": {"type": "string", "minLength": 1},
+                "version": {"type": "string", "minLength": 1},
+                "validation_status": {
+                  "enum": [
+                    "prototype_unvalidated",
+                    "operationally_validated"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "hard_body_radius_m": {
+          "type": ["number", "null"],
+          "exclusiveMinimum": 0
+        },
+        "interpretation": {"type": "string", "minLength": 1}
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {"status": {"const": "computed"}},
+            "required": ["status"]
+          },
+          "then": {
+            "properties": {
+              "collision_probability": {"type": "number"},
+              "method": {"type": "object"},
+              "hard_body_radius_m": {"type": "number"}
+            }
+          },
+          "else": {
+            "properties": {
+              "collision_probability": {"type": "null"},
+              "method": {"type": "null"}
+            }
+          }
+        }
+      ]
+    },
+    "risk": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["level", "basis", "threshold_version"],
+      "properties": {
+        "level": {
+          "enum": [
+            "undetermined",
+            "negligible",
+            "low",
+            "moderate",
+            "high",
+            "critical"
+          ]
+        },
+        "basis": {"type": "string", "minLength": 1},
+        "threshold_version": {"type": ["string", "null"]}
+      }
+    },
+    "uncertaintyAssurance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "covariance_frame",
+        "assumptions"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "combined_covariance",
+            "covariance_available",
+            "missing_covariance",
+            "invalid_covariance"
+          ]
+        },
+        "covariance_frame": {
+          "type": ["string", "null"]
+        },
+        "assumptions": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "dataQuality": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "issues"],
+      "properties": {
+        "status": {"enum": ["complete", "degraded", "invalid"]},
+        "issues": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["code", "severity", "message"],
+            "properties": {
+              "code": {"type": "string", "minLength": 1},
+              "severity": {"enum": ["warning", "error"]},
+              "message": {"type": "string", "minLength": 1}
+            }
+          }
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {"assessment_status": {"const": "complete"}},
+        "required": ["assessment_status"]
+      },
+      "then": {
+        "properties": {
+          "closest_approach": {"type": "object"},
+          "probability": {
+            "properties": {"status": {"const": "computed"}}
+          },
+          "risk": {
+            "properties": {
+              "level": {
+                "enum": [
+                  "negligible",
+                  "low",
+                  "moderate",
+                  "high",
+                  "critical"
+                ]
+              },
+              "threshold_version": {"type": "string", "minLength": 1}
+            }
+          },
+          "abstention_reason": {"type": "null"}
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "assessment_status": {"const": "geometric_only"}
+        },
+        "required": ["assessment_status"]
+      },
+      "then": {
+        "properties": {
+          "closest_approach": {"type": "object"},
+          "probability": {
+            "properties": {"status": {"const": "unavailable"}}
+          },
+          "risk": {
+            "properties": {
+              "level": {"const": "undetermined"},
+              "threshold_version": {"type": "null"}
+            }
+          },
+          "abstention_reason": {"type": "null"}
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {"assessment_status": {"const": "abstained"}},
+        "required": ["assessment_status"]
+      },
+      "then": {
+        "properties": {
+          "closest_approach": {"type": "null"},
+          "probability": {
+            "properties": {"status": {"const": "unavailable"}}
+          },
+          "risk": {
+            "properties": {
+              "level": {"const": "undetermined"},
+              "threshold_version": {"type": "null"}
+            }
+          },
+          "abstention_reason": {"type": "string", "minLength": 1}
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,60 @@
+{
+  "schema_version": "0.1.0",
+  "contract_version": "0.1.0",
+  "assessment_id": "CRA-CONJ-2026-001",
+  "request_id": "CONJ-2026-001",
+  "generated_at": "2026-07-29T20:01:00Z",
+  "assessment_status": "complete",
+  "primary_object_id": "CAT-25544",
+  "secondary_object_id": "CAT-40002",
+  "closest_approach": {
+    "time_of_closest_approach": "2026-07-30T02:15:30Z",
+    "miss_distance_km": 0.012,
+    "relative_velocity_km_s": 11.7,
+    "relative_position_km": [0.01, 0.005, 0.004],
+    "relative_velocity_vector_km_s": [-8.1, 7.9, 2.9],
+    "method": {
+      "name": "prototype-propagated-distance-minimization",
+      "version": "prototype-0.1"
+    }
+  },
+  "probability": {
+    "status": "computed",
+    "collision_probability": 0.0025,
+    "method": {
+      "name": "prototype-2d-encounter-plane-gaussian",
+      "version": "prototype-0.1",
+      "validation_status": "prototype_unvalidated"
+    },
+    "hard_body_radius_m": 20.0,
+    "interpretation": "Prototype uncalibrated collision probability."
+  },
+  "risk": {
+    "level": "high",
+    "basis": "Prototype collision-probability threshold.",
+    "threshold_version": "prototype-0.1"
+  },
+  "uncertainty_assurance": {
+    "status": "combined_covariance",
+    "covariance_frame": "encounter_plane",
+    "assumptions": [
+      "Primary and secondary errors are independent.",
+      "Covariance is propagated by a prototype, non-operational method."
+    ]
+  },
+  "data_quality": {
+    "status": "complete",
+    "issues": []
+  },
+  "abstention_reason": null,
+  "rationale": [
+    "Closest-approach geometry and compatible covariance were available.",
+    "Risk level uses prototype, unvalidated thresholds."
+  ],
+  "artifact_metadata": {
+    "name": "prototype-collision-risk-assessor",
+    "version": "prototype-0.1",
+    "validation_status": "prototype_unvalidated"
+  },
+  "use_designation": "prototype_non_operational"
+}

@@ -1,0 +1,77 @@
+{
+  "schema_version": "0.1.0",
+  "contract_version": "0.1.0",
+  "request_id": "CONJ-2026-001",
+  "generated_at": "2026-07-29T20:00:00Z",
+  "analysis_window": {
+    "start": "2026-07-29T20:00:00Z",
+    "end": "2026-07-29T20:15:00Z"
+  },
+  "primary": {
+    "object_id": "CAT-25544",
+    "identity_status": "known",
+    "epoch": "2026-07-29T20:00:00Z",
+    "coordinate_frame": "ECI",
+    "position_km": [6628.0, 1045.0, -422.0],
+    "velocity_km_s": [-1.08, 7.31, 1.42],
+    "state_covariance": [
+      [0.04, 0.0, 0.0, 0.0, 0.0, 0.0],
+      [0.0, 0.04, 0.0, 0.0, 0.0, 0.0],
+      [0.0, 0.0, 0.04, 0.0, 0.0, 0.0],
+      [0.0, 0.0, 0.0, 0.000001, 0.0, 0.0],
+      [0.0, 0.0, 0.0, 0.0, 0.000001, 0.0],
+      [0.0, 0.0, 0.0, 0.0, 0.0, 0.000001]
+    ],
+    "covariance_metadata": {
+      "frame": "ECI",
+      "state_order": ["x", "y", "z", "vx", "vy", "vz"],
+      "source": "supplied",
+      "validation_status": "prototype_unvalidated"
+    },
+    "hard_body_radius_m": 15.0,
+    "provenance": {
+      "source": "TLE_API",
+      "source_record_id": "TLE_API-25544",
+      "source_record_valid_at": "2026-07-29T19:55:00Z"
+    },
+    "propagation": {
+      "method": "SGP4",
+      "version": "prototype-0.1",
+      "propagated_at": "2026-07-29T20:00:00Z"
+    }
+  },
+  "secondary": {
+    "object_id": "CAT-40002",
+    "identity_status": "known",
+    "epoch": "2026-07-29T20:00:00Z",
+    "coordinate_frame": "ECI",
+    "position_km": [6628.5, 1045.2, -421.9],
+    "velocity_km_s": [-1.081, 7.309, 1.419],
+    "state_covariance": [
+      [0.09, 0.0, 0.0, 0.0, 0.0, 0.0],
+      [0.0, 0.09, 0.0, 0.0, 0.0, 0.0],
+      [0.0, 0.0, 0.09, 0.0, 0.0, 0.0],
+      [0.0, 0.0, 0.0, 0.000004, 0.0, 0.0],
+      [0.0, 0.0, 0.0, 0.0, 0.000004, 0.0],
+      [0.0, 0.0, 0.0, 0.0, 0.0, 0.000004]
+    ],
+    "covariance_metadata": {
+      "frame": "ECI",
+      "state_order": ["x", "y", "z", "vx", "vy", "vz"],
+      "source": "modeled",
+      "validation_status": "prototype_unvalidated"
+    },
+    "hard_body_radius_m": 5.0,
+    "provenance": {
+      "source": "PROTOTYPE_CATALOG",
+      "source_record_id": "CAT-40002",
+      "source_record_valid_at": "2026-07-29T19:58:00Z"
+    },
+    "propagation": {
+      "method": "SGP4",
+      "version": "prototype-0.1",
+      "propagated_at": "2026-07-29T20:00:00Z"
+    }
+  },
+  "use_designation": "prototype_non_operational"
+}

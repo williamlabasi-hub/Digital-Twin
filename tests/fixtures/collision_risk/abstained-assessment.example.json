@@ -1,0 +1,48 @@
+{
+  "schema_version": "0.1.0",
+  "contract_version": "0.1.0",
+  "assessment_id": "CRA-CONJ-2026-002",
+  "request_id": "CONJ-2026-002",
+  "generated_at": "2026-07-29T20:01:00Z",
+  "assessment_status": "abstained",
+  "primary_object_id": "CAT-25544",
+  "secondary_object_id": "TRACK-UNRESOLVED-9",
+  "closest_approach": null,
+  "probability": {
+    "status": "unavailable",
+    "collision_probability": null,
+    "method": null,
+    "hard_body_radius_m": null,
+    "interpretation": "Unavailable because input coordinate frames were incompatible."
+  },
+  "risk": {
+    "level": "undetermined",
+    "basis": "Assessment abstained before accepted closest-approach geometry.",
+    "threshold_version": null
+  },
+  "uncertainty_assurance": {
+    "status": "missing_covariance",
+    "covariance_frame": null,
+    "assumptions": []
+  },
+  "data_quality": {
+    "status": "invalid",
+    "issues": [
+      {
+        "code": "INCOMPATIBLE_COORDINATE_FRAMES",
+        "severity": "error",
+        "message": "Object states must be transformed to a common supported frame."
+      }
+    ]
+  },
+  "abstention_reason": "incompatible_coordinate_frames",
+  "rationale": [
+    "No collision-risk claim was produced from incompatible state vectors."
+  ],
+  "artifact_metadata": {
+    "name": "prototype-collision-risk-assessor",
+    "version": "prototype-0.1",
+    "validation_status": "prototype_unvalidated"
+  },
+  "use_designation": "prototype_non_operational"
+}

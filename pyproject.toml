@@ -28,3 +28,4 @@ where = ["src"]
 
 [tool.setuptools.package-data]
 coa = ["*.json"]
+"collision_risk.schemas" = ["*.json"]
