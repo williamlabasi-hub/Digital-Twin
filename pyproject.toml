@@ -20,6 +20,9 @@ dependencies = [
     "skyfield>=1.48",
 ]
 
+[project.scripts]
+collision-risk-assess = "collision_risk.cli:main"
+
 [tool.setuptools]
 package-dir = {"" = "src"}
 

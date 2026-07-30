@@ -52,3 +52,18 @@ Prototype risk bands are inclusive at their lower bounds:
 
 These Version `prototype-0.1` bands are transparent software assumptions, not
 validated operational maneuver thresholds.
+
+## Running the prototype
+
+From the repository root:
+
+```cmd
+set PYTHONPATH=src
+python -m collision_risk.cli ^
+  --input tests/fixtures/collision_risk/conjunction-assessment-input.example.json ^
+  --output outputs/collision-risk/assessment.json
+```
+
+Installed packages expose the equivalent `collision-risk-assess` command.
+Semantic input limitations produce schema-valid abstained assessments, while
+malformed inputs or file errors return a nonzero process exit code.
