@@ -196,9 +196,7 @@ class COADecisionSupportTests(unittest.TestCase):
         source["affiliation_provenance"] = None
         source["candidate_selection"]["decision_basis"] = "ambiguous"
         records = evidence_set()
-        withheld = adapt_object_identification(source)
-        withheld["subject"]["subject_id"] = "CAT-40002"
-        records[1] = withheld
+        records[1] = adapt_object_identification(source)
 
         report = build_coa_report(records)
 
@@ -206,6 +204,10 @@ class COADecisionSupportTests(unittest.TestCase):
         self.assertEqual(
             [item["code"] for item in report["advisories"]],
             ["RESOLVE_WITHHELD_EVIDENCE"],
+        )
+        self.assertEqual(
+            report["evidence_summary"][1]["subject_id"],
+            "OBS-001",
         )
 
     def test_critical_health_adds_constraint_review(self) -> None:
@@ -248,6 +250,14 @@ class COADecisionSupportTests(unittest.TestCase):
                 evidence_set(),
                 generated_at=datetime(2026, 7, 30),
             )
+
+    def test_report_mutation_does_not_change_later_reports(self) -> None:
+        first = build_coa_report(evidence_set())
+        first["blocked_actions"].clear()
+
+        second = build_coa_report(evidence_set())
+
+        self.assertEqual(len(second["blocked_actions"]), 3)
 
     def test_cli_writes_schema_valid_report(self) -> None:
         records = evidence_set()

@@ -21,8 +21,10 @@ decision-support confidence.
 
 `coa.build_coa_report` combines exactly one health, object-identification, and
 collision-risk envelope. The health subject must match the collision primary
-object, and the object-identification subject must match the secondary object.
-Its output is validated against `src/coa/coa-report.schema.json`.
+object. Usable or degraded object-identification evidence must match the
+secondary object; withheld identification evidence may retain its observation
+ID because it cannot assert a canonical identity. Its output is validated
+against `src/coa/coa-report.schema.json`.
 
 The engine produces deterministic operator advisories:
 

@@ -188,7 +188,11 @@ def build_coa_report(
         raise COADecisionSupportError(
             "Health evidence subject must match the collision primary object."
         )
-    if object_id["subject"]["subject_id"] != secondary_id:
+    object_id_usability = object_id["decision_support"]["usability"]
+    if (
+        object_id_usability != "withheld"
+        and object_id["subject"]["subject_id"] != secondary_id
+    ):
         raise COADecisionSupportError(
             "Object-identification subject must match the collision secondary object."
         )
@@ -277,7 +281,7 @@ def build_coa_report(
             "secondary_affiliation": affiliation,
         },
         "advisories": advisories,
-        "blocked_actions": BLOCKED_ACTIONS,
+        "blocked_actions": list(BLOCKED_ACTIONS),
         "limitations": [
             "Inputs and thresholds are prototype, non-operational evidence.",
             "Advisories require operator review and independent mission constraints.",
