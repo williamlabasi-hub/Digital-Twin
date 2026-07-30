@@ -16,7 +16,7 @@ capability is operationally implemented.
 | `05-orbital-data-functional-diagram.png` | Prototype implemented |
 | `06-collision-risk-functional-diagram.png` | Functional collision-risk flow; prototype implementation available |
 | `07-object-identification-functional-diagram.png` | Prototype implemented |
-| `08-coa-functional-diagram.png` | Evidence contract implemented; COA model not implemented |
+| `08-coa-functional-diagram.png` | Evidence contract and deterministic prototype advisory engine implemented |
 | `09-sda-digital-twin-capability-map.png` | Architecture overview |
 | `10-digital-twin-data-flow.png` | Architecture overview |
 | `11-tle-propagator.png` | Prototype implemented |

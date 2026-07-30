@@ -22,6 +22,7 @@ dependencies = [
 
 [project.scripts]
 collision-risk-assess = "collision_risk.cli:main"
+coa-decision-support = "coa.cli:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
