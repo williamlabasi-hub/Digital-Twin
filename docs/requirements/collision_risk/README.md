@@ -38,7 +38,14 @@ constant-velocity state transition. It assumes independent object errors,
 combines the position covariance, projects it into the plane normal to relative
 velocity, and numerically integrates a bivariate Gaussian over the combined
 hard-body-radius circle. Probability is withheld when those assumptions cannot
-be supported.
+be supported. It is also withheld when unconstrained closest approach lies
+outside the requested window; projecting a clamped boundary state would discard
+along-track separation and could overstate risk.
+
+Probability method Version `prototype-0.2` diagonalizes the encounter
+covariance and uses an adaptive integral in standardized Gaussian coordinates.
+This remains stable when covariance is extremely small relative to hard-body
+radius.
 
 Prototype risk bands are inclusive at their lower bounds:
 

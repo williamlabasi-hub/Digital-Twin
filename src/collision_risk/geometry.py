@@ -146,6 +146,11 @@ def assess_closest_approach(
     """Return geometry-only evidence or an explicit semantic abstention."""
 
     generated_at = generated_at or datetime.now(timezone.utc)
+    if generated_at.tzinfo is None or generated_at.utcoffset() is None:
+        raise ConjunctionInputError(
+            "GENERATED_AT_TIMEZONE_MISSING",
+            "generated_at requires a timezone.",
+        )
     try:
         validate_conjunction_input(record)
     except ConjunctionInputError as error:
@@ -174,10 +179,15 @@ def assess_closest_approach(
     speed_squared = _dot(relative_velocity, relative_velocity)
     if speed_squared <= 1e-24:
         tca_seconds = lower_seconds
+        tca_was_clamped = False
     else:
         unconstrained_tca = -_dot(
             relative_position, relative_velocity
         ) / speed_squared
+        tca_was_clamped = (
+            unconstrained_tca < lower_seconds
+            or unconstrained_tca > upper_seconds
+        )
         tca_seconds = min(max(unconstrained_tca, lower_seconds), upper_seconds)
 
     relative_at_tca = _vector_add_scaled(
@@ -190,6 +200,14 @@ def assess_closest_approach(
     uncertainty_status, covariance_frame = _uncertainty_status(record)
     issues = []
     try:
+        if tca_was_clamped:
+            raise ProbabilityUnavailable(
+                "ENCOUNTER_OUTSIDE_ANALYSIS_WINDOW",
+                (
+                    "Collision probability is withheld because unconstrained "
+                    "closest approach lies outside the analysis window."
+                ),
+            )
         probability_evidence = compute_collision_probability(
             primary,
             secondary,

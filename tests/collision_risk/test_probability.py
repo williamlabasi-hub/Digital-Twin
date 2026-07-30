@@ -1,3 +1,4 @@
+import math
 import unittest
 
 import numpy as np
@@ -39,6 +40,21 @@ class CollisionProbabilityTests(unittest.TestCase):
             expected,
             places=10,
         )
+        self.assertEqual(result["method"]["version"], "prototype-0.2")
+
+    def test_extreme_radius_to_sigma_ratio_remains_stable(self) -> None:
+        primary = state(0.5e-12, 5.0)
+        secondary = state(0.5e-12, 5.0)
+
+        result = compute_collision_probability(
+            primary,
+            secondary,
+            [0.0, 0.0, 0.0],
+            [1.0, 0.0, 0.0],
+            0.0,
+        )
+
+        self.assertAlmostEqual(result["collision_probability"], 1.0)
 
     def test_probability_decreases_for_larger_miss_distance(self) -> None:
         primary = state(0.0001)
@@ -61,6 +77,63 @@ class CollisionProbabilityTests(unittest.TestCase):
         self.assertGreater(
             close["collision_probability"],
             far["collision_probability"],
+        )
+
+    def test_probability_is_invariant_under_coordinate_rotation(self) -> None:
+        angle = 0.731
+        rotation = np.array(
+            [
+                [math.cos(angle), -math.sin(angle), 0.0],
+                [math.sin(angle), math.cos(angle), 0.0],
+                [0.0, 0.0, 1.0],
+            ]
+        )
+        relative_position = np.array([0.0, 0.012, -0.007])
+        relative_velocity = np.array([1.0, 0.0, 0.0])
+        covariance_matrix = np.eye(6) * 1e-12
+        covariance_matrix[1:3, 1:3] = np.array(
+            [[0.0002, 0.00006], [0.00006, 0.00045]]
+        )
+        primary = {
+            "state_covariance": covariance_matrix.tolist(),
+            "hard_body_radius_m": 12.5,
+        }
+        secondary = {
+            "state_covariance": covariance_matrix.tolist(),
+            "hard_body_radius_m": 12.5,
+        }
+        original = compute_collision_probability(
+            primary,
+            secondary,
+            relative_position.tolist(),
+            relative_velocity.tolist(),
+            0.0,
+        )
+
+        transform = np.zeros((6, 6))
+        transform[:3, :3] = rotation
+        transform[3:, 3:] = rotation
+        rotated_covariance = transform @ covariance_matrix @ transform.T
+        rotated_primary = {
+            **primary,
+            "state_covariance": rotated_covariance.tolist(),
+        }
+        rotated_secondary = {
+            **secondary,
+            "state_covariance": rotated_covariance.tolist(),
+        }
+        rotated = compute_collision_probability(
+            rotated_primary,
+            rotated_secondary,
+            (rotation @ relative_position).tolist(),
+            (rotation @ relative_velocity).tolist(),
+            0.0,
+        )
+
+        self.assertAlmostEqual(
+            original["collision_probability"],
+            rotated["collision_probability"],
+            places=12,
         )
 
     def test_velocity_covariance_is_propagated_to_tca(self) -> None:
