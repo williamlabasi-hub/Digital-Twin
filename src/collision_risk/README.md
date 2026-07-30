@@ -10,13 +10,13 @@ From a source checkout:
 
 ```cmd
 set PYTHONPATH=src
-python -m collision_risk.cli --input tests/fixtures/collision_risk/conjunction-assessment-input.example.json --output outputs/collision-risk/assessment.json
+python -m collision_risk.cli --input tests/fixtures/collision_risk/conjunction-assessment-input.example.json --output outputs/collision-risk/assessment.json --coa-output outputs/collision-risk/coa-evidence.json
 ```
 
 After installing the package:
 
 ```cmd
-collision-risk-assess --input conjunction.json --output assessment.json
+collision-risk-assess --input conjunction.json --output assessment.json --coa-output coa-evidence.json
 ```
 
 Use `--generated-at 2026-07-29T20:01:00Z` for reproducible output. The

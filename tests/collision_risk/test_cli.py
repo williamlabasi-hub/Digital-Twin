@@ -76,6 +76,78 @@ class CollisionRiskCliTests(unittest.TestCase):
         result = json.loads(completed.stdout)
         self.assertEqual(result["request_id"], "CONJ-2026-001")
 
+    def test_cli_writes_assessment_and_coa_evidence(self) -> None:
+        output_path = (
+            REPOSITORY_ROOT
+            / "tests"
+            / "collision_risk"
+            / "_dual_assessment_output.json"
+        )
+        coa_output_path = (
+            REPOSITORY_ROOT
+            / "tests"
+            / "collision_risk"
+            / "_dual_coa_output.json"
+        )
+        try:
+            completed = self.run_cli(
+                "--input",
+                str(FIXTURE_PATH),
+                "--output",
+                str(output_path),
+                "--coa-output",
+                str(coa_output_path),
+                "--generated-at",
+                "2026-07-29T20:01:00Z",
+            )
+
+            self.assertEqual(completed.returncode, 0, completed.stderr)
+            assessment = json.loads(
+                output_path.read_text(encoding="utf-8")
+            )
+            evidence = json.loads(
+                coa_output_path.read_text(encoding="utf-8")
+            )
+            self.assertEqual(assessment["assessment_status"], "complete")
+            self.assertEqual(evidence["contract_version"], "0.2.0")
+            self.assertEqual(evidence["evidence_type"], "collision_risk")
+            self.assertEqual(
+                evidence["decision_support"]["usability"],
+                "usable",
+            )
+            self.assertEqual(
+                evidence["source"]["source_record_id"],
+                assessment["assessment_id"],
+            )
+            self.assertIn("COA evidence written to", completed.stdout)
+        finally:
+            output_path.unlink(missing_ok=True)
+            coa_output_path.unlink(missing_ok=True)
+
+    def test_coa_output_preserves_assessment_stdout_json(self) -> None:
+        coa_output_path = (
+            REPOSITORY_ROOT
+            / "tests"
+            / "collision_risk"
+            / "_stdout_coa_output.json"
+        )
+        try:
+            completed = self.run_cli(
+                "--input",
+                str(FIXTURE_PATH),
+                "--coa-output",
+                str(coa_output_path),
+                "--generated-at",
+                "2026-07-29T20:01:00Z",
+            )
+
+            self.assertEqual(completed.returncode, 0, completed.stderr)
+            assessment = json.loads(completed.stdout)
+            self.assertEqual(assessment["assessment_status"], "complete")
+            self.assertIn("COA evidence written to", completed.stderr)
+        finally:
+            coa_output_path.unlink(missing_ok=True)
+
     def test_cli_rejects_missing_input_file(self) -> None:
         completed = self.run_cli(
             "--input",

@@ -68,9 +68,12 @@ From the repository root:
 set PYTHONPATH=src
 python -m collision_risk.cli ^
   --input tests/fixtures/collision_risk/conjunction-assessment-input.example.json ^
-  --output outputs/collision-risk/assessment.json
+  --output outputs/collision-risk/assessment.json ^
+  --coa-output outputs/collision-risk/coa-evidence.json
 ```
 
 Installed packages expose the equivalent `collision-risk-assess` command.
+The optional `--coa-output` writes the adapted Version 0.2 COA evidence
+envelope in the same run.
 Semantic input limitations produce schema-valid abstained assessments, while
 malformed inputs or file errors return a nonzero process exit code.
