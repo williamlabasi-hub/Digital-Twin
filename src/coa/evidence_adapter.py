@@ -10,7 +10,7 @@ from typing import Any, Mapping
 from jsonschema import Draft202012Validator, FormatChecker
 
 
-CONTRACT_VERSION = "0.1.0"
+CONTRACT_VERSION = "0.2.0"
 USE_DESIGNATION = "prototype_non_operational"
 
 
@@ -307,6 +307,151 @@ def adapt_object_identification(
             ),
             "inference_assurance": inference_assurance,
             "rationale": copy.deepcopy(prediction.get("rationale", [])),
+        },
+        "use_designation": USE_DESIGNATION,
+    }
+    if validate:
+        validate_coa_evidence(evidence)
+    return evidence
+
+
+def adapt_collision_risk(
+    assessment: Mapping[str, Any],
+    *,
+    validate: bool = True,
+) -> dict[str, Any]:
+    """Convert one collision-risk assessment into safe COA evidence."""
+
+    assessment = _require_mapping(
+        assessment,
+        "collision-risk assessment",
+    )
+    probability = _require_mapping(
+        assessment.get("probability"),
+        "probability",
+    )
+    risk = _require_mapping(assessment.get("risk"), "risk")
+    quality = _require_mapping(
+        assessment.get("data_quality"),
+        "data_quality",
+    )
+    uncertainty = _require_mapping(
+        assessment.get("uncertainty_assurance"),
+        "uncertainty_assurance",
+    )
+
+    assessment_id = assessment.get("assessment_id")
+    primary_id = assessment.get("primary_object_id")
+    secondary_id = assessment.get("secondary_object_id")
+    generated_at = assessment.get("generated_at")
+    source_version = assessment.get(
+        "contract_version",
+        assessment.get("schema_version"),
+    )
+    if not all(
+        isinstance(value, str) and value
+        for value in (
+            assessment_id,
+            primary_id,
+            secondary_id,
+            generated_at,
+            source_version,
+        )
+    ):
+        raise COAEvidenceAdapterError(
+            "Collision-risk assessment requires assessment_id, primary and "
+            "secondary object IDs, generated_at, and a contract version."
+        )
+
+    status = assessment.get("assessment_status")
+    probability_status = probability.get("status")
+    risk_level = risk.get("level")
+    quality_status = quality.get("status", "degraded")
+    abstention_reason = assessment.get("abstention_reason")
+    if status == "complete":
+        if probability_status != "computed" or risk_level == "undetermined":
+            raise COAEvidenceAdapterError(
+                "Complete collision-risk evidence requires computed "
+                "probability and a determined risk level."
+            )
+        usability = (
+            "degraded" if quality_status == "degraded" else "usable"
+        )
+        withheld_reason = None
+    elif status == "geometric_only":
+        if probability_status != "unavailable" or risk_level != "undetermined":
+            raise COAEvidenceAdapterError(
+                "Geometry-only collision-risk evidence must withhold "
+                "probability and risk level."
+            )
+        usability = "degraded"
+        withheld_reason = None
+    elif status == "abstained":
+        usability = "withheld"
+        withheld_reason = (
+            str(abstention_reason)
+            if abstention_reason
+            else "collision_risk_assessment_abstained"
+        )
+    else:
+        raise COAEvidenceAdapterError(
+            "Collision-risk assessment_status must be complete, "
+            "geometric_only, or abstained."
+        )
+
+    closest_approach = assessment.get("closest_approach")
+    observation_timestamp = generated_at
+    if isinstance(closest_approach, Mapping):
+        candidate_timestamp = closest_approach.get(
+            "time_of_closest_approach"
+        )
+        if isinstance(candidate_timestamp, str) and candidate_timestamp:
+            observation_timestamp = candidate_timestamp
+
+    evidence = {
+        "schema_version": CONTRACT_VERSION,
+        "contract_version": CONTRACT_VERSION,
+        "evidence_id": f"COA-COLLISION-RISK-{assessment_id}",
+        "generated_at": generated_at,
+        "evidence_type": "collision_risk",
+        "subject": {
+            "subject_id": primary_id,
+            "subject_type": "space_object",
+            "identity_status": "known",
+        },
+        "observation_timestamp": observation_timestamp,
+        "source": {
+            "component": "collision_risk",
+            "source_record_id": assessment_id,
+            "source_schema_version": source_version,
+            "source_generated_at": generated_at,
+        },
+        "decision_support": {
+            "usability": usability,
+            "confidence": None,
+            "confidence_interpretation": (
+                "collision_probability_is_not_confidence; "
+                "see payload.probability"
+            ),
+            "withheld_reason": withheld_reason,
+        },
+        "data_quality": {
+            "status": quality_status,
+            "issues": _quality_issues(quality),
+        },
+        "payload": {
+            "assessment_status": status,
+            "primary_object_id": primary_id,
+            "secondary_object_id": secondary_id,
+            "closest_approach": copy.deepcopy(closest_approach),
+            "probability": copy.deepcopy(dict(probability)),
+            "risk": copy.deepcopy(dict(risk)),
+            "uncertainty_assurance": copy.deepcopy(dict(uncertainty)),
+            "abstention_reason": abstention_reason,
+            "rationale": copy.deepcopy(assessment.get("rationale", [])),
+            "artifact_metadata": copy.deepcopy(
+                assessment.get("artifact_metadata")
+            ),
         },
         "use_designation": USE_DESIGNATION,
     }

@@ -3,6 +3,7 @@ import json
 import subprocess
 import sys
 import unittest
+from datetime import datetime, timezone
 from importlib.resources import files
 from pathlib import Path
 
@@ -14,11 +15,13 @@ sys.path.insert(0, str(REPOSITORY_ROOT / "src"))
 
 from coa.evidence_adapter import (  # noqa: E402
     COAEvidenceAdapterError,
+    adapt_collision_risk,
     adapt_health_predictions,
     adapt_health_report,
     adapt_object_identification,
     validate_coa_evidence,
 )
+from collision_risk.geometry import assess_closest_approach  # noqa: E402
 
 
 def health_report() -> dict:
@@ -116,6 +119,18 @@ def object_id_prediction() -> dict:
     }
 
 
+def collision_fixture(name: str) -> dict:
+    return json.loads(
+        (
+            REPOSITORY_ROOT
+            / "tests"
+            / "fixtures"
+            / "collision_risk"
+            / name
+        ).read_text(encoding="utf-8")
+    )
+
+
 class COAEvidenceAdapterTests(unittest.TestCase):
     def test_packaged_schema_is_valid(self) -> None:
         schema = json.loads(
@@ -145,6 +160,7 @@ class COAEvidenceAdapterTests(unittest.TestCase):
     def test_health_report_becomes_usable_evidence(self) -> None:
         evidence = adapt_health_report(health_report())
 
+        self.assertEqual(evidence["contract_version"], "0.2.0")
         self.assertEqual(evidence["evidence_type"], "health")
         self.assertEqual(evidence["subject"]["subject_id"], "SAT-001")
         self.assertEqual(evidence["decision_support"]["usability"], "usable")
@@ -232,6 +248,125 @@ class COAEvidenceAdapterTests(unittest.TestCase):
             evidence["decision_support"]["withheld_reason"], "ambiguous"
         )
 
+    def test_complete_collision_risk_becomes_usable_evidence(self) -> None:
+        evidence = adapt_collision_risk(
+            collision_fixture("high-risk-assessment.example.json")
+        )
+
+        self.assertEqual(evidence["evidence_type"], "collision_risk")
+        self.assertEqual(
+            evidence["source"]["component"],
+            "collision_risk",
+        )
+        self.assertEqual(
+            evidence["subject"]["subject_id"],
+            "CAT-25544",
+        )
+        self.assertEqual(
+            evidence["observation_timestamp"],
+            "2026-07-30T02:15:30Z",
+        )
+        self.assertEqual(
+            evidence["decision_support"]["usability"],
+            "usable",
+        )
+        self.assertIsNone(evidence["decision_support"]["confidence"])
+        self.assertEqual(
+            evidence["payload"]["probability"]["collision_probability"],
+            0.0025,
+        )
+        self.assertEqual(evidence["payload"]["risk"]["level"], "high")
+
+    def test_current_collision_engine_output_adapts_end_to_end(self) -> None:
+        assessment = assess_closest_approach(
+            collision_fixture(
+                "conjunction-assessment-input.example.json"
+            ),
+            generated_at=datetime(
+                2026,
+                7,
+                29,
+                20,
+                1,
+                tzinfo=timezone.utc,
+            ),
+        )
+
+        evidence = adapt_collision_risk(assessment)
+
+        self.assertEqual(assessment["assessment_status"], "complete")
+        self.assertEqual(
+            evidence["decision_support"]["usability"],
+            "usable",
+        )
+        self.assertEqual(
+            evidence["payload"]["probability"]["method"]["version"],
+            "prototype-0.2",
+        )
+        self.assertEqual(
+            evidence["source"]["source_schema_version"],
+            "0.1.0",
+        )
+
+    def test_geometry_only_collision_risk_is_degraded(self) -> None:
+        request = collision_fixture(
+            "conjunction-assessment-input.example.json"
+        )
+        for state in (request["primary"], request["secondary"]):
+            del state["state_covariance"]
+            del state["covariance_metadata"]
+        assessment = assess_closest_approach(request)
+
+        evidence = adapt_collision_risk(assessment)
+
+        self.assertEqual(
+            evidence["decision_support"]["usability"],
+            "degraded",
+        )
+        self.assertIsNone(
+            evidence["decision_support"]["withheld_reason"]
+        )
+        self.assertEqual(
+            evidence["payload"]["probability"]["status"],
+            "unavailable",
+        )
+        self.assertEqual(
+            evidence["payload"]["risk"]["level"],
+            "undetermined",
+        )
+        self.assertTrue(evidence["data_quality"]["issues"])
+
+    def test_abstained_collision_risk_is_withheld(self) -> None:
+        assessment = collision_fixture(
+            "abstained-assessment.example.json"
+        )
+
+        evidence = adapt_collision_risk(assessment)
+
+        self.assertEqual(
+            evidence["decision_support"]["usability"],
+            "withheld",
+        )
+        self.assertEqual(
+            evidence["decision_support"]["withheld_reason"],
+            "incompatible_coordinate_frames",
+        )
+        self.assertEqual(evidence["data_quality"]["status"], "invalid")
+        self.assertEqual(
+            evidence["observation_timestamp"],
+            assessment["generated_at"],
+        )
+
+    def test_inconsistent_complete_collision_risk_is_rejected(self) -> None:
+        assessment = collision_fixture(
+            "high-risk-assessment.example.json"
+        )
+        assessment["probability"]["status"] = "unavailable"
+        assessment["probability"]["collision_probability"] = None
+
+        with self.assertRaises(COAEvidenceAdapterError):
+            adapt_collision_risk(assessment)
+
     def test_contract_rejects_withheld_evidence_without_reason(self) -> None:
         evidence = adapt_health_report(health_report())
         evidence["decision_support"]["usability"] = "withheld"
@@ -246,6 +381,16 @@ class COAEvidenceAdapterTests(unittest.TestCase):
         adapt_object_identification(prediction)
 
         self.assertEqual(prediction, original)
+
+    def test_collision_adapter_does_not_mutate_source_record(self) -> None:
+        assessment = collision_fixture(
+            "high-risk-assessment.example.json"
+        )
+        original = copy.deepcopy(assessment)
+
+        adapt_collision_risk(assessment)
+
+        self.assertEqual(assessment, original)
 
 
 if __name__ == "__main__":

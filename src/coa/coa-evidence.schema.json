@@ -20,11 +20,13 @@
     "use_designation"
   ],
   "properties": {
-    "schema_version": {"const": "0.1.0"},
-    "contract_version": {"const": "0.1.0"},
+    "schema_version": {"const": "0.2.0"},
+    "contract_version": {"const": "0.2.0"},
     "evidence_id": {"type": "string", "minLength": 1},
     "generated_at": {"type": "string", "format": "date-time"},
-    "evidence_type": {"enum": ["health", "object_identification"]},
+    "evidence_type": {
+      "enum": ["health", "object_identification", "collision_risk"]
+    },
     "subject": {
       "type": "object",
       "additionalProperties": false,
@@ -48,7 +50,9 @@
         "source_generated_at"
       ],
       "properties": {
-        "component": {"enum": ["health", "object_identification"]},
+        "component": {
+          "enum": ["health", "object_identification", "collision_risk"]
+        },
         "source_record_id": {"type": "string", "minLength": 1},
         "source_schema_version": {"type": "string", "minLength": 1},
         "source_generated_at": {"type": "string", "format": "date-time"}
@@ -100,6 +104,24 @@
           "payload": {"$ref": "#/$defs/healthPayload"},
           "source": {
             "properties": {"component": {"const": "health"}}
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "evidence_type": {"const": "collision_risk"}
+        },
+        "required": ["evidence_type"]
+      },
+      "then": {
+        "properties": {
+          "payload": {"$ref": "#/$defs/collisionRiskPayload"},
+          "source": {
+            "properties": {
+              "component": {"const": "collision_risk"}
+            }
           }
         }
       }
@@ -235,6 +257,65 @@
           "type": "array",
           "items": {"type": "string"}
         }
+      }
+    },
+    "collisionRiskPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "assessment_status",
+        "primary_object_id",
+        "secondary_object_id",
+        "closest_approach",
+        "probability",
+        "risk",
+        "uncertainty_assurance",
+        "abstention_reason",
+        "rationale",
+        "artifact_metadata"
+      ],
+      "properties": {
+        "assessment_status": {
+          "enum": ["complete", "geometric_only", "abstained"]
+        },
+        "primary_object_id": {"type": "string", "minLength": 1},
+        "secondary_object_id": {"type": "string", "minLength": 1},
+        "closest_approach": {"type": ["object", "null"]},
+        "probability": {
+          "type": "object",
+          "required": ["status", "collision_probability"],
+          "properties": {
+            "status": {"enum": ["computed", "unavailable"]},
+            "collision_probability": {
+              "type": ["number", "null"],
+              "minimum": 0,
+              "maximum": 1
+            }
+          }
+        },
+        "risk": {
+          "type": "object",
+          "required": ["level"],
+          "properties": {
+            "level": {
+              "enum": [
+                "undetermined",
+                "negligible",
+                "low",
+                "moderate",
+                "high",
+                "critical"
+              ]
+            }
+          }
+        },
+        "uncertainty_assurance": {"type": "object"},
+        "abstention_reason": {"type": ["string", "null"]},
+        "rationale": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "artifact_metadata": {"type": ["object", "null"]}
       }
     }
   }
