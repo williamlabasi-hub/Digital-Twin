@@ -2,6 +2,7 @@
 
 from .evidence_adapter import (
     COAEvidenceAdapterError,
+    adapt_collision_risk,
     adapt_health_predictions,
     adapt_health_report,
     adapt_object_identification,
@@ -10,6 +11,7 @@ from .evidence_adapter import (
 
 __all__ = [
     "COAEvidenceAdapterError",
+    "adapt_collision_risk",
     "adapt_health_predictions",
     "adapt_health_report",
     "adapt_object_identification",

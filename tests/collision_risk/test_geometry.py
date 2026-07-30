@@ -71,6 +71,11 @@ class ClosestApproachGeometryTests(unittest.TestCase):
             geometry["miss_distance_km"],
             (5.0**2 + 1.0**2) ** 0.5,
         )
+        self.assertEqual(result["assessment_status"], "geometric_only")
+        self.assertEqual(
+            result["data_quality"]["issues"][0]["code"],
+            "ENCOUNTER_OUTSIDE_ANALYSIS_WINDOW",
+        )
 
     def test_tca_is_clamped_to_delayed_window_start(self) -> None:
         record = linear_case()
@@ -86,6 +91,11 @@ class ClosestApproachGeometryTests(unittest.TestCase):
             "2026-07-29T20:00:05Z",
         )
         self.assertAlmostEqual(geometry["miss_distance_km"], 6.0)
+        self.assertEqual(result["assessment_status"], "geometric_only")
+        self.assertEqual(
+            result["data_quality"]["issues"][0]["code"],
+            "ENCOUNTER_OUTSIDE_ANALYSIS_WINDOW",
+        )
 
     def test_zero_relative_velocity_uses_window_start(self) -> None:
         record = linear_case()
@@ -163,6 +173,18 @@ class ClosestApproachGeometryTests(unittest.TestCase):
             assess_closest_approach(record, generated_at=GENERATED_AT)
 
         self.assertEqual(context.exception.code, "SCHEMA_VALIDATION_FAILED")
+
+    def test_generated_at_requires_timezone(self) -> None:
+        with self.assertRaises(ConjunctionInputError) as context:
+            assess_closest_approach(
+                linear_case(),
+                generated_at=datetime(2026, 7, 29, 20, 1),
+            )
+
+        self.assertEqual(
+            context.exception.code,
+            "GENERATED_AT_TIMEZONE_MISSING",
+        )
 
     def test_assessment_does_not_mutate_input(self) -> None:
         record = linear_case()
