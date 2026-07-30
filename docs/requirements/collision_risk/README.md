@@ -31,3 +31,24 @@ requires a common state epoch and coordinate frame, accepts windows no longer
 than 15 minutes, and requires any supplied covariance to already use the
 state-vector frame. This short limit is an explicit prototype guardrail;
 longer screening windows require proper orbital propagation.
+
+When both objects provide positive-definite covariance and hard-body radius,
+the prototype propagates each Cartesian covariance to closest approach with a
+constant-velocity state transition. It assumes independent object errors,
+combines the position covariance, projects it into the plane normal to relative
+velocity, and numerically integrates a bivariate Gaussian over the combined
+hard-body-radius circle. Probability is withheld when those assumptions cannot
+be supported.
+
+Prototype risk bands are inclusive at their lower bounds:
+
+| Level | Collision probability |
+| --- | ---: |
+| Critical | `>= 1e-2` |
+| High | `>= 1e-3` |
+| Moderate | `>= 1e-4` |
+| Low | `>= 1e-6` |
+| Negligible | `< 1e-6` |
+
+These Version `prototype-0.1` bands are transparent software assumptions, not
+validated operational maneuver thresholds.

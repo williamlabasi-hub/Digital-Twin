@@ -44,7 +44,7 @@ class ClosestApproachGeometryTests(unittest.TestCase):
         )
 
         geometry = result["closest_approach"]
-        self.assertEqual(result["assessment_status"], "geometric_only")
+        self.assertEqual(result["assessment_status"], "complete")
         self.assertEqual(
             geometry["time_of_closest_approach"],
             "2026-07-29T20:00:10Z",
@@ -52,8 +52,9 @@ class ClosestApproachGeometryTests(unittest.TestCase):
         self.assertAlmostEqual(geometry["miss_distance_km"], 1.0)
         self.assertAlmostEqual(geometry["relative_velocity_km_s"], 1.0)
         self.assertEqual(geometry["relative_position_km"], [0.0, 1.0, 0.0])
-        self.assertEqual(result["probability"]["status"], "unavailable")
-        self.assertEqual(result["risk"]["level"], "undetermined")
+        self.assertEqual(result["probability"]["status"], "computed")
+        self.assertIsNotNone(result["probability"]["collision_probability"])
+        self.assertNotEqual(result["risk"]["level"], "undetermined")
 
     def test_tca_is_clamped_to_window_end(self) -> None:
         record = linear_case()
@@ -99,6 +100,11 @@ class ClosestApproachGeometryTests(unittest.TestCase):
         self.assertEqual(
             result["closest_approach"]["relative_velocity_km_s"],
             0.0,
+        )
+        self.assertEqual(result["assessment_status"], "geometric_only")
+        self.assertEqual(
+            result["data_quality"]["issues"][0]["code"],
+            "RELATIVE_VELOCITY_TOO_LOW",
         )
 
     def test_missing_covariance_still_returns_geometry(self) -> None:

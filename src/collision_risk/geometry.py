@@ -6,6 +6,11 @@ import math
 from datetime import datetime, timedelta, timezone
 from typing import Any, Mapping
 
+from .probability import (
+    RISK_THRESHOLD_VERSION,
+    ProbabilityUnavailable,
+    compute_collision_probability,
+)
 from .validation import (
     ConjunctionInputError,
     OUTPUT_SCHEMA_PATH,
@@ -15,7 +20,7 @@ from .validation import (
 )
 
 
-ARTIFACT_NAME = "prototype-linear-closest-approach"
+ARTIFACT_NAME = "prototype-collision-risk-assessor"
 ARTIFACT_VERSION = "prototype-0.1"
 
 
@@ -184,26 +189,73 @@ def assess_closest_approach(
 
     uncertainty_status, covariance_frame = _uncertainty_status(record)
     issues = []
-    if uncertainty_status == "missing_covariance":
+    try:
+        probability_evidence = compute_collision_probability(
+            primary,
+            secondary,
+            relative_at_tca,
+            relative_velocity,
+            tca_seconds,
+        )
+    except ProbabilityUnavailable as error:
+        probability_evidence = None
         issues.append(
             {
-                "code": "COVARIANCE_MISSING",
+                "code": error.code,
                 "severity": "warning",
-                "message": (
-                    "Collision probability is unavailable without covariance "
-                    "for both objects."
-                ),
+                "message": str(error),
             }
         )
-    issues.append(
-        {
-            "code": "PROBABILITY_MODEL_NOT_IMPLEMENTED",
-            "severity": "warning",
-            "message": (
-                "This phase computes closest-approach geometry only."
+
+    if probability_evidence is None:
+        assessment_status = "geometric_only"
+        probability = {
+            "status": "unavailable",
+            "collision_probability": None,
+            "method": None,
+            "hard_body_radius_m": _combined_hard_body_radius(
+                primary, secondary
+            ),
+            "interpretation": (
+                "Not computed because required encounter evidence was "
+                "unavailable."
             ),
         }
-    )
+        risk = {
+            "level": "undetermined",
+            "basis": "Collision probability is unavailable.",
+            "threshold_version": None,
+        }
+        data_quality_status = "degraded"
+        probability_rationale = (
+            "Collision probability and risk level were intentionally withheld."
+        )
+    else:
+        assessment_status = "complete"
+        probability_value = probability_evidence["collision_probability"]
+        probability = {
+            "status": "computed",
+            "collision_probability": probability_value,
+            "method": probability_evidence["method"],
+            "hard_body_radius_m": probability_evidence[
+                "hard_body_radius_m"
+            ],
+            "interpretation": (
+                "Prototype uncalibrated encounter-plane collision probability."
+            ),
+        }
+        risk = {
+            "level": probability_evidence["risk_level"],
+            "basis": "Prototype collision-probability threshold.",
+            "threshold_version": RISK_THRESHOLD_VERSION,
+        }
+        uncertainty_status = "combined_covariance"
+        covariance_frame = "encounter_plane"
+        data_quality_status = "complete"
+        probability_rationale = (
+            f"Prototype collision probability is {probability_value:.12g}; "
+            f"risk level is {probability_evidence['risk_level']}."
+        )
 
     result = {
         "schema_version": "0.1.0",
@@ -211,7 +263,7 @@ def assess_closest_approach(
         "assessment_id": f"CRA-{record['request_id']}",
         "request_id": record["request_id"],
         "generated_at": _iso_utc(generated_at),
-        "assessment_status": "geometric_only",
+        "assessment_status": assessment_status,
         "primary_object_id": primary["object_id"],
         "secondary_object_id": secondary["object_id"],
         "closest_approach": {
@@ -225,39 +277,30 @@ def assess_closest_approach(
                 "version": ARTIFACT_VERSION,
             },
         },
-        "probability": {
-            "status": "unavailable",
-            "collision_probability": None,
-            "method": None,
-            "hard_body_radius_m": _combined_hard_body_radius(
-                primary, secondary
-            ),
-            "interpretation": (
-                "Not computed; probability model is not implemented."
-            ),
-        },
-        "risk": {
-            "level": "undetermined",
-            "basis": "Collision probability is unavailable.",
-            "threshold_version": None,
-        },
+        "probability": probability,
+        "risk": risk,
         "uncertainty_assurance": {
             "status": uncertainty_status,
             "covariance_frame": covariance_frame,
             "assumptions": [
                 "Object motion is linear over the bounded analysis window.",
                 "Both state vectors share one epoch and coordinate frame.",
+                "Primary and secondary state errors are independent.",
+                (
+                    "Cartesian covariance is propagated to closest approach "
+                    "with a constant-velocity transition."
+                ),
             ],
         },
         "data_quality": {
-            "status": "degraded",
+            "status": data_quality_status,
             "issues": issues,
         },
         "abstention_reason": None,
         "rationale": [
             f"Closest approach occurs {tca_seconds:.6f} seconds after the state epoch.",
             f"Prototype miss distance is {miss_distance:.9f} km.",
-            "Collision probability and risk level were intentionally withheld.",
+            probability_rationale,
         ],
         "artifact_metadata": {
             "name": ARTIFACT_NAME,
