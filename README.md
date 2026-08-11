@@ -26,6 +26,27 @@ The SDA Satellite Digital Twin is a modular software framework that models, moni
 
 - Under Development
 
+## Quick start
+
+From a fresh clone, create an isolated Python environment and install the
+project from the repository root:
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+python -m pip install -e .
+```
+
+Run the complete automated test suite:
+
+```powershell
+python -m unittest discover -s tests -t . -v
+```
+
+Generated reports are written under `outputs/` or the module-specific data
+output folders and are intentionally excluded from version control.
+
 ## Capstone health demo
 
 Launch the presentation-ready health ML dashboard from the repository root:

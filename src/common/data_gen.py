@@ -226,8 +226,9 @@ def closeApproach(target_elems=None, a0=None, e0=None, i0=None, d_desired=None,
             grid_n=grid_n,
             max_refine=max(2, max_refine // 2),
         )
-        if not (feas_lo - 0.1 * (feas_hi - feas_lo) <= d_desired <=
-                feas_hi + 0.1 * (feas_hi - feas_lo)):
+        feasibility_tolerance = max(1e-6, 0.1 * (feas_hi - feas_lo))
+        if not (feas_lo - feasibility_tolerance <= d_desired <=
+                feas_hi + feasibility_tolerance):
             print(f"  [warning] d_desired={d_desired} km looks outside the "
                   f"roughly achievable range [{feas_lo:.1f}, {feas_hi:.1f}] km "
                   f"for this (a, e, i). Consider adjusting a/e/i instead of "
