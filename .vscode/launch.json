@@ -12,10 +12,38 @@
       "justMyCode": true
     },
     {
-      "name": "Python: common.test module",
+      "name": "Tests: Complete suite",
       "type": "debugpy",
       "request": "launch",
-      "module": "common.test",
+      "module": "unittest",
+      "args": [
+        "discover",
+        "-s",
+        "tests",
+        "-t",
+        ".",
+        "-v"
+      ],
+      "cwd": "${workspaceFolder}",
+      "envFile": "${workspaceFolder}/.env",
+      "console": "integratedTerminal",
+      "justMyCode": false
+    },
+    {
+      "name": "Demo: Health dashboard",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/demo/start_demo.py",
+      "cwd": "${workspaceFolder}",
+      "envFile": "${workspaceFolder}/.env",
+      "console": "integratedTerminal",
+      "justMyCode": true
+    },
+    {
+      "name": "Validate: Health scenarios",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/validate_health_scenarios.py",
       "cwd": "${workspaceFolder}",
       "envFile": "${workspaceFolder}/.env",
       "console": "integratedTerminal",
