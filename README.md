@@ -1,5 +1,7 @@
 # SDA Satellite Digital Twin
 
+[![Tests](https://github.com/williamlabasi-hub/Digital-Twin/actions/workflows/tests.yml/badge.svg)](https://github.com/williamlabasi-hub/Digital-Twin/actions/workflows/tests.yml)
+
 ## Overview
 
 The SDA Satellite Digital Twin is a modular software framework that models, monitors, analyzes, and predicts satellite behavior using artificial intelligence and machine learning.
@@ -46,6 +48,8 @@ python -m unittest discover -s tests -t . -v
 
 Generated reports are written under `outputs/` or the module-specific data
 output folders and are intentionally excluded from version control.
+
+Development and branch conventions are documented in `CONTRIBUTING.md`.
 
 ## Capstone health demo
 
