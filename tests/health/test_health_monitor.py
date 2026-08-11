@@ -116,7 +116,7 @@ class HealthMonitorTests(unittest.TestCase):
         self.assertIn("satellite health predictions", completed.stdout.lower())
 
     def test_committed_example_output_matches_health_schema(self) -> None:
-        output_path = REPOSITORY_ROOT / "data" / "outputs" / "health" / "health_predictions.json"
+        output_path = REPOSITORY_ROOT / "demo" / "data" / "health_predictions.json"
         schema = json.loads(DEFAULT_SCHEMA_PATH.read_text(encoding="utf-8"))
         output = json.loads(output_path.read_text(encoding="utf-8"))
 

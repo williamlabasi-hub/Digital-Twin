@@ -6,7 +6,7 @@ const safe=v=>v===null||v===undefined?'—':v;
 
 async function load(){
   try{
-    const response=await fetch('../data/outputs/health/health_predictions.json');
+    const response=await fetch('data/health_predictions.json');
     if(!response.ok) throw new Error(`HTTP ${response.status}`);
     const payload=await response.json();
     state.records=payload.report;

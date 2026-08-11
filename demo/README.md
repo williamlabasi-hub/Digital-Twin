@@ -1,6 +1,10 @@
 # Health ML capstone demo
 
-This browser-based dashboard presents the existing Version 1.1 health report without changing its decisions. It reads the validated report at `data/outputs/health/health_predictions.json` and provides four-class scenario selection, timeline playback, subsystem status, model assurance, evidence, command context, telemetry, and preliminary advisories.
+This browser-based dashboard presents a committed Version 1.1 health-report
+fixture without changing its decisions. It reads the validated report at
+`demo/data/health_predictions.json` and provides four-class scenario selection,
+timeline playback, subsystem status, model assurance, evidence, command
+context, telemetry, and preliminary advisories.
 
 ## Run
 
@@ -25,6 +29,11 @@ Open `http://127.0.0.1:8000/demo/`. Use the four status buttons for a controlled
 ```powershell
 python src\health\health_monitor.py
 python scripts\validate_health_scenarios.py
+Copy-Item data\outputs\health\health_predictions.json demo\data\health_predictions.json
 ```
 
-The dashboard is intentionally dependency-free and uses only Python's standard-library web server.
+The copy step intentionally promotes a validated runtime result into the
+versioned demo fixture. Review the generated report before committing it.
+
+The dashboard server is dependency-free and uses only Python's standard
+library.

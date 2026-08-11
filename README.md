@@ -59,4 +59,6 @@ Launch the presentation-ready health ML dashboard from the repository root:
 python demo\start_demo.py
 ```
 
-Then open `http://127.0.0.1:8000/demo/`. See `demo/README.md` for the suggested presentation flow.
+Then open `http://127.0.0.1:8000/demo/`. The dashboard uses the committed,
+schema-validated fixture under `demo/data/`; see `demo/README.md` for the
+suggested presentation flow and refresh procedure.
