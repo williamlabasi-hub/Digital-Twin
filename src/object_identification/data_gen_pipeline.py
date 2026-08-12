@@ -8,6 +8,10 @@ import sys
 from pathlib import Path
 from typing import Any
 
+if __package__ in {None, ""}:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+    __package__ = "object_identification"
+
 from .association import build_ranked_prediction, load_association_config
 from .data_gen_adapter import build_identification_records
 from .input_pipeline import ObjectIdentificationInputError

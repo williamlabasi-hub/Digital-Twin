@@ -10,6 +10,10 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
+if __package__ in {None, ""}:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+    __package__ = "object_identification"
+
 from .input_pipeline import (
     ObjectIdentificationInputError,
     prepare_identification_input,
