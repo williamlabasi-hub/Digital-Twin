@@ -65,14 +65,15 @@ validated operational maneuver thresholds.
 From the repository root:
 
 ```cmd
-set PYTHONPATH=src
-python -m collision_risk.cli ^
-  --input tests/fixtures/collision_risk/conjunction-assessment-input.example.json ^
-  --output outputs/collision-risk/assessment.json ^
-  --coa-output outputs/collision-risk/coa-evidence.json
+python src\collision_risk\cli.py ^
+  --input tests\fixtures\collision_risk\conjunction-assessment-input.example.json ^
+  --output outputs\collision-risk\assessment.json ^
+  --coa-output outputs\collision-risk\coa-evidence.json
 ```
 
-Installed packages expose the equivalent `collision-risk-assess` command.
+This source-checkout command does not require a `PYTHONPATH` change. After
+running `python -m pip install -e .` from the repository root, the equivalent
+installed command is `collision-risk-assess`.
 The optional `--coa-output` writes the adapted Version 0.2 COA evidence
 envelope in the same run.
 Semantic input limitations produce schema-valid abstained assessments, while

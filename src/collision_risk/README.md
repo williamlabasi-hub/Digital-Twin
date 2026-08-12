@@ -9,8 +9,7 @@ claims.
 From a source checkout:
 
 ```cmd
-set PYTHONPATH=src
-python -m collision_risk.cli --input tests/fixtures/collision_risk/conjunction-assessment-input.example.json --output outputs/collision-risk/assessment.json --coa-output outputs/collision-risk/coa-evidence.json
+python src\collision_risk\cli.py --input tests\fixtures\collision_risk\conjunction-assessment-input.example.json --output outputs\collision-risk\assessment.json --coa-output outputs\collision-risk\coa-evidence.json
 ```
 
 After installing the package:
@@ -18,6 +17,10 @@ After installing the package:
 ```cmd
 collision-risk-assess --input conjunction.json --output assessment.json --coa-output coa-evidence.json
 ```
+
+The source-checkout form works without changing `PYTHONPATH`. The installed
+command is available after running `python -m pip install -e .` from the
+repository root.
 
 Use `--generated-at 2026-07-29T20:01:00Z` for reproducible output. The
 component is a non-operational prototype and does not recommend or authorize
