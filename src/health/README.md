@@ -59,6 +59,20 @@ Inference outside that profile is marked `abstained` and excluded from overall
 health aggregation, while the raw classifier output remains available for
 diagnostic review.
 
+## Run the health monitor
+
+From the repository root, process the versioned telemetry and command-history
+fixtures with the saved model:
+
+```cmd
+python src\health\health_monitor.py ^
+  --output outputs\health\health-predictions.json ^
+  --history outputs\health\health-history.json
+```
+
+The source-checkout command does not require installation or a `PYTHONPATH`
+change. It validates the generated report against the packaged health schema.
+
 Run the synthetic fault-injection validation harness with:
 
 ```cmd

@@ -34,7 +34,7 @@ Affiliation, authority, object type, sensor provenance, and measurement quality
 must be supplied explicitly. They are not inferred from orbital motion.
 
 ```cmd
-python -m src.object_identification.data_gen_adapter ^
+python src\object_identification\data_gen_adapter.py ^
   --observation-input data\generated\observation.json ^
   --candidate-input data\generated\candidate.json ^
   --output data\processed\object_identification\generated-records.json ^
@@ -65,7 +65,7 @@ versioned transparent prototype model in
 `src/object_identification/config/object-identification-uncertainty.json`:
 
 ```cmd
-python -m src.object_identification.data_gen_pipeline ^
+python src\object_identification\data_gen_pipeline.py ^
   --observation-input observation.json ^
   --candidate-manifest candidate-manifest.json ^
   --output modeled-uncertainty-prediction.json ^
@@ -94,7 +94,7 @@ all candidates, applies ambiguity protection, and writes the complete evidence
 and prediction bundle:
 
 ```cmd
-python -m src.object_identification.data_gen_pipeline ^
+python src\object_identification\data_gen_pipeline.py ^
   --observation-input tests\fixtures\object_identification\data_gen\observation-propagation.example.json ^
   --candidate-manifest tests\fixtures\object_identification\data_gen\candidate-manifest.example.json ^
   --output outputs\verification\data-gen-pipeline-demo.json ^
@@ -117,7 +117,7 @@ After training an artifact, the same generated-data command can request safe ML
 inference:
 
 ```cmd
-python -m src.object_identification.data_gen_pipeline ^
+python src\object_identification\data_gen_pipeline.py ^
   --observation-input observation.json ^
   --candidate-manifest candidate-manifest.json ^
   --output ml-prediction.json ^
@@ -146,7 +146,7 @@ normalized candidate-evidence record. It does not score or classify the
 candidate.
 
 ```cmd
-python -m src.object_identification.input_pipeline ^
+python src\object_identification\input_pipeline.py ^
   --observation tests\fixtures\object_identification\tracking-observation.example.json ^
   --catalog tests\fixtures\object_identification\object-catalog-record.example.json ^
   --orbital tests\fixtures\object_identification\orbital-state-record.example.json ^
@@ -173,7 +173,7 @@ candidate provenance, and withhold identity when multiple threshold-clearing
 candidates fall within the configured ambiguity margin.
 
 ```cmd
-python -m src.object_identification.association ^
+python src\object_identification\association.py ^
   --observation tests\fixtures\object_identification\tracking-observation.example.json ^
   --catalog tests\fixtures\object_identification\object-catalog-record.example.json ^
   --orbital tests\fixtures\object_identification\orbital-state-record.example.json ^
@@ -185,7 +185,7 @@ For catalog-wide ranking, repeat `--candidate` with each catalog, orbital, and
 affiliation record triplet:
 
 ```cmd
-python -m src.object_identification.association ^
+python src\object_identification\association.py ^
   --observation tests\fixtures\object_identification\tracking-observation.example.json ^
   --candidate catalog-a.json orbit-a.json affiliation-a.json ^
   --candidate catalog-b.json orbit-b.json affiliation-b.json ^
@@ -195,7 +195,7 @@ python -m src.object_identification.association ^
 ### Run the clear-match demonstration
 
 ```cmd
-python -m src.object_identification.association ^
+python src\object_identification\association.py ^
   --observation tests\fixtures\object_identification\tracking-observation.example.json ^
   --candidate tests\fixtures\object_identification\multi_candidate\clear-best.catalog.json tests\fixtures\object_identification\multi_candidate\clear-best.orbital.json tests\fixtures\object_identification\multi_candidate\clear-best.affiliation.json ^
   --candidate tests\fixtures\object_identification\multi_candidate\clear-mid.catalog.json tests\fixtures\object_identification\multi_candidate\clear-mid.orbital.json tests\fixtures\object_identification\multi_candidate\clear-mid.affiliation.json ^
@@ -206,7 +206,7 @@ python -m src.object_identification.association ^
 ### Run the ambiguity demonstration
 
 ```cmd
-python -m src.object_identification.association ^
+python src\object_identification\association.py ^
   --observation tests\fixtures\object_identification\tracking-observation.example.json ^
   --candidate tests\fixtures\object_identification\multi_candidate\clear-best.catalog.json tests\fixtures\object_identification\multi_candidate\clear-best.orbital.json tests\fixtures\object_identification\multi_candidate\clear-best.affiliation.json ^
   --candidate tests\fixtures\object_identification\multi_candidate\ambiguous-near.catalog.json tests\fixtures\object_identification\multi_candidate\ambiguous-near.orbital.json tests\fixtures\object_identification\multi_candidate\ambiguous-near.affiliation.json ^
@@ -220,7 +220,7 @@ ambiguous scenarios, sweeps match thresholds and ambiguity margins, and writes
 JSON and CSV reports:
 
 ```cmd
-python -m src.object_identification.evaluation ^
+python src\object_identification\evaluation.py ^
   --cases 60 ^
   --seed 20260728 ^
   --output-directory outputs\object_identification\evaluation
@@ -243,7 +243,7 @@ Random Forest, calibrates each model on a separate scenario split, and evaluates
 the selected artifact on held-out scenarios:
 
 ```cmd
-python -m src.object_identification.ml_association ^
+python src\object_identification\ml_association.py ^
   --cases 300 ^
   --seed 20260728 ^
   --output-directory outputs\object_identification\ml
@@ -271,7 +271,7 @@ After training, run the saved artifact against one observation and one or more
 candidate triplets:
 
 ```cmd
-python -m src.object_identification.ml_inference ^
+python src\object_identification\ml_inference.py ^
   --artifact outputs\object_identification\ml\object-identification-ml.joblib ^
   --observation tests\fixtures\object_identification\tracking-observation.example.json ^
   --candidate tests\fixtures\object_identification\multi_candidate\clear-best.catalog.json tests\fixtures\object_identification\multi_candidate\clear-best.orbital.json tests\fixtures\object_identification\multi_candidate\clear-best.affiliation.json ^
