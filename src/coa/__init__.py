@@ -13,6 +13,7 @@ from .decision_support import (
     build_coa_report,
     validate_coa_report,
 )
+from .decision_tree import evaluate_coa_decision_tree
 
 __all__ = [
     "COAEvidenceAdapterError",
@@ -22,6 +23,7 @@ __all__ = [
     "adapt_health_report",
     "adapt_object_identification",
     "build_coa_report",
+    "evaluate_coa_decision_tree",
     "validate_coa_evidence",
     "validate_coa_report",
 ]

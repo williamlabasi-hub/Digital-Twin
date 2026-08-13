@@ -163,6 +163,15 @@ class COADecisionSupportTests(unittest.TestCase):
             report["decision_scope"],
             "operator_advisory_only_no_command_authority",
         )
+        self.assertEqual(report["contract_version"], "0.2.0")
+        self.assertEqual(
+            report["decision_tree"]["terminal_node"],
+            "candidate_coas_generated",
+        )
+        self.assertIn(
+            "COA_URGENT_COLLISION_RESPONSE_REVIEW",
+            {item["code"] for item in report["candidate_coas"]},
+        )
         self.assertEqual(
             set(report["blocked_actions"]),
             {
@@ -170,6 +179,39 @@ class COADecisionSupportTests(unittest.TestCase):
                 "autonomous_spacecraft_command",
                 "threat_designation_from_proximity",
             },
+        )
+        self.assertIn(
+            "COA_URGENT_COLLISION_RESPONSE_REVIEW",
+            report["operator_summary"]["selected_coa_codes"],
+        )
+        self.assertIn("no command", report["operator_summary"]["operator_action"])
+
+    def test_stale_and_unsynchronized_evidence_limits_report(self) -> None:
+        report = build_coa_report(
+            evidence_set(),
+            generated_at=datetime(2026, 8, 2, tzinfo=timezone.utc),
+        )
+        self.assertEqual(report["status"], "limited")
+        self.assertTrue(any(
+            "stale" in item
+            for item in report["operator_summary"]["selection_basis"]
+        ))
+
+    def test_future_evidence_is_rejected(self) -> None:
+        with self.assertRaisesRegex(COADecisionSupportError, "dated after"):
+            build_coa_report(
+                evidence_set(),
+                generated_at=datetime(2026, 7, 29, 19, tzinfo=timezone.utc),
+            )
+
+    def test_invalid_data_quality_is_withheld(self) -> None:
+        health = health_source()
+        health["data_quality"]["status"] = "invalid"
+        evidence = adapt_health_report(health)
+        self.assertEqual(evidence["decision_support"]["usability"], "withheld")
+        self.assertEqual(
+            evidence["decision_support"]["withheld_reason"],
+            "health_data_quality_invalid",
         )
 
     def test_degraded_collision_evidence_limits_report(self) -> None:
@@ -184,6 +226,10 @@ class COADecisionSupportTests(unittest.TestCase):
         self.assertEqual(
             report["advisories"][0]["code"],
             "IMPROVE_DEGRADED_EVIDENCE",
+        )
+        self.assertEqual(
+            report["candidate_coas"][0]["code"],
+            "COA_IMPROVE_DEGRADED_EVIDENCE",
         )
 
     def test_withheld_evidence_blocks_advisory_selection(self) -> None:
@@ -206,6 +252,14 @@ class COADecisionSupportTests(unittest.TestCase):
             ["RESOLVE_WITHHELD_EVIDENCE"],
         )
         self.assertEqual(
+            [item["code"] for item in report["candidate_coas"]],
+            ["COA_RESOLVE_WITHHELD_EVIDENCE"],
+        )
+        self.assertEqual(
+            report["decision_tree"]["terminal_node"],
+            "insufficient_evidence",
+        )
+        self.assertEqual(
             report["evidence_summary"][1]["subject_id"],
             "OBS-001",
         )
@@ -226,6 +280,13 @@ class COADecisionSupportTests(unittest.TestCase):
             if item["code"] == "ASSESS_HEALTH_CONSTRAINTS"
         )
         self.assertEqual(health_advisory["priority"], "urgent")
+        health_coa = next(
+            item
+            for item in report["candidate_coas"]
+            if item["code"] == "COA_ASSESS_HEALTH_CONSTRAINTS"
+        )
+        self.assertEqual(health_coa["priority"], "urgent")
+        self.assertTrue(health_coa["requires_operator_approval"])
 
     def test_subject_mismatch_is_rejected(self) -> None:
         records = evidence_set()
@@ -285,7 +346,7 @@ class COADecisionSupportTests(unittest.TestCase):
                     "--output",
                     str(output),
                     "--generated-at",
-                    "2026-07-30T20:00:00Z",
+                    "2026-07-29T20:05:00Z",
                 ],
                 cwd=REPOSITORY_ROOT,
                 env={
@@ -300,7 +361,7 @@ class COADecisionSupportTests(unittest.TestCase):
             self.assertEqual(completed.returncode, 0, completed.stderr)
             report = json.loads(output.read_text(encoding="utf-8"))
             self.assertEqual(report["status"], "advisory_ready")
-            self.assertEqual(report["generated_at"], "2026-07-30T20:00:00Z")
+            self.assertEqual(report["generated_at"], "2026-07-29T20:05:00Z")
         finally:
             for path in [*inputs, output]:
                 path.unlink(missing_ok=True)

@@ -51,6 +51,25 @@ output folders and are intentionally excluded from version control.
 
 Development and branch conventions are documented in `CONTRIBUTING.md`.
 
+## Integrated golden path
+
+Run the versioned synthetic Health, Object Identification, Collision Risk, and
+COA workflow end to end:
+
+```powershell
+python scripts\run_golden_path.py
+```
+
+Use Landon's live TLE retrieval and propagation stage with:
+
+```powershell
+python scripts\run_golden_path.py --orbital-source live
+```
+
+The validated artifacts are written under `outputs/golden-path/`. See
+[`docs/GOLDEN_PATH.md`](docs/GOLDEN_PATH.md) for the scenario boundaries and
+artifact inventory.
+
 ## Capstone health demo
 
 Launch the presentation-ready health ML dashboard from the repository root:

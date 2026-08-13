@@ -97,7 +97,10 @@ def adapt_health_report(
 
     health_status = overall.get("status")
     quality_status = data_quality.get("status", "degraded")
-    if health_status == "Unknown":
+    if quality_status == "invalid":
+        usability = "withheld"
+        withheld_reason = "health_data_quality_invalid"
+    elif health_status == "Unknown":
         usability = "withheld"
         withheld_reason = "overall_health_unknown"
     elif quality_status == "degraded":
@@ -242,7 +245,10 @@ def adapt_object_identification(
     clear_identity = identity_status == "known" and (
         decision_basis in (None, "clear_match")
     )
-    if not clear_identity:
+    if quality_status == "invalid":
+        usability = "withheld"
+        withheld_reason = "object_identification_data_quality_invalid"
+    elif not clear_identity:
         usability = "withheld"
         withheld_reason = (
             decision_basis
@@ -397,6 +403,13 @@ def adapt_collision_risk(
         raise COAEvidenceAdapterError(
             "Collision-risk assessment_status must be complete, "
             "geometric_only, or abstained."
+        )
+    if quality_status == "invalid":
+        usability = "withheld"
+        withheld_reason = (
+            str(abstention_reason)
+            if abstention_reason
+            else "collision_risk_data_quality_invalid"
         )
 
     closest_approach = assessment.get("closest_approach")
