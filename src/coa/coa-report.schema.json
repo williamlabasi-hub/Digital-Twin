@@ -15,7 +15,10 @@
     "status",
     "evidence_summary",
     "assessment",
+    "decision_tree",
+    "candidate_coas",
     "advisories",
+    "operator_summary",
     "blocked_actions",
     "limitations",
     "decision_scope",
@@ -23,8 +26,8 @@
     "use_designation"
   ],
   "properties": {
-    "schema_version": {"const": "0.1.0"},
-    "contract_version": {"const": "0.1.0"},
+    "schema_version": {"const": "0.2.0"},
+    "contract_version": {"const": "0.2.0"},
     "report_id": {"type": "string", "minLength": 1},
     "generated_at": {"type": "string", "format": "date-time"},
     "primary_subject_id": {"type": "string", "minLength": 1},
@@ -96,6 +99,71 @@
         }
       }
     },
+    "decision_tree": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["policy_name", "policy_version", "terminal_node", "trace"],
+      "properties": {
+        "policy_name": {"const": "prototype-coa-decision-tree"},
+        "policy_version": {"const": "prototype-0.2"},
+        "terminal_node": {
+          "enum": ["insufficient_evidence", "candidate_coas_generated"]
+        },
+        "trace": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["node_id", "question", "observed_value", "branch"],
+            "properties": {
+              "node_id": {"type": "string", "minLength": 1},
+              "question": {"type": "string", "minLength": 1},
+              "observed_value": {"type": "string", "minLength": 1},
+              "branch": {"type": "string", "minLength": 1}
+            }
+          }
+        }
+      }
+    },
+    "candidate_coas": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "code",
+          "name",
+          "priority",
+          "disposition",
+          "rationale",
+          "actions",
+          "constraints",
+          "requires_operator_approval"
+        ],
+        "properties": {
+          "code": {"type": "string", "pattern": "^COA_[A-Z0-9_]+$"},
+          "name": {"type": "string", "minLength": 1},
+          "priority": {"enum": ["routine", "watch", "priority", "urgent"]},
+          "disposition": {
+            "enum": ["prerequisite", "planning_only", "recommended_for_review"]
+          },
+          "rationale": {"type": "string", "minLength": 1},
+          "actions": {
+            "type": "array",
+            "minItems": 1,
+            "items": {"type": "string", "minLength": 1}
+          },
+          "constraints": {
+            "type": "array",
+            "minItems": 1,
+            "items": {"type": "string", "minLength": 1}
+          },
+          "requires_operator_approval": {"const": true}
+        }
+      }
+    },
     "advisories": {
       "type": "array",
       "minItems": 1,
@@ -116,6 +184,17 @@
           "rationale": {"type": "string", "minLength": 1},
           "requires_operator_review": {"type": "boolean"}
         }
+      }
+    },
+    "operator_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["headline", "selection_basis", "selected_coa_codes", "operator_action"],
+      "properties": {
+        "headline": {"type": "string", "minLength": 1},
+        "selection_basis": {"type": "array", "minItems": 3, "items": {"type": "string", "minLength": 1}},
+        "selected_coa_codes": {"type": "array", "minItems": 1, "items": {"type": "string", "pattern": "^COA_[A-Z0-9_]+$"}},
+        "operator_action": {"type": "string", "minLength": 1}
       }
     },
     "blocked_actions": {
@@ -144,7 +223,7 @@
       "required": ["name", "version", "validation_status"],
       "properties": {
         "name": {"const": "prototype-coa-decision-support"},
-        "version": {"const": "prototype-0.1"},
+        "version": {"const": "prototype-0.2"},
         "validation_status": {"const": "prototype_unvalidated"}
       }
     },
