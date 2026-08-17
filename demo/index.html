@@ -47,6 +47,19 @@
         </article>
       </section>
 
+      <section class="panel report-explorer">
+        <div class="panel-title report-heading">
+          <div><p class="eyebrow">Validated source artifacts</p><h3>Report details</h3><p class="report-intro">Inspect the evidence and calculations behind each summary result.</p></div>
+          <div class="report-tabs" role="tablist" aria-label="Detailed subsystem reports">
+            <button class="report-tab active" type="button" role="tab" data-report="health" aria-selected="true">Health</button>
+            <button class="report-tab" type="button" role="tab" data-report="identity" aria-selected="false">Identity</button>
+            <button class="report-tab" type="button" role="tab" data-report="collision" aria-selected="false">Collision</button>
+            <button class="report-tab" type="button" role="tab" data-report="coa" aria-selected="false">COA</button>
+          </div>
+        </div>
+        <div id="report-detail" class="report-detail" role="tabpanel"></div>
+      </section>
+
       <footer><span>Non-operational synthetic scenario</span><span>Fixture evidence / synchronized state not established</span></footer>
     </main>
 
