@@ -1,10 +1,9 @@
-# Health ML capstone demo
+# Integrated operator dashboard
 
-This browser-based dashboard presents a committed Version 1.1 health-report
-fixture without changing its decisions. It reads the validated report at
-`demo/data/health_predictions.json` and provides four-class scenario selection,
-timeline playback, subsystem status, model assurance, evidence, command
-context, telemetry, and preliminary advisories.
+This dependency-free browser dashboard presents the latest validated
+golden-path run across Health, Object Identification, Collision Risk, and COA
+decision support. It displays prototype evidence and operator review options;
+it cannot authorize or execute commands or maneuvers.
 
 ## Run
 
@@ -14,26 +13,21 @@ From the repository root:
 python demo\start_demo.py
 ```
 
-Open `http://127.0.0.1:8000/demo/`. Use the four status buttons for a controlled presentation or **Run timeline** for automatic playback. The left and right arrow keys also move between records.
+The launcher first publishes a new deterministic golden-path run, then serves
+the dashboard at `http://127.0.0.1:8000/demo/`. Use `--scenario` to demonstrate
+an expected degraded-evidence mode, or `--skip-run` to display the current
+latest run without generating another one.
 
-## Suggested 3-minute presentation flow
+The browser reads `/api/dashboard`. The server validates `latest.json` and the
+referenced summary against dashboard contract Version 1.0.0, constrains all
+artifact paths to the published run, and returns the detailed Health, identity,
+collision, and COA artifacts. Missing, invalid, or unsupported data produces a
+visible compatibility error rather than guessed display values.
 
-1. Start on **Healthy** and explain the telemetry-to-decision pipeline.
-2. Select **Warning**, then point to the subsystem grid and observed evidence.
-3. Select **Critical** and contrast the ML confidence with model assurance.
-4. Open telemetry details to show traceability back to measurements.
-5. Close on the validation boundary: 100 synthetic scenarios pass, but hardware-in-the-loop validation remains pending.
+## Suggested presentation flow
 
-## Refresh the underlying result
-
-```powershell
-python src\health\health_monitor.py
-python scripts\validate_health_scenarios.py
-Copy-Item data\outputs\health\health_predictions.json demo\data\health_predictions.json
-```
-
-The copy step intentionally promotes a validated runtime result into the
-versioned demo fixture. Review the generated report before committing it.
-
-The dashboard server is dependency-free and uses only Python's standard
-library.
+1. Identify `SAT-001` and the associated secondary track.
+2. Review the four subsystem status cards.
+3. Explain why degraded or withheld evidence limits the COA result.
+4. Review the ordered candidate COAs and their planning-only scope.
+5. End at operator review and the visible no-command-authority boundary.

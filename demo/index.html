@@ -3,242 +3,56 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Digital Twin Health Systems Prototype ML Model V1</title>
+  <meta name="description" content="Integrated satellite digital-twin operator decision-support prototype">
+  <title>Aegis Orbit — Operator Decision Support</title>
   <link rel="stylesheet" href="styles.css">
-  <style>
-    :root { --cyan: #276878; --line: #4c5358; --muted: #647078; }
-    body {
-      background: #d6d8da;
-      color: #172027;
-      font-family: "Segoe UI", Arial, sans-serif;
-    }
-    .topbar {
-      background: #c7cacf;
-      border-color: #a7acb0;
-      backdrop-filter: none;
-    }
-    .live i { box-shadow: none; background: #88a3ab; }
-    .eyebrow,
-    .kicker,
-    .label { color: #526c76; letter-spacing: .09em; }
-    .hero h2 { font-size: clamp(32px, 4vw, 52px); letter-spacing: -.025em; }
-    .mission-card { border-color: #87939a; }
-    .panel {
-      background: #292d30;
-      color: #eceff1;
-      border-color: #4c5358;
-      border-radius: 3px;
-      box-shadow: 0 3px 10px #00000024;
-    }
-    .panel .subsystem,
-    .panel .evidence-item,
-    .panel .telemetry div {
-      background: #353a3e;
-      border-color: #535b60;
-      border-radius: 2px;
-    }
-    .panel .evidence-item { border-left-color: #747e84; }
-    .panel .method,
-    .panel.status-card p,
-    .panel.metric small,
-    .panel .playback span,
-    .panel .evidence-item span,
-    .panel .telemetry span { color: #46525a; }
-    .panel .method,
-    .panel.status-card p,
-    .panel.metric small,
-    .panel .playback span,
-    .panel .evidence-item span,
-    .panel .telemetry span { color: #aeb7bc; }
-    .panel button {
-      background: #3b4145;
-      color: #eceff1;
-      border-color: #626a70;
-      border-radius: 2px;
-    }
-    .panel button:hover,
-    .panel button.active { background: #4a5156; color: #c6e3e8; border-color: #82959c; }
-    .panel .prob-track,
-    .panel .bar { background: #4c5358; }
-    .panel .label { color: #8fb7c0; }
-    .status-row i { box-shadow: none !important; }
-
-    /* Space-opera command console theme */
-    :root { --cyan: #55c8e8; --line: #6f642f; --muted: #a8a28b; }
-    body { background: #050608; color: #e8e3cc; font-family: Consolas, "Courier New", monospace; }
-    body::before {
-      content: ""; position: fixed; inset: 0; width: 2px; height: 2px; background: #fff;
-      box-shadow: 5vw 8vh #fff, 14vw 22vh #8ca1aa, 26vw 11vh #fff, 37vw 31vh #59676d,
-        48vw 6vh #fff, 58vw 19vh #9ba8ad, 69vw 10vh #fff, 81vw 27vh #68777d,
-        93vw 7vh #fff, 8vw 48vh #68777d, 19vw 63vh #fff, 31vw 44vh #8ca1aa,
-        43vw 72vh #fff, 54vw 51vh #68777d, 66vw 67vh #fff, 77vw 43vh #8ca1aa,
-        89vw 59vh #fff, 97vw 81vh #68777d, 12vw 87vh #fff, 35vw 91vh #8ca1aa,
-        61vw 89vh #fff, 84vw 94vh #68777d;
-      opacity: .65; pointer-events: none; z-index: -1;
-    }
-    .topbar { background: #080a0d; border-color: #8c7a27; }
-    .topbar h1, .hero h2 { color: #f2d75c; }
-    .eyebrow, .kicker, .label, .panel .label { color: #f2d75c; }
-    .hero h2 { text-transform: uppercase; letter-spacing: .035em; }
-    .lede, .mission-card span, .mission-card small { color: #b8b49f; }
-    .mission-card { border-color: #f2d75c; }
-    .panel {
-      background: #111419; color: #e8e3cc; border-color: #8c7a27; border-radius: 0;
-      box-shadow: 0 0 0 1px #29240f, 0 6px 18px #0008;
-      clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
-    }
-    .panel .subsystem, .panel .evidence-item, .panel .telemetry div {
-      background: #1b2026; border-color: #4e5760; border-radius: 0;
-    }
-    .panel .evidence-item { border-left-color: #f2d75c; }
-    .panel button { background: #171c22; color: #f2d75c; border-color: #8c7a27; border-radius: 0; }
-    .panel button:hover, .panel button.active { background: #29240f; color: #fff2a8; border-color: #f2d75c; }
-    .panel .prob-track, .panel .bar { background: #30363d; }
-    .live { color: #9fb3ba; }
-    .live i { background: #ef5b5b; }
-    footer { color: #8f8a76; }
-    body::after {
-      content: ""; position: fixed; inset: 0; width: 1px; height: 1px; background: #fff;
-      pointer-events: none; z-index: -1; opacity: .5; transform: translateY(var(--stars-far, 0));
-      box-shadow: 2vw 17vh #fff, 7vw 73vh #65747a, 11vw 39vh #fff, 16vw 92vh #8ca1aa,
-        22vw 54vh #fff, 29vw 83vh #59676d, 34vw 14vh #fff, 41vw 61vh #8ca1aa,
-        47vw 38vh #fff, 52vw 96vh #65747a, 57vw 27vh #fff, 63vw 76vh #8ca1aa,
-        68vw 47vh #fff, 73vw 88vh #59676d, 79vw 16vh #fff, 85vw 69vh #8ca1aa,
-        91vw 43vh #fff, 96vw 91vh #65747a, 4vw 58vh #fff, 18vw 6vh #59676d,
-        38vw 87vh #fff, 56vw 66vh #65747a, 76vw 34vh #fff, 88vw 4vh #8ca1aa;
-    }
-    body::before { transform: translateY(var(--stars-near, 0)); }
-    .space-scene { height: 190px; position: relative; overflow: hidden; margin: -15px 0 22px; }
-    .battle-station {
-      position: absolute; left: 7%; top: 18px; width: 138px; height: 138px; border-radius: 50%;
-      background: repeating-linear-gradient(12deg, #252b31 0 6px, #343b42 7px 9px);
-      border: 2px solid #68727a; box-shadow: inset -22px -14px 22px #050608, 0 0 24px #84939b55;
-    }
-    .battle-station::before {
-      content: ""; position: absolute; width: 42px; height: 42px; border-radius: 50%;
-      right: 23px; top: 27px; background: #11161a; border: 3px solid #515b63;
-      box-shadow: inset 8px 4px 8px #000;
-    }
-    .battle-station::after { content: ""; position: absolute; left: 0; right: 0; top: 68px; border-top: 3px solid #161a1e; }
-    .fighter { position: absolute; right: 9%; top: 35px; width: 220px; height: 104px; transform: rotate(-8deg); }
-    .cockpit {
-      position: absolute; left: 78px; top: 22px; width: 68px; height: 56px; border-radius: 48% 55% 35% 35%;
-      background: #445761; border: 3px solid #98a8ad; color: #fff; font-size: 35px;
-      display: grid; place-items: center; z-index: 3; overflow: hidden;
-    }
-    .fuselage { position: absolute; left: 35px; top: 61px; width: 166px; height: 25px; background: #79858a; clip-path: polygon(0 45%, 70% 0, 100% 45%, 70% 100%); }
-    .wing { position: absolute; left: 20px; width: 185px; height: 18px; background: #a2aaad; clip-path: polygon(0 50%, 100% 0, 86% 100%); }
-    .wing.top { top: 30px; transform: rotate(-13deg); }
-    .wing.bottom { top: 91px; transform: rotate(13deg) scaleY(-1); }
-    .engine { position: absolute; right: 5px; top: 64px; width: 28px; height: 18px; background: #55c8e8; box-shadow: 16px 0 20px #55c8e8; }
-    .laser { position: absolute; height: 3px; width: 170px; transform-origin: left; box-shadow: 0 0 8px currentColor; }
-    .laser.red { color: #ff4747; background: #ff4747; left: 25%; top: 35px; transform: rotate(10deg); }
-    .laser.green { color: #66ff7a; background: #66ff7a; left: 47%; top: 145px; transform: rotate(-13deg); }
-    .laser.red.two { left: 62%; top: 28px; width: 110px; transform: rotate(19deg); }
-    @media(max-width:700px){.space-scene{height:150px}.battle-station{width:100px;height:100px}.fighter{right:-25px;transform:scale(.72) rotate(-8deg)}}
-    .space-scene { display: none; }
-    .orbital-decor { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
-    .orbital-decor::before {
-      content: ""; position: absolute; inset: 0;
-      background: url("assets/earth-only-background.png") center bottom / contain no-repeat;
-      transform: translateY(var(--planet-shift, 0));
-    }
-    .corner-station {
-      position: absolute; right: -28px; top: 86px; width: 220px; height: 220px; border-radius: 50%;
-      background: url("assets/orbital-station-realistic.png") center / contain no-repeat;
-      border: 0; box-shadow: none;
-      transform: translateY(var(--station-shift, 0));
-    }
-    .corner-station::before {
-      content: ""; position: absolute; width: 48px; height: 48px; border-radius: 50%; left: 35px; top: 38px;
-      background: #11161a; border: 3px solid #515b63; box-shadow: inset 8px 4px 8px #000;
-    }
-    .corner-station::after { content: ""; position: absolute; left: 0; right: 0; top: 86px; border-top: 3px solid #161a1e; }
-    .corner-station::before, .corner-station::after { display: none; }
-    .earth-planet {
-      position: absolute; left: 50%; bottom: -320px; width: min(760px, 92vw); aspect-ratio: 1; border-radius: 50%;
-      transform: translateX(-50%) translateY(var(--planet-shift, 0));
-      background: radial-gradient(circle at 38% 30%, #82b978 0 7%, #30704c 8% 15%, transparent 16%),
-        radial-gradient(circle at 62% 38%, #91bd73 0 8%, #356e49 9% 18%, transparent 19%),
-        radial-gradient(circle at 48% 47%, #4c91bb 0 52%, #183d65 70%, #071321 100%);
-      border: 2px solid #70b9df; box-shadow: 0 -10px 50px #4c9fd477, inset -70px -55px 80px #02070c;
-    }
-    .earth-planet { display: none; }
-    .dave-badge {
-      position: absolute; left: max(11.2vw, calc(50vw - 77.6vh)); top: clamp(205px, 35vh, 330px);
-      transform: translateY(var(--planet-shift, 0)) rotate(-1deg);
-      background: #f2f0df; color: #15191c; border: 2px solid #70777b; border-radius: 3px;
-      padding: 4px 12px; font: 700 12px/1 Consolas, monospace; letter-spacing: .16em;
-      box-shadow: 0 2px 5px #0008;
-    }
-    @media(max-width:700px){.dave-badge{left:8vw;top:235px;font-size:9px;padding:3px 7px}.corner-station{width:120px;height:120px}}
-  </style>
 </head>
 <body>
-  <div class="orbital-decor" aria-hidden="true"></div>
-  <header class="topbar">
-    <div><span class="eyebrow">SDA ORBITAL COMMAND</span><h1>Digital Twin Health Systems Console</h1></div>
-    <div class="live"><i></i> SYNTHETIC TELEMETRY // LIVE</div>
-  </header>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand-mark" aria-hidden="true"><span></span></div>
+      <div><p class="eyebrow">Digital twin / mission assurance</p><h1>Aegis Orbit</h1></div>
+      <div class="run-meta"><span class="status-light"></span><div><small>Validated run</small><strong id="run-id">Loading…</strong></div></div>
+    </header>
 
-  <main>
-    <section class="hero">
-      <div>
-        <p class="kicker">A LONG TIME AGO, IN A LAB NOT FAR AWAY...</p>
-        <h2>Health Assessment</h2>
-        <p class="lede">A hybrid Random Forest and engineering-rules pipeline identifies spacecraft health, checks model applicability, and preserves evidence for operator review.</p>
-      </div>
-      <div class="mission-card">
-        <span>SELECTED SPACECRAFT</span>
-        <strong id="satellite">—</strong>
-        <small id="timestamp">Loading verified scenario data…</small>
-      </div>
-    </section>
+    <main id="dashboard" hidden>
+      <section class="mission-strip">
+        <div><p class="eyebrow">Primary spacecraft</p><h2 id="spacecraft">—</h2><p id="scenario-label" class="muted">Integrated prototype golden path</p></div>
+        <div class="mission-stat"><small>Identity track</small><strong id="identity-track">—</strong></div>
+        <div class="mission-stat"><small>Published</small><strong id="published">—</strong></div>
+        <div class="mission-stat"><small>Contract</small><strong id="contract">—</strong></div>
+      </section>
 
-    <section class="controls panel">
-      <div class="scenario-buttons" id="scenarios"></div>
-      <div class="playback">
-        <button id="previous" aria-label="Previous scenario">←</button>
-        <button id="play">▶ Run timeline</button>
-        <button id="next" aria-label="Next scenario">→</button>
-        <span id="position">— / —</span>
-      </div>
-    </section>
+      <section class="alert-banner" role="note">
+        <span class="alert-icon">!</span>
+        <div><strong>Prototype decision support only</strong><p>No command or maneuver authority. Operator approval and refined evidence are required.</p></div>
+      </section>
 
-    <section class="summary-grid">
-      <article class="status-card panel">
-        <span class="label">OVERALL HEALTH</span>
-        <div class="status-row"><i id="status-dot"></i><strong id="status">—</strong></div>
-        <p id="contributors">Awaiting data</p>
-      </article>
-      <article class="metric panel"><span class="label">ML CONFIDENCE</span><strong id="confidence">—</strong><div class="bar"><i id="confidence-bar"></i></div><small>Uncalibrated RF vote fraction</small></article>
-      <article class="metric panel"><span class="label">MODEL ASSURANCE</span><strong id="assurance">—</strong><small id="assurance-note">Training-profile bounds check</small></article>
-      <article class="metric panel"><span class="label">LATEST COMMAND</span><strong id="command">—</strong><small id="command-note">—</small></article>
-    </section>
+      <section class="status-grid" aria-label="Subsystem assessment overview">
+        <article class="status-card"><div class="card-head"><span>01</span><p>Spacecraft health</p></div><div class="status-line"><i id="health-dot"></i><strong id="health-status">—</strong></div><p id="health-note" class="card-copy">Awaiting validated evidence.</p></article>
+        <article class="status-card"><div class="card-head"><span>02</span><p>Object identification</p></div><div class="status-line"><i id="identity-dot"></i><strong id="identity-status">—</strong></div><p id="identity-note" class="card-copy">Awaiting validated evidence.</p></article>
+        <article class="status-card"><div class="card-head"><span>03</span><p>Collision assessment</p></div><div class="status-line"><i id="collision-dot"></i><strong id="collision-status">—</strong></div><p id="collision-note" class="card-copy">Awaiting validated evidence.</p></article>
+        <article class="status-card accent"><div class="card-head"><span>04</span><p>COA decision support</p></div><div class="status-line"><i id="coa-dot"></i><strong id="coa-status">—</strong></div><p id="coa-note" class="card-copy">Awaiting validated evidence.</p></article>
+      </section>
 
-    <section class="main-grid">
-      <article class="panel subsystem-panel">
-        <div class="section-head"><div><span class="label">EXPLAINABLE ASSESSMENT</span><h3>Subsystem health</h3></div><span class="method">Maximum severity aggregation</span></div>
-        <div id="subsystems" class="subsystems"></div>
-      </article>
-      <article class="panel probability-panel">
-        <span class="label">MODEL OUTPUT</span><h3>Class probabilities</h3>
-        <div id="probabilities"></div>
-        <div class="divider"></div>
-        <span class="label">OPERATOR ADVISORY</span>
-        <ul id="recommendations"></ul>
-      </article>
-    </section>
+      <section class="workspace">
+        <article class="panel evidence-panel">
+          <div class="panel-title"><div><p class="eyebrow">Evidence posture</p><h3>Decision confidence</h3></div><span id="overall-posture" class="tag">—</span></div>
+          <div id="evidence-list" class="evidence-list"></div>
+          <div class="limitations"><p class="eyebrow">Active limitations</p><ul id="limitations"></ul></div>
+        </article>
+        <article class="panel coa-panel">
+          <div class="panel-title"><div><p class="eyebrow">Ordered response options</p><h3>Candidate courses of action</h3></div><span class="review-badge">Review only</span></div>
+          <ol id="coa-list" class="coa-list"></ol>
+        </article>
+      </section>
 
-    <section class="panel evidence-panel">
-      <div class="section-head"><div><span class="label">WHY THIS RESULT?</span><h3>Observed evidence</h3></div><button id="details">Show telemetry details</button></div>
-      <div id="evidence" class="evidence"></div>
-      <div id="telemetry" class="telemetry hidden"></div>
-    </section>
+      <footer><span>Non-operational synthetic scenario</span><span>Fixture evidence / synchronized state not established</span></footer>
+    </main>
 
-    <footer><span>Prototype v0.1 • 100 synthetic fault-injection scenarios validated</span><span>Not flight-qualified • Hardware-in-the-loop validation pending</span></footer>
-    <p style="text-align:center;color:#f2d75c;font-size:11px;letter-spacing:.12em">DAVE APPROVAL STATUS: PROBABLY A DISTURBANCE IN THE FORCE</p>
-  </main>
-  <script src="app.js?v=20260806-ml-degraded-explanation"></script>
+    <section id="loading" class="state-screen" aria-live="polite"><div class="loader" aria-hidden="true"></div><p class="eyebrow">Validating dashboard handoff</p><h2>Resolving latest complete run</h2></section>
+    <section id="error" class="state-screen error-screen" hidden role="alert"><span class="error-code">DATA LINK ERROR</span><h2 id="error-title">Dashboard unavailable</h2><p id="error-message">The latest validated run could not be loaded.</p><button id="retry" type="button">Retry data link</button></section>
+  </div>
+  <script src="app.js"></script>
 </body>
 </html>

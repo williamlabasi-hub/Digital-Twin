@@ -73,14 +73,15 @@ artifact inventory, and
 [`docs/PROTOTYPE_DEMO_SCENARIO.md`](docs/PROTOTYPE_DEMO_SCENARIO.md) for the
 frozen operator demonstration and acceptance criteria.
 
-## Capstone health demo
+## Integrated operator dashboard
 
-Launch the presentation-ready health ML dashboard from the repository root:
+Launch the integrated decision-support dashboard from the repository root:
 
 ```powershell
 python demo\start_demo.py
 ```
 
-Then open `http://127.0.0.1:8000/demo/`. The dashboard uses the committed,
-schema-validated fixture under `demo/data/`; see `demo/README.md` for the
-suggested presentation flow and refresh procedure.
+Then open `http://127.0.0.1:8000/demo/`. The launcher publishes a deterministic
+golden-path run and the dashboard validates the Version 1 handoff before
+showing Health, identity, collision-risk, evidence, and COA results. See
+`demo/README.md` for scenario controls and the presentation flow.
