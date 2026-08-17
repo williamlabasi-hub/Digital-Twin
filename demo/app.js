@@ -16,6 +16,7 @@ const tone = value => value === 'usable' || value === 'complete' || value === 'H
 const text = value => labels[value] || value || 'Unknown';
 const esc = value => String(value ?? '—').replace(/[&<>"']/g, character => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[character]));
 const pct = value => value === null || value === undefined ? '—' : `${(Number(value) * 100).toFixed(2)}%`;
+const probabilityPct = value => value === null || value === undefined ? '—' : `${(Number(value) * 100).toFixed(4)}%`;
 const number = (value, digits = 3) => value === null || value === undefined ? '—' : Number(value).toFixed(digits);
 let dashboardPayload = null;
 
@@ -74,7 +75,7 @@ function renderCollisionReport(report) {
   const probability = report.probability || {};
   return hero([
     ['Assessment', report.assessment_status], ['Risk level', report.risk?.level],
-    ['Miss distance', `${number(closest.miss_distance_km, 6)} km`], ['Collision probability', pct(probability.collision_probability)]
+    ['Miss distance', `${number(closest.miss_distance_km, 6)} km`], ['Collision probability', probabilityPct(probability.collision_probability)]
   ]) + `<div class="detail-layout">
     <section class="detail-section"><h4>Encounter geometry</h4>${detailGrid([
       ['Closest approach', closest.time_of_closest_approach], ['Relative velocity', `${number(closest.relative_velocity_km_s, 6)} km/s`],
@@ -215,16 +216,16 @@ function renderTrajectory(view = 'combined') {
   const metrics = view === 'identity' ? [
     ['Selected identity', prediction.canonical_object_id], ['Match score', number(prediction.match_score, 6)], ['Candidate count', prediction.candidate_selection?.candidate_count]
   ] : view === 'collision' ? [
-    ['Time of closest approach', collision.closest_approach?.time_of_closest_approach], ['Miss distance', `${number(collision.closest_approach?.miss_distance_km, 6)} km`], ['Collision probability', pct(collision.probability?.collision_probability)]
+    ['Time of closest approach', collision.closest_approach?.time_of_closest_approach], ['Miss distance', `${number(collision.closest_approach?.miss_distance_km, 6)} km`], ['Collision probability', probabilityPct(collision.probability?.collision_probability)]
   ] : [
-    ['Closest approach', `${number(collision.closest_approach?.miss_distance_km, 3)} km`], ['Prototype probability', pct(collision.probability?.collision_probability)], ['Selected match', `${prediction.canonical_object_id} / ${pct(prediction.match_score)}`]
+    ['Closest approach', `${number(collision.closest_approach?.miss_distance_km, 3)} km`], ['Prototype probability', probabilityPct(collision.probability?.collision_probability)], ['Selected match', `${prediction.canonical_object_id} / ${pct(prediction.match_score)}`]
   ];
   $('trajectory-metrics').innerHTML = metrics.map(([label, value]) => `<div class="trajectory-metric"><span>${esc(label)}</span><strong>${esc(value)}</strong></div>`).join('');
   $('trajectory-legend').innerHTML = view === 'identity'
     ? '<span><i style="background:var(--cyan)"></i>Tracking observation</span><span><i style="background:var(--green)"></i>Selected catalog match</span><span><i style="background:#798b93"></i>Alternative candidate</span>'
     : view === 'collision'
       ? '<span><i style="background:var(--cyan)"></i>SAT-001 reference path</span><span><i style="background:var(--amber)"></i>Secondary relative path</span><span><i style="background:var(--red)"></i>Miss distance / hard-body radius</span>'
-      : '<span><i style="background:var(--cyan)"></i>Primary / observation</span><span><i style="background:var(--amber)"></i>Secondary path</span><span><i style="background:var(--green)"></i>Selected identity</span>';
+      : '<span><i style="background:var(--cyan)"></i>Primary / observation</span><span><i style="background:var(--amber)"></i>Secondary path</span><span><i style="background:var(--green)"></i>Selected identity</span><span><i style="background:#798b93"></i>Alternative candidate</span>';
   document.querySelectorAll('.trajectory-tab').forEach(button => {
     const active = button.dataset.view === view;
     button.classList.toggle('active', active);
@@ -248,14 +249,17 @@ function render(payload) {
   $('identity-track').textContent = summary.identified_secondary_object_id || summary.tracked_secondary_subject_id;
   $('published').textContent = new Date(latest.published_at).toLocaleString();
   $('contract').textContent = `v${summary.dashboard_contract_version}`;
+  const temporalChecks = details.coa.operator_summary?.selection_basis?.filter(item => item.startsWith('Temporal check:')) || [];
+  $('evidence-alert').textContent = temporalChecks.length ? 'Evidence stale / unsynchronized' : 'Evidence timestamps aligned';
 
   const healthNote = details.health.data_quality?.status === 'degraded'
     ? 'Health result available with degraded input quality.' : 'Subsystem result available for operator review.';
   setStatus('health', summary.health_status, healthNote);
+  $('health-evidence').textContent = `Evidence: ${summary.evidence_usability.health}`;
   setStatus('identity', summary.object_identification_decision,
     summary.identified_secondary_object_id ? `Associated with ${summary.identified_secondary_object_id}. Affiliation does not establish intent.` : 'Canonical identity is withheld pending better evidence.');
-  setStatus('collision', summary.collision_assessment_status,
-    `${text(summary.collision_risk_level)} prototype risk. ${details.collision.risk?.basis || 'Review detailed evidence.'}`);
+  setStatus('collision', `${text(summary.collision_risk_level)} risk`,
+    `Assessment ${text(summary.collision_assessment_status).toLowerCase()}. Prototype probability ${probabilityPct(details.collision.probability?.collision_probability)}.`);
   setStatus('coa', summary.coa_status,
     summary.coa_status === 'limited' ? 'Planning support is available, but evidence limits action selection.' : 'Response options reflect the current evidence posture.');
 
@@ -283,11 +287,13 @@ function render(payload) {
   $('loading').hidden = true;
   $('error').hidden = true;
   $('dashboard').hidden = false;
+  $('section-nav').hidden = false;
 }
 
 function showError(error) {
   $('loading').hidden = true;
   $('dashboard').hidden = true;
+  $('section-nav').hidden = true;
   $('error').hidden = false;
   $('error-title').textContent = error.code === 'dashboard_version_unsupported' ? 'Contract version unsupported' : 'Validated run unavailable';
   $('error-message').textContent = error.message || 'The dashboard could not resolve a complete validated run.';
@@ -296,6 +302,7 @@ function showError(error) {
 async function load() {
   $('error').hidden = true;
   $('loading').hidden = false;
+  $('section-nav').hidden = true;
   try {
     const response = await fetch('/api/dashboard', {cache: 'no-store'});
     const payload = await response.json();
@@ -309,4 +316,12 @@ async function load() {
 $('retry').addEventListener('click', load);
 document.querySelectorAll('.report-tab').forEach(button => button.addEventListener('click', () => renderReport(button.dataset.report)));
 document.querySelectorAll('.trajectory-tab').forEach(button => button.addEventListener('click', () => renderTrajectory(button.dataset.view)));
+$('report-toggle').addEventListener('click', () => {
+  const expanded = $('report-toggle').getAttribute('aria-expanded') === 'true';
+  $('report-toggle').setAttribute('aria-expanded', String(!expanded));
+  $('report-toggle').textContent = expanded ? 'Show details' : 'Hide details';
+  $('report-tabs').hidden = expanded;
+  $('report-detail').hidden = expanded;
+  $('reports').classList.toggle('collapsed', expanded);
+});
 load();

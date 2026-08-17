@@ -12,13 +12,17 @@
     <header class="topbar">
       <div class="brand-mark" aria-hidden="true"><span></span></div>
       <div><p class="eyebrow">Digital twin / mission assurance</p><h1>SDA Satellite Digital Twin Dashboard</h1></div>
-      <div class="run-meta"><span class="status-light"></span><div><small>Validated run</small><strong id="run-id">Loading…</strong></div></div>
+      <div class="run-meta"><span class="status-light"></span><div><small>Validated run</small><strong id="run-id">Loading…</strong></div><span id="evidence-alert" class="header-alert">Evidence check pending</span></div>
     </header>
 
+    <nav id="section-nav" class="section-nav" hidden aria-label="Dashboard sections">
+      <a href="#mission">Mission</a><a href="#geometry">Geometry</a><a href="#assessments">Assessments</a><a href="#reports">Reports</a>
+    </nav>
+
     <main id="dashboard" hidden>
-      <section class="mission-strip">
+      <section id="mission" class="mission-strip">
         <div><p class="eyebrow">Primary spacecraft</p><h2 id="spacecraft">—</h2><p id="scenario-label" class="muted">Integrated prototype golden path</p></div>
-        <div class="mission-stat"><small>Identity track</small><strong id="identity-track">—</strong></div>
+        <div class="mission-stat"><small>Identified object</small><strong id="identity-track">—</strong></div>
         <div class="mission-stat"><small>Published</small><strong id="published">—</strong></div>
         <div class="mission-stat"><small>Contract</small><strong id="contract">—</strong></div>
       </section>
@@ -28,7 +32,7 @@
         <div><strong>Prototype decision support only</strong><p>No command or maneuver authority. Operator approval and refined evidence are required.</p></div>
       </section>
 
-      <section class="panel trajectory-panel" aria-labelledby="trajectory-title">
+      <section id="geometry" class="panel trajectory-panel" aria-labelledby="trajectory-title">
         <div class="panel-title trajectory-heading">
           <div><p class="eyebrow">Spatial evidence</p><h3 id="trajectory-title">Encounter and identification geometry</h3><p class="report-intro">Synthetic prototype geometry derived directly from the validated report.</p></div>
           <div class="trajectory-tabs" role="group" aria-label="Geometry view">
@@ -45,8 +49,8 @@
         <p class="trajectory-disclaimer">Relative linear-motion view—not a full propagated orbit. Axes and scale change between collision and identification views.</p>
       </section>
 
-      <section class="status-grid" aria-label="Subsystem assessment overview">
-        <article class="status-card"><div class="card-head"><span>01</span><p>Spacecraft health</p></div><div class="status-line"><i id="health-dot"></i><strong id="health-status">—</strong></div><p id="health-note" class="card-copy">Awaiting validated evidence.</p></article>
+      <section id="assessments" class="status-grid" aria-label="Subsystem assessment overview">
+        <article class="status-card"><div class="card-head"><span>01</span><p>Spacecraft health</p></div><div class="status-line"><i id="health-dot"></i><strong id="health-status">—</strong></div><div class="status-qualifiers"><span>State result</span><strong id="health-evidence">Evidence: —</strong></div><p id="health-note" class="card-copy">Awaiting validated evidence.</p></article>
         <article class="status-card"><div class="card-head"><span>02</span><p>Object identification</p></div><div class="status-line"><i id="identity-dot"></i><strong id="identity-status">—</strong></div><p id="identity-note" class="card-copy">Awaiting validated evidence.</p></article>
         <article class="status-card"><div class="card-head"><span>03</span><p>Collision assessment</p></div><div class="status-line"><i id="collision-dot"></i><strong id="collision-status">—</strong></div><p id="collision-note" class="card-copy">Awaiting validated evidence.</p></article>
         <article class="status-card accent"><div class="card-head"><span>04</span><p>COA decision support</p></div><div class="status-line"><i id="coa-dot"></i><strong id="coa-status">—</strong></div><p id="coa-note" class="card-copy">Awaiting validated evidence.</p></article>
@@ -64,17 +68,17 @@
         </article>
       </section>
 
-      <section class="panel report-explorer">
+      <section id="reports" class="panel report-explorer collapsed">
         <div class="panel-title report-heading">
           <div><p class="eyebrow">Validated source artifacts</p><h3>Report details</h3><p class="report-intro">Inspect the evidence and calculations behind each summary result.</p></div>
-          <div class="report-tabs" role="tablist" aria-label="Detailed subsystem reports">
+          <div class="report-actions"><button id="report-toggle" class="report-toggle" type="button" aria-expanded="false">Show details</button><div id="report-tabs" class="report-tabs" role="tablist" aria-label="Detailed subsystem reports" hidden>
             <button class="report-tab active" type="button" role="tab" data-report="health" aria-selected="true">Health</button>
             <button class="report-tab" type="button" role="tab" data-report="identity" aria-selected="false">Identity</button>
             <button class="report-tab" type="button" role="tab" data-report="collision" aria-selected="false">Collision</button>
             <button class="report-tab" type="button" role="tab" data-report="coa" aria-selected="false">COA</button>
-          </div>
+          </div></div>
         </div>
-        <div id="report-detail" class="report-detail" role="tabpanel"></div>
+        <div id="report-detail" class="report-detail" role="tabpanel" hidden></div>
       </section>
 
       <footer><span>Non-operational synthetic scenario</span><span>Fixture evidence / synchronized state not established</span></footer>
