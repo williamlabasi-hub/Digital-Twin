@@ -138,11 +138,11 @@ function collisionPlot(report, x, width) {
     <line x1="${left}" y1="${centerY}" x2="${right}" y2="${centerY}" class="trajectory-axis"/>
     <line x1="${centerX}" y1="${top}" x2="${centerX}" y2="${bottom}" class="trajectory-axis"/>
     ${ticks.map(value => `<line x1="${sx(value)}" y1="${top}" x2="${sx(value)}" y2="${bottom}" class="trajectory-grid"/><text x="${sx(value)}" y="300" text-anchor="middle" class="trajectory-label muted">${number(value,2)} km</text>`).join('')}
-    <line x1="${left}" y1="${centerY}" x2="${right}" y2="${centerY}" class="trajectory-path-primary" marker-end="url(#arrow-primary)"/>
-    <line x1="${left}" y1="${secondaryY}" x2="${right}" y2="${secondaryY}" class="trajectory-path-secondary" marker-end="url(#arrow-secondary)"/>
+    <line x1="${left}" y1="${centerY}" x2="${right}" y2="${centerY}" class="trajectory-path-primary trajectory-hover" marker-end="url(#arrow-primary)"><title>SAT-001 reference path in the relative encounter plane</title></line>
+    <line x1="${left}" y1="${secondaryY}" x2="${right}" y2="${secondaryY}" class="trajectory-path-secondary trajectory-hover" marker-end="url(#arrow-secondary)"><title>${esc(report.secondary_object_id)} relative path; speed ${number(relativeVelocity,6)} km/s</title></line>
     <circle cx="${centerX}" cy="${centerY}" r="${radius}" class="trajectory-hbr"/>
-    <circle cx="${centerX}" cy="${centerY}" r="6" class="trajectory-point-primary"><title>SAT-001 reference position at closest approach</title></circle>
-    <circle cx="${centerX}" cy="${secondaryY}" r="6" class="trajectory-point-secondary"><title>${esc(report.secondary_object_id)} at closest approach</title></circle>
+    <polygon points="${centerX},${centerY - 8} ${centerX + 8},${centerY} ${centerX},${centerY + 8} ${centerX - 8},${centerY}" class="trajectory-point-primary trajectory-hover"><title>SAT-001 at closest approach; hard-body radius ${number(report.probability?.hard_body_radius_m,1)} m</title></polygon>
+    <polygon points="${centerX},${secondaryY - 8} ${centerX + 8},${secondaryY + 7} ${centerX - 8},${secondaryY + 7}" class="trajectory-point-secondary trajectory-hover"><title>${esc(report.secondary_object_id)} at closest approach; miss distance ${number(miss,6)} km</title></polygon>
     <line x1="${centerX}" y1="${centerY}" x2="${centerX}" y2="${secondaryY}" class="trajectory-miss"/>
     <text x="${centerX + 9}" y="${(centerY + secondaryY) / 2}" class="trajectory-label accent">miss ${number(miss,3)} km</text>
     <text x="${centerX + 10}" y="${centerY + 18}" class="trajectory-label">SAT-001</text>
@@ -166,14 +166,35 @@ function identityPlot(report, x, width) {
   const sx = value => centerX + (value / extent) * (right - left) * .45;
   const sy = value => centerY - (value / extent) * (bottom - top) * .45;
   const selectedId = report.prediction?.canonical_object_id;
+  const observationLabelX = centerX + 13;
+  const observationLabelY = centerY + 24;
+  const candidateMarks = candidates.map(item => {
+    const px = sx(item.dx), py = sy(item.dy), rank = Number(item.ranking?.rank || 99);
+    let labelX, labelY, anchor;
+    if (rank === 1) {
+      labelX = centerX - 13; labelY = centerY - 28; anchor = 'end';
+    } else if (rank === 2) {
+      labelX = centerX + 24; labelY = centerY - 26; anchor = 'start';
+    } else if (px > right - 95) {
+      labelX = right - 5; labelY = py - 13; anchor = 'end';
+    } else {
+      labelX = px + 12; labelY = py - 13; anchor = 'start';
+    }
+    const marker = item.id === selectedId
+      ? `<polygon points="${px},${py - 8} ${px + 8},${py} ${px},${py + 8} ${px - 8},${py}" class="trajectory-candidate selected trajectory-hover"><title>Selected rank ${esc(item.ranking?.rank)}: ${esc(item.id)}; score ${number(item.ranking?.match_score,6)}; residual ${number(item.ranking?.position_residual_km,4)} km</title></polygon>`
+      : `<circle cx="${px}" cy="${py}" r="5" class="trajectory-candidate trajectory-hover"><title>Rank ${esc(item.ranking?.rank)}: ${esc(item.id)}; score ${number(item.ranking?.match_score,6)}; residual ${number(item.ranking?.position_residual_km,4)} km</title></circle>`;
+    return `<g><line x1="${centerX}" y1="${centerY}" x2="${px}" y2="${py}" class="trajectory-grid"/><line x1="${px}" y1="${py}" x2="${labelX + (anchor === 'end' ? -3 : 3)}" y2="${labelY + 3}" class="trajectory-leader"/>${marker}<text x="${labelX}" y="${labelY}" text-anchor="${anchor}" class="trajectory-label">${esc(item.ranking?.rank)} · ${esc(item.id)}</text></g>`;
+  }).join('');
   return `<g>
     <text x="${x + 12}" y="22" class="trajectory-title-svg">IDENTIFICATION RESIDUAL FIELD</text>
     <line x1="${left}" y1="${centerY}" x2="${right}" y2="${centerY}" class="trajectory-axis"/>
     <line x1="${centerX}" y1="${top}" x2="${centerX}" y2="${bottom}" class="trajectory-axis"/>
     ${[-extent, 0, extent].map(value => `<line x1="${sx(value)}" y1="${top}" x2="${sx(value)}" y2="${bottom}" class="trajectory-grid"/><text x="${sx(value)}" y="300" text-anchor="middle" class="trajectory-label muted">${number(value,1)} km</text>`).join('')}
-    <circle cx="${centerX}" cy="${centerY}" r="8" class="trajectory-observation"><title>Tracking observation ${esc(observation.observation_id)}</title></circle>
-    <text x="${centerX + 12}" y="${centerY - 10}" class="trajectory-label">Observation</text>
-    ${candidates.map(item => `<g><line x1="${centerX}" y1="${centerY}" x2="${sx(item.dx)}" y2="${sy(item.dy)}" class="trajectory-grid"/><circle cx="${sx(item.dx)}" cy="${sy(item.dy)}" r="${item.id === selectedId ? 7 : 5}" class="trajectory-candidate ${item.id === selectedId ? 'selected' : ''}"><title>Rank ${esc(item.ranking?.rank)}: ${esc(item.id)}, score ${number(item.ranking?.match_score,6)}</title></circle><text x="${sx(item.dx) + 9}" y="${sy(item.dy) - 7}" class="trajectory-label">${esc(item.ranking?.rank)} · ${esc(item.id)}</text></g>`).join('')}
+    <circle cx="${centerX}" cy="${centerY}" r="9" class="trajectory-observation trajectory-hover"><title>Tracking observation ${esc(observation.observation_id)}; quality ${pct(observation.measurement_quality)}; frame ${esc(observation.coordinate_frame)}</title></circle>
+    <line x1="${centerX - 5}" y1="${centerY}" x2="${centerX + 5}" y2="${centerY}" class="trajectory-path-primary"/><line x1="${centerX}" y1="${centerY - 5}" x2="${centerX}" y2="${centerY + 5}" class="trajectory-path-primary"/>
+    <line x1="${centerX}" y1="${centerY}" x2="${observationLabelX - 3}" y2="${observationLabelY - 5}" class="trajectory-leader"/>
+    <text x="${observationLabelX}" y="${observationLabelY}" class="trajectory-label">Observation</text>
+    ${candidateMarks}
     <text x="${right}" y="318" text-anchor="end" class="trajectory-label muted">position residual, projected x/y</text>
   </g>`;
 }

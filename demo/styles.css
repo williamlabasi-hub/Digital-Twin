@@ -42,12 +42,14 @@ body::before { content: ""; position: fixed; inset: 0; pointer-events: none; opa
 .trajectory-path-primary { stroke: var(--cyan); stroke-width: 2; fill: none; }
 .trajectory-path-secondary { stroke: var(--amber); stroke-width: 2; fill: none; }
 .trajectory-miss { stroke: var(--red); stroke-width: 1.5; stroke-dasharray: 5 4; }
+.trajectory-leader { stroke: #667981; stroke-width: 1; fill: none; }
 .trajectory-hbr { stroke: var(--red); stroke-width: 1; fill: #ee6b7214; }
 .trajectory-point-primary { fill: var(--cyan); stroke: #081115; stroke-width: 2; }
 .trajectory-point-secondary { fill: var(--amber); stroke: #081115; stroke-width: 2; }
 .trajectory-candidate { fill: #798b93; stroke: #081115; stroke-width: 2; }
 .trajectory-candidate.selected { fill: var(--green); }
 .trajectory-observation { fill: none; stroke: var(--cyan); stroke-width: 2; }
+.trajectory-hover { cursor: help; }
 .trajectory-label { fill: #dfe8eb; font-size: 11px; font-family: "Segoe UI", Arial, sans-serif; }
 .trajectory-label.muted { fill: #7f9199; font-size: 9px; }
 .trajectory-label.accent { fill: var(--amber); }
