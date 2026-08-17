@@ -115,6 +115,102 @@ function renderReport(kind) {
   });
 }
 
+function vectorMagnitude(values) {
+  return Math.sqrt((values || []).reduce((sum, value) => sum + Number(value || 0) ** 2, 0));
+}
+
+function collisionPlot(report, x, width) {
+  const closest = report.closest_approach || {};
+  const relativeVelocity = vectorMagnitude(closest.relative_velocity_vector_km_s);
+  const miss = Number(closest.miss_distance_km || 0);
+  const hardBodyKm = Number(report.probability?.hard_body_radius_m || 0) / 1000;
+  const xMax = Math.max(relativeVelocity * 300, miss * 1.5, .1);
+  const yMax = Math.max(miss * 1.5, hardBodyKm * 4, .1);
+  const left = x + 50, right = x + width - 20, top = 54, bottom = 280;
+  const centerX = (left + right) / 2, centerY = (top + bottom) / 2;
+  const sx = value => centerX + (value / xMax) * (right - left) * .46;
+  const sy = value => centerY - (value / yMax) * (bottom - top) * .44;
+  const secondaryY = sy(miss);
+  const radius = Math.max(2, Math.abs(sx(hardBodyKm) - sx(0)));
+  const ticks = [-xMax, 0, xMax];
+  return `<g>
+    <text x="${x + 12}" y="22" class="trajectory-title-svg">RELATIVE ENCOUNTER PLANE</text>
+    <line x1="${left}" y1="${centerY}" x2="${right}" y2="${centerY}" class="trajectory-axis"/>
+    <line x1="${centerX}" y1="${top}" x2="${centerX}" y2="${bottom}" class="trajectory-axis"/>
+    ${ticks.map(value => `<line x1="${sx(value)}" y1="${top}" x2="${sx(value)}" y2="${bottom}" class="trajectory-grid"/><text x="${sx(value)}" y="300" text-anchor="middle" class="trajectory-label muted">${number(value,2)} km</text>`).join('')}
+    <line x1="${left}" y1="${centerY}" x2="${right}" y2="${centerY}" class="trajectory-path-primary" marker-end="url(#arrow-primary)"/>
+    <line x1="${left}" y1="${secondaryY}" x2="${right}" y2="${secondaryY}" class="trajectory-path-secondary" marker-end="url(#arrow-secondary)"/>
+    <circle cx="${centerX}" cy="${centerY}" r="${radius}" class="trajectory-hbr"/>
+    <circle cx="${centerX}" cy="${centerY}" r="6" class="trajectory-point-primary"><title>SAT-001 reference position at closest approach</title></circle>
+    <circle cx="${centerX}" cy="${secondaryY}" r="6" class="trajectory-point-secondary"><title>${esc(report.secondary_object_id)} at closest approach</title></circle>
+    <line x1="${centerX}" y1="${centerY}" x2="${centerX}" y2="${secondaryY}" class="trajectory-miss"/>
+    <text x="${centerX + 9}" y="${(centerY + secondaryY) / 2}" class="trajectory-label accent">miss ${number(miss,3)} km</text>
+    <text x="${centerX + 10}" y="${centerY + 18}" class="trajectory-label">SAT-001</text>
+    <text x="${centerX + 10}" y="${secondaryY - 9}" class="trajectory-label">${esc(report.secondary_object_id)}</text>
+    <text x="${right}" y="318" text-anchor="end" class="trajectory-label muted">along-track displacement</text>
+  </g>`;
+}
+
+function identityPlot(report, x, width) {
+  const observation = report.observation || {};
+  const observationPosition = observation.position_km || [0, 0, 0];
+  const rankings = new Map((report.prediction?.candidate_rankings || []).map(item => [item.canonical_object_id, item]));
+  const candidates = (report.candidates || []).map(item => {
+    const id = item.catalog?.canonical_object_id;
+    const position = item.orbital?.position_km || observationPosition;
+    return {id, dx: Number(position[0]) - Number(observationPosition[0]), dy: Number(position[1]) - Number(observationPosition[1]), ranking: rankings.get(id)};
+  });
+  const extent = Math.max(...candidates.flatMap(item => [Math.abs(item.dx), Math.abs(item.dy)]), 1) * 1.15;
+  const left = x + 50, right = x + width - 20, top = 54, bottom = 280;
+  const centerX = (left + right) / 2, centerY = (top + bottom) / 2;
+  const sx = value => centerX + (value / extent) * (right - left) * .45;
+  const sy = value => centerY - (value / extent) * (bottom - top) * .45;
+  const selectedId = report.prediction?.canonical_object_id;
+  return `<g>
+    <text x="${x + 12}" y="22" class="trajectory-title-svg">IDENTIFICATION RESIDUAL FIELD</text>
+    <line x1="${left}" y1="${centerY}" x2="${right}" y2="${centerY}" class="trajectory-axis"/>
+    <line x1="${centerX}" y1="${top}" x2="${centerX}" y2="${bottom}" class="trajectory-axis"/>
+    ${[-extent, 0, extent].map(value => `<line x1="${sx(value)}" y1="${top}" x2="${sx(value)}" y2="${bottom}" class="trajectory-grid"/><text x="${sx(value)}" y="300" text-anchor="middle" class="trajectory-label muted">${number(value,1)} km</text>`).join('')}
+    <circle cx="${centerX}" cy="${centerY}" r="8" class="trajectory-observation"><title>Tracking observation ${esc(observation.observation_id)}</title></circle>
+    <text x="${centerX + 12}" y="${centerY - 10}" class="trajectory-label">Observation</text>
+    ${candidates.map(item => `<g><line x1="${centerX}" y1="${centerY}" x2="${sx(item.dx)}" y2="${sy(item.dy)}" class="trajectory-grid"/><circle cx="${sx(item.dx)}" cy="${sy(item.dy)}" r="${item.id === selectedId ? 7 : 5}" class="trajectory-candidate ${item.id === selectedId ? 'selected' : ''}"><title>Rank ${esc(item.ranking?.rank)}: ${esc(item.id)}, score ${number(item.ranking?.match_score,6)}</title></circle><text x="${sx(item.dx) + 9}" y="${sy(item.dy) - 7}" class="trajectory-label">${esc(item.ranking?.rank)} · ${esc(item.id)}</text></g>`).join('')}
+    <text x="${right}" y="318" text-anchor="end" class="trajectory-label muted">position residual, projected x/y</text>
+  </g>`;
+}
+
+function renderTrajectory(view = 'combined') {
+  if (!dashboardPayload) return;
+  const collision = dashboardPayload.details.collision;
+  const identity = dashboardPayload.details.identity;
+  const svg = $('trajectory-svg');
+  const plots = view === 'combined'
+    ? collisionPlot(collision, 0, 450) + identityPlot(identity, 460, 450)
+    : view === 'collision' ? collisionPlot(collision, 25, 870) : identityPlot(identity, 25, 870);
+  svg.innerHTML = `<defs>
+    <marker id="arrow-primary" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="var(--cyan)"/></marker>
+    <marker id="arrow-secondary" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="var(--amber)"/></marker>
+  </defs>${plots}`;
+  const prediction = identity.prediction || {};
+  const metrics = view === 'identity' ? [
+    ['Selected identity', prediction.canonical_object_id], ['Match score', number(prediction.match_score, 6)], ['Candidate count', prediction.candidate_selection?.candidate_count]
+  ] : view === 'collision' ? [
+    ['Time of closest approach', collision.closest_approach?.time_of_closest_approach], ['Miss distance', `${number(collision.closest_approach?.miss_distance_km, 6)} km`], ['Collision probability', pct(collision.probability?.collision_probability)]
+  ] : [
+    ['Closest approach', `${number(collision.closest_approach?.miss_distance_km, 3)} km`], ['Prototype probability', pct(collision.probability?.collision_probability)], ['Selected match', `${prediction.canonical_object_id} / ${pct(prediction.match_score)}`]
+  ];
+  $('trajectory-metrics').innerHTML = metrics.map(([label, value]) => `<div class="trajectory-metric"><span>${esc(label)}</span><strong>${esc(value)}</strong></div>`).join('');
+  $('trajectory-legend').innerHTML = view === 'identity'
+    ? '<span><i style="background:var(--cyan)"></i>Tracking observation</span><span><i style="background:var(--green)"></i>Selected catalog match</span><span><i style="background:#798b93"></i>Alternative candidate</span>'
+    : view === 'collision'
+      ? '<span><i style="background:var(--cyan)"></i>SAT-001 reference path</span><span><i style="background:var(--amber)"></i>Secondary relative path</span><span><i style="background:var(--red)"></i>Miss distance / hard-body radius</span>'
+      : '<span><i style="background:var(--cyan)"></i>Primary / observation</span><span><i style="background:var(--amber)"></i>Secondary path</span><span><i style="background:var(--green)"></i>Selected identity</span>';
+  document.querySelectorAll('.trajectory-tab').forEach(button => {
+    const active = button.dataset.view === view;
+    button.classList.toggle('active', active);
+    button.setAttribute('aria-pressed', String(active));
+  });
+}
+
 function setStatus(domain, value, note) {
   $(`${domain}-status`).textContent = text(value);
   $(`${domain}-dot`).style.background = tone(value);
@@ -160,6 +256,7 @@ function render(payload) {
     const type = candidate.disposition || (index === 0 ? 'Prerequisite' : 'Candidate');
     return `<li class="coa-item"><div><h4>${candidate.name || coaNames[code] || code.replaceAll('_', ' ')}</h4><p>${description}</p></div><span class="coa-type">${type.replaceAll('_', ' ')}</span></li>`;
   }).join('');
+  renderTrajectory('combined');
   renderReport('health');
 
   $('loading').hidden = true;
@@ -190,4 +287,5 @@ async function load() {
 
 $('retry').addEventListener('click', load);
 document.querySelectorAll('.report-tab').forEach(button => button.addEventListener('click', () => renderReport(button.dataset.report)));
+document.querySelectorAll('.trajectory-tab').forEach(button => button.addEventListener('click', () => renderTrajectory(button.dataset.view)));
 load();

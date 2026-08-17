@@ -28,6 +28,23 @@
         <div><strong>Prototype decision support only</strong><p>No command or maneuver authority. Operator approval and refined evidence are required.</p></div>
       </section>
 
+      <section class="panel trajectory-panel" aria-labelledby="trajectory-title">
+        <div class="panel-title trajectory-heading">
+          <div><p class="eyebrow">Spatial evidence</p><h3 id="trajectory-title">Encounter and identification geometry</h3><p class="report-intro">Synthetic prototype geometry derived directly from the validated report.</p></div>
+          <div class="trajectory-tabs" role="group" aria-label="Geometry view">
+            <button type="button" class="trajectory-tab active" data-view="combined" aria-pressed="true">Combined</button>
+            <button type="button" class="trajectory-tab" data-view="collision" aria-pressed="false">Collision</button>
+            <button type="button" class="trajectory-tab" data-view="identity" aria-pressed="false">Identification</button>
+          </div>
+        </div>
+        <div class="trajectory-layout">
+          <div class="trajectory-stage"><svg id="trajectory-svg" viewBox="0 0 920 330" role="img" aria-labelledby="trajectory-title trajectory-description"></svg><p id="trajectory-description" class="sr-only">Relative encounter path and object-identification candidate residuals.</p></div>
+          <aside id="trajectory-metrics" class="trajectory-metrics" aria-label="Selected geometry metrics"></aside>
+        </div>
+        <div id="trajectory-legend" class="trajectory-legend"></div>
+        <p class="trajectory-disclaimer">Relative linear-motion view—not a full propagated orbit. Axes and scale change between collision and identification views.</p>
+      </section>
+
       <section class="status-grid" aria-label="Subsystem assessment overview">
         <article class="status-card"><div class="card-head"><span>01</span><p>Spacecraft health</p></div><div class="status-line"><i id="health-dot"></i><strong id="health-status">—</strong></div><p id="health-note" class="card-copy">Awaiting validated evidence.</p></article>
         <article class="status-card"><div class="card-head"><span>02</span><p>Object identification</p></div><div class="status-line"><i id="identity-dot"></i><strong id="identity-status">—</strong></div><p id="identity-note" class="card-copy">Awaiting validated evidence.</p></article>
