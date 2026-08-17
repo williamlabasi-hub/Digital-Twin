@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://digital-twin.local/schemas/latest-run.schema.json",
+  "title": "Golden Path Latest Run Reference",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "dashboard_contract_version",
+    "run_id",
+    "run_directory",
+    "summary",
+    "published_at"
+  ],
+  "properties": {
+    "dashboard_contract_version": {"const": "1.0.0"},
+    "run_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"},
+    "run_directory": {"type": "string", "minLength": 1},
+    "summary": {"type": "string", "minLength": 1},
+    "published_at": {"type": "string", "format": "date-time"}
+  }
+}
