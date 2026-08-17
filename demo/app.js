@@ -243,7 +243,10 @@ function setStatus(domain, value, note) {
 function render(payload) {
   dashboardPayload = payload;
   const {latest, summary, details} = payload;
-  $('run-id').textContent = summary.run_id;
+  const runParts = summary.run_id.split('-');
+  const shortRunId = runParts.length > 1 ? `${runParts[0]}…${runParts.at(-1)}` : summary.run_id;
+  $('run-id').textContent = shortRunId;
+  $('run-id').title = summary.run_id;
   $('spacecraft').textContent = summary.primary_spacecraft_id;
   $('scenario-label').textContent = summary.scenario_mode.replaceAll('_', ' ') + ' / ' + summary.orbital_source + ' orbital source';
   $('identity-track').textContent = summary.identified_secondary_object_id || summary.tracked_secondary_subject_id;
@@ -316,6 +319,15 @@ async function load() {
 $('retry').addEventListener('click', load);
 document.querySelectorAll('.report-tab').forEach(button => button.addEventListener('click', () => renderReport(button.dataset.report)));
 document.querySelectorAll('.trajectory-tab').forEach(button => button.addEventListener('click', () => renderTrajectory(button.dataset.view)));
+$('section-nav').querySelectorAll('a').forEach(link => link.addEventListener('click', () => {
+  $('section-nav').querySelectorAll('a').forEach(item => item.classList.toggle('active', item === link));
+}));
+const sectionObserver = new IntersectionObserver(entries => {
+  const visible = entries.filter(entry => entry.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+  if (!visible) return;
+  $('section-nav').querySelectorAll('a').forEach(link => link.classList.toggle('active', link.getAttribute('href') === `#${visible.target.id}`));
+}, {rootMargin: '-15% 0px -65% 0px', threshold: [0, .15, .4]});
+['mission', 'geometry', 'assessments', 'reports'].forEach(id => sectionObserver.observe($(id)));
 $('report-toggle').addEventListener('click', () => {
   const expanded = $('report-toggle').getAttribute('aria-expanded') === 'true';
   $('report-toggle').setAttribute('aria-expanded', String(!expanded));
