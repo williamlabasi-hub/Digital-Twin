@@ -66,9 +66,12 @@ Use Landon's live TLE retrieval and propagation stage with:
 python scripts\run_golden_path.py --orbital-source live
 ```
 
-The validated artifacts are written under `outputs/golden-path/`. See
+Validated runs are written under `outputs/golden-path/runs/`, and
+`outputs/golden-path/latest.json` identifies the newest completed run. See
 [`docs/GOLDEN_PATH.md`](docs/GOLDEN_PATH.md) for the scenario boundaries and
-artifact inventory.
+artifact inventory, and
+[`docs/PROTOTYPE_DEMO_SCENARIO.md`](docs/PROTOTYPE_DEMO_SCENARIO.md) for the
+frozen operator demonstration and acceptance criteria.
 
 ## Capstone health demo
 
