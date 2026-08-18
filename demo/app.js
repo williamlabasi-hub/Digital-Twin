@@ -1,127 +1,339 @@
-const state={records:[],index:0,timer:null};
-const colors={Healthy:'#38d996',Warning:'#f5c84c',Degraded:'#ff8b42',Critical:'#ff5364',Unknown:'#8fa7b5'};
-const names={adcs:'ADCS',cdh:'C&DH',command_control:'Command & control'};
-const $=id=>document.getElementById(id);
-const safe=v=>v===null||v===undefined?'—':v;
+const $ = id => document.getElementById(id);
+const labels = {
+  clear_match: 'Clear match', ambiguous: 'Ambiguous identity', no_candidate_above_threshold: 'No match',
+  complete: 'Complete', geometric_only: 'Geometry only', abstained: 'Abstained',
+  advisory_ready: 'Advisory ready', limited: 'Limited', insufficient_evidence: 'Insufficient evidence'
+};
+const coaNames = {
+  COA_IMPROVE_DEGRADED_EVIDENCE: 'Improve degraded evidence',
+  COA_REFINE_TRACKING: 'Refine tracking solution',
+  COA_MANEUVER_PLANNING_REVIEW: 'Begin maneuver planning review',
+  COA_RESOLVE_WITHHELD_EVIDENCE: 'Resolve withheld evidence'
+};
+const tone = value => value === 'usable' || value === 'complete' || value === 'Healthy' || value === 'clear_match'
+  ? 'var(--green)' : value === 'withheld' || value === 'abstained' || value === 'insufficient_evidence'
+    ? 'var(--red)' : 'var(--amber)';
+const text = value => labels[value] || value || 'Unknown';
+const esc = value => String(value ?? '—').replace(/[&<>"']/g, character => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[character]));
+const pct = value => value === null || value === undefined ? '—' : `${(Number(value) * 100).toFixed(2)}%`;
+const probabilityPct = value => value === null || value === undefined ? '—' : `${(Number(value) * 100).toFixed(4)}%`;
+const number = (value, digits = 3) => value === null || value === undefined ? '—' : Number(value).toFixed(digits);
+let dashboardPayload = null;
 
-async function load(){
-  try{
-    const response=await fetch('data/health_predictions.json');
-    if(!response.ok) throw new Error(`HTTP ${response.status}`);
-    const payload=await response.json();
-    state.records=payload.report;
-    buildScenarios(); render(0);
-  }catch(error){
-    $('timestamp').textContent='Unable to load data. Start with: python demo/start_demo.py';
-    console.error(error);
-  }
+function hero(items) {
+  return `<div class="detail-hero">${items.map(([label, value]) => `<div><small>${esc(label)}</small><strong>${esc(value)}</strong></div>`).join('')}</div>`;
 }
 
-function buildScenarios(){
-  ['Healthy','Warning','Degraded','Critical'].forEach(status=>{
-    const button=document.createElement('button'); button.textContent=status;
-    button.onclick=()=>{let i=state.records.findIndex(r=>r.overall_health.status===status);if(i<0)i=state.records.findIndex(r=>r.prediction===status);if(i>=0)render(i)};
-    $('scenarios').appendChild(button);
+function detailGrid(items) {
+  return `<div class="detail-grid">${items.map(([label, value]) => `<div class="detail-item"><span>${esc(label)}</span><strong>${esc(value)}</strong></div>`).join('')}</div>`;
+}
+
+function bulletList(items, empty = 'No findings reported.') {
+  const values = (items || []).filter(Boolean);
+  return `<ul class="detail-list">${values.length ? values.map(item => `<li>${esc(item)}</li>`).join('') : `<li>${esc(empty)}</li>`}</ul>`;
+}
+
+function renderHealthReport(report) {
+  const assurance = report.model_assurance || {};
+  const subsystems = Object.entries(report.subsystem_health || {});
+  const telemetry = Object.entries(report.telemetry || {}).filter(([, value]) => value !== null).slice(0, 18);
+  return hero([
+    ['Overall health', report.overall_health?.status], ['ML prediction', report.prediction],
+    ['Model assurance', assurance.decision], ['Prediction confidence', pct(report.predicted_probability)]
+  ]) + `<div class="detail-layout">
+    <section class="detail-section wide"><h4>Subsystem assessments</h4><table class="detail-table"><thead><tr><th>Subsystem</th><th>Status</th><th>Confidence</th><th>Method</th><th>Completeness</th></tr></thead><tbody>${subsystems.map(([name, item]) => `<tr><td>${esc(name.replaceAll('_',' '))}</td><td class="${esc(item.status?.toLowerCase())}">${esc(item.status)}</td><td>${pct(item.confidence)}</td><td>${esc(item.method)}</td><td>${esc(item.data_completeness?.available_measurements)} / ${esc(item.data_completeness?.required_measurements)}</td></tr>`).join('')}</tbody></table></section>
+    <section class="detail-section"><h4>Data and model assurance</h4>${detailGrid([
+      ['Data quality', report.data_quality?.status], ['Model accepted', assurance.accepted ? 'Yes' : 'No'],
+      ['Assurance method', assurance.method], ['Report time', report.report_generated_at],
+      ['Telemetry time', report.timestamp], ['Recommendation scope', report.recommendation_scope]
+    ])}</section>
+    <section class="detail-section"><h4>Recommendations</h4>${bulletList(report.recommendations)}</section>
+    <section class="detail-section wide"><h4>Telemetry snapshot</h4>${detailGrid(telemetry.map(([key, value]) => [key.replaceAll('_',' '), value]))}</section>
+  </div>`;
+}
+
+function renderIdentityReport(report) {
+  const prediction = report.prediction || {};
+  const selection = prediction.candidate_selection || {};
+  const rankings = prediction.candidate_rankings || [];
+  return hero([
+    ['Decision', selection.decision_basis], ['Canonical identity', prediction.canonical_object_id],
+    ['Match score', number(prediction.match_score, 6)], ['Prototype threshold', prediction.threshold?.value]
+  ]) + `<div class="detail-layout">
+    <section class="detail-section wide"><h4>Ranked candidates</h4><table class="detail-table"><thead><tr><th>Rank</th><th>Object</th><th>Score</th><th>Position residual</th><th>Velocity residual</th><th>Threshold</th></tr></thead><tbody>${rankings.map(item => `<tr><td>${esc(item.rank)}</td><td>${esc(item.canonical_object_id)}</td><td>${number(item.match_score, 6)}</td><td>${number(item.position_residual_km, 4)} km</td><td>${number(item.velocity_residual_km_s, 6)} km/s</td><td>${item.meets_threshold ? 'Met' : 'Not met'}</td></tr>`).join('')}</tbody></table></section>
+    <section class="detail-section"><h4>Observation and provenance</h4>${detailGrid([
+      ['Observation', prediction.observation_id], ['Observed at', prediction.observation_timestamp],
+      ['Catalog source', prediction.catalog_provenance?.catalog_source], ['Catalog record', prediction.catalog_provenance?.catalog_record_id],
+      ['Affiliation', prediction.affiliation], ['Affiliation authority', prediction.affiliation_provenance?.affiliation_authority]
+    ])}</section>
+    <section class="detail-section"><h4>Selection rationale</h4>${bulletList(prediction.rationale)}</section>
+  </div>`;
+}
+
+function renderCollisionReport(report) {
+  const closest = report.closest_approach || {};
+  const probability = report.probability || {};
+  return hero([
+    ['Assessment', report.assessment_status], ['Risk level', report.risk?.level],
+    ['Miss distance', `${number(closest.miss_distance_km, 6)} km`], ['Collision probability', probabilityPct(probability.collision_probability)]
+  ]) + `<div class="detail-layout">
+    <section class="detail-section"><h4>Encounter geometry</h4>${detailGrid([
+      ['Closest approach', closest.time_of_closest_approach], ['Relative velocity', `${number(closest.relative_velocity_km_s, 6)} km/s`],
+      ['Geometry method', closest.method?.name], ['Primary object', report.primary_object_id],
+      ['Secondary object', report.secondary_object_id], ['Assessment ID', report.assessment_id]
+    ])}</section>
+    <section class="detail-section"><h4>Probability and uncertainty</h4>${detailGrid([
+      ['Probability status', probability.status], ['Hard-body radius', `${number(probability.hard_body_radius_m, 1)} m`],
+      ['Probability method', probability.method?.name], ['Validation', probability.method?.validation_status],
+      ['Covariance status', report.uncertainty_assurance?.status], ['Covariance frame', report.uncertainty_assurance?.covariance_frame]
+    ])}</section>
+    <section class="detail-section"><h4>Assessment rationale</h4>${bulletList(report.rationale)}</section>
+    <section class="detail-section"><h4>Uncertainty assumptions</h4>${bulletList(report.uncertainty_assurance?.assumptions)}</section>
+  </div>`;
+}
+
+function renderCoaReport(report) {
+  const trace = report.decision_tree?.trace || [];
+  const candidates = report.candidate_coas || [];
+  return hero([
+    ['COA status', report.status], ['Decision scope', report.decision_scope],
+    ['Terminal node', report.decision_tree?.terminal_node], ['Operator approval', 'Required for every candidate']
+  ]) + `<div class="detail-layout">
+    <section class="detail-section"><h4>Decision-tree trace</h4>${trace.map((item, index) => `<div class="trace-row"><span>${String(index + 1).padStart(2,'0')}</span><div><strong>${esc(item.question)}</strong><small>Observed: ${esc(item.observed_value)}</small></div><span class="trace-branch">${esc(item.branch)}</span></div>`).join('')}</section>
+    <section class="detail-section"><h4>Operator summary</h4>${bulletList(report.operator_summary?.selection_basis)}<h4>Blocked actions</h4>${bulletList(report.blocked_actions)}</section>
+    <section class="detail-section wide"><h4>Candidate actions and constraints</h4><table class="detail-table"><thead><tr><th>Course of action</th><th>Actions</th><th>Constraints</th><th>Disposition</th></tr></thead><tbody>${candidates.map(item => `<tr><td><strong>${esc(item.name)}</strong><br><span class="muted">${esc(item.rationale)}</span></td><td>${bulletList(item.actions)}</td><td>${bulletList(item.constraints)}</td><td>${esc(item.disposition?.replaceAll('_',' '))}<br>Approval: ${item.requires_operator_approval ? 'required' : 'not specified'}</td></tr>`).join('')}</tbody></table></section>
+  </div>`;
+}
+
+function renderReport(kind) {
+  if (!dashboardPayload) return;
+  const renderers = {health: renderHealthReport, identity: renderIdentityReport, collision: renderCollisionReport, coa: renderCoaReport};
+  $('report-detail').innerHTML = renderers[kind](dashboardPayload.details[kind]);
+  document.querySelectorAll('.report-tab').forEach(button => {
+    const active = button.dataset.report === kind;
+    button.classList.toggle('active', active);
+    button.setAttribute('aria-selected', String(active));
   });
 }
 
-function render(index){
-  state.index=(index+state.records.length)%state.records.length;
-  const r=state.records[state.index], overall=r.overall_health, status=overall.status;
-  $('satellite').textContent=r.satellite_id;
-  $('timestamp').textContent=new Date(r.timestamp).toLocaleString();
-  $('status').textContent=status; $('status').className=status;
-  $('status-dot').style.background=colors[status]; $('status-dot').style.boxShadow=`0 0 16px ${colors[status]}`;
-  renderOverallExplanation(r);
-  const confidence=Math.round((r.predicted_probability||0)*100);
-  $('confidence').textContent=`${confidence}%`; $('confidence-bar').style.width=`${confidence}%`;
-  $('assurance').textContent=r.model_assurance.accepted?'Accepted':'Abstained';
-  $('assurance').className=r.model_assurance.accepted?'Healthy':'Critical';
-  $('assurance-note').textContent=r.model_assurance.reasons?.[0]||'Inside training-profile bounds';
-  $('command').textContent=(r.recent_command.name||'No command').replaceAll('_',' ');
-  $('command-note').textContent=`${r.recent_command.status} • ${Math.round((r.recent_command.seconds_since_command||0)/60)} min earlier`;
-  $('position').textContent=`${state.index+1} / ${state.records.length}`;
-  document.querySelectorAll('.scenario-buttons button').forEach(b=>b.classList.toggle('active',b.textContent===status));
-  renderSubsystems(r); renderProbabilities(r); renderEvidence(r); renderTelemetry(r);
+function vectorMagnitude(values) {
+  return Math.sqrt((values || []).reduce((sum, value) => sum + Number(value || 0) ** 2, 0));
 }
 
-function renderOverallExplanation(r){
-  const overall=r.overall_health;
-  const subsystemStatuses=Object.values(overall.subsystem_statuses||{});
-  const mlOnly=overall.contributors.length===1&&overall.contributors[0]==='ml_classifier';
-  const allSubsystemsHealthy=subsystemStatuses.length>0&&subsystemStatuses.every(status=>status==='Healthy');
-
-  if(mlOnly&&overall.status!=='Healthy'){
-    const ruleContext=allSubsystemsHealthy
-      ? 'no subsystem rule violations'
-      : `subsystem rules remained below ${overall.status}`;
-    $('contributors').textContent=`ML-only anomaly; ${ruleContext}. The accepted classifier prediction raised overall health to ${overall.status}.`;
-    return;
-  }
-
-  $('contributors').textContent=`Driven by ${overall.contributors.map(x=>x.replaceAll('_',' ')).join(', ')||'subsystem assessment'}`;
+function collisionPlot(report, x, width) {
+  const closest = report.closest_approach || {};
+  const relativeVelocity = vectorMagnitude(closest.relative_velocity_vector_km_s);
+  const miss = Number(closest.miss_distance_km || 0);
+  const hardBodyKm = Number(report.probability?.hard_body_radius_m || 0) / 1000;
+  const xMax = Math.max(relativeVelocity * 300, miss * 1.5, .1);
+  const yMax = Math.max(miss * 1.5, hardBodyKm * 4, .1);
+  const left = x + 50, right = x + width - 20, top = 54, bottom = 280;
+  const centerX = (left + right) / 2, centerY = (top + bottom) / 2;
+  const sx = value => centerX + (value / xMax) * (right - left) * .46;
+  const sy = value => centerY - (value / yMax) * (bottom - top) * .44;
+  const secondaryY = sy(miss);
+  const radius = Math.max(2, Math.abs(sx(hardBodyKm) - sx(0)));
+  const ticks = [-xMax, 0, xMax];
+  return `<g>
+    <text x="${x + 12}" y="22" class="trajectory-title-svg">RELATIVE ENCOUNTER PLANE</text>
+    <line x1="${left}" y1="${centerY}" x2="${right}" y2="${centerY}" class="trajectory-axis"/>
+    <line x1="${centerX}" y1="${top}" x2="${centerX}" y2="${bottom}" class="trajectory-axis"/>
+    ${ticks.map(value => `<line x1="${sx(value)}" y1="${top}" x2="${sx(value)}" y2="${bottom}" class="trajectory-grid"/><text x="${sx(value)}" y="300" text-anchor="middle" class="trajectory-label muted">${number(value,2)} km</text>`).join('')}
+    <line x1="${left}" y1="${centerY}" x2="${right}" y2="${centerY}" class="trajectory-path-primary trajectory-hover" marker-end="url(#arrow-primary)"><title>SAT-001 reference path in the relative encounter plane</title></line>
+    <line x1="${left}" y1="${secondaryY}" x2="${right}" y2="${secondaryY}" class="trajectory-path-secondary trajectory-hover" marker-end="url(#arrow-secondary)"><title>${esc(report.secondary_object_id)} relative path; speed ${number(relativeVelocity,6)} km/s</title></line>
+    <circle cx="${centerX}" cy="${centerY}" r="${radius}" class="trajectory-hbr"/>
+    <polygon points="${centerX},${centerY - 8} ${centerX + 8},${centerY} ${centerX},${centerY + 8} ${centerX - 8},${centerY}" class="trajectory-point-primary trajectory-hover"><title>SAT-001 at closest approach; hard-body radius ${number(report.probability?.hard_body_radius_m,1)} m</title></polygon>
+    <polygon points="${centerX},${secondaryY - 8} ${centerX + 8},${secondaryY + 7} ${centerX - 8},${secondaryY + 7}" class="trajectory-point-secondary trajectory-hover"><title>${esc(report.secondary_object_id)} at closest approach; miss distance ${number(miss,6)} km</title></polygon>
+    <line x1="${centerX}" y1="${centerY}" x2="${centerX}" y2="${secondaryY}" class="trajectory-miss"/>
+    <text x="${centerX + 9}" y="${(centerY + secondaryY) / 2}" class="trajectory-label accent">miss ${number(miss,3)} km</text>
+    <text x="${centerX + 10}" y="${centerY + 18}" class="trajectory-label">SAT-001</text>
+    <text x="${centerX + 10}" y="${secondaryY - 9}" class="trajectory-label">${esc(report.secondary_object_id)}</text>
+    <text x="${right}" y="318" text-anchor="end" class="trajectory-label muted">along-track displacement</text>
+  </g>`;
 }
 
-function renderSubsystems(r){
-  $('subsystems').innerHTML='';
-  Object.entries(r.overall_health.subsystem_statuses).forEach(([key,value])=>{
-    const item=document.createElement('div'); item.className='subsystem';
-    item.innerHTML=`<span>${names[key]||key.replaceAll('_',' ')}</span><span class="pill ${value}">${value}</span>`;
-    $('subsystems').appendChild(item);
+function identityPlot(report, x, width) {
+  const observation = report.observation || {};
+  const observationPosition = observation.position_km || [0, 0, 0];
+  const rankings = new Map((report.prediction?.candidate_rankings || []).map(item => [item.canonical_object_id, item]));
+  const candidates = (report.candidates || []).map(item => {
+    const id = item.catalog?.canonical_object_id;
+    const position = item.orbital?.position_km || observationPosition;
+    return {id, dx: Number(position[0]) - Number(observationPosition[0]), dy: Number(position[1]) - Number(observationPosition[1]), ranking: rankings.get(id)};
+  });
+  const extent = Math.max(...candidates.flatMap(item => [Math.abs(item.dx), Math.abs(item.dy)]), 1) * 1.15;
+  const left = x + 50, right = x + width - 20, top = 54, bottom = 280;
+  const centerX = (left + right) / 2, centerY = (top + bottom) / 2;
+  const sx = value => centerX + (value / extent) * (right - left) * .45;
+  const sy = value => centerY - (value / extent) * (bottom - top) * .45;
+  const selectedId = report.prediction?.canonical_object_id;
+  const observationLabelX = centerX + 13;
+  const observationLabelY = centerY + 24;
+  const candidateMarks = candidates.map(item => {
+    const px = sx(item.dx), py = sy(item.dy), rank = Number(item.ranking?.rank || 99);
+    let labelX, labelY, anchor;
+    if (rank === 1) {
+      labelX = centerX - 13; labelY = centerY - 28; anchor = 'end';
+    } else if (rank === 2) {
+      labelX = centerX + 24; labelY = centerY - 26; anchor = 'start';
+    } else if (px > right - 95) {
+      labelX = right - 5; labelY = py - 13; anchor = 'end';
+    } else {
+      labelX = px + 12; labelY = py - 13; anchor = 'start';
+    }
+    const marker = item.id === selectedId
+      ? `<polygon points="${px},${py - 8} ${px + 8},${py} ${px},${py + 8} ${px - 8},${py}" class="trajectory-candidate selected trajectory-hover"><title>Selected rank ${esc(item.ranking?.rank)}: ${esc(item.id)}; score ${number(item.ranking?.match_score,6)}; residual ${number(item.ranking?.position_residual_km,4)} km</title></polygon>`
+      : `<circle cx="${px}" cy="${py}" r="5" class="trajectory-candidate trajectory-hover"><title>Rank ${esc(item.ranking?.rank)}: ${esc(item.id)}; score ${number(item.ranking?.match_score,6)}; residual ${number(item.ranking?.position_residual_km,4)} km</title></circle>`;
+    return `<g><line x1="${centerX}" y1="${centerY}" x2="${px}" y2="${py}" class="trajectory-grid"/><line x1="${px}" y1="${py}" x2="${labelX + (anchor === 'end' ? -3 : 3)}" y2="${labelY + 3}" class="trajectory-leader"/>${marker}<text x="${labelX}" y="${labelY}" text-anchor="${anchor}" class="trajectory-label">${esc(item.ranking?.rank)} · ${esc(item.id)}</text></g>`;
+  }).join('');
+  return `<g>
+    <text x="${x + 12}" y="22" class="trajectory-title-svg">IDENTIFICATION RESIDUAL FIELD</text>
+    <line x1="${left}" y1="${centerY}" x2="${right}" y2="${centerY}" class="trajectory-axis"/>
+    <line x1="${centerX}" y1="${top}" x2="${centerX}" y2="${bottom}" class="trajectory-axis"/>
+    ${[-extent, 0, extent].map(value => `<line x1="${sx(value)}" y1="${top}" x2="${sx(value)}" y2="${bottom}" class="trajectory-grid"/><text x="${sx(value)}" y="300" text-anchor="middle" class="trajectory-label muted">${number(value,1)} km</text>`).join('')}
+    <circle cx="${centerX}" cy="${centerY}" r="9" class="trajectory-observation trajectory-hover"><title>Tracking observation ${esc(observation.observation_id)}; quality ${pct(observation.measurement_quality)}; frame ${esc(observation.coordinate_frame)}</title></circle>
+    <line x1="${centerX - 5}" y1="${centerY}" x2="${centerX + 5}" y2="${centerY}" class="trajectory-path-primary"/><line x1="${centerX}" y1="${centerY - 5}" x2="${centerX}" y2="${centerY + 5}" class="trajectory-path-primary"/>
+    <line x1="${centerX}" y1="${centerY}" x2="${observationLabelX - 3}" y2="${observationLabelY - 5}" class="trajectory-leader"/>
+    <text x="${observationLabelX}" y="${observationLabelY}" class="trajectory-label">Observation</text>
+    ${candidateMarks}
+    <text x="${right}" y="318" text-anchor="end" class="trajectory-label muted">position residual, projected x/y</text>
+  </g>`;
+}
+
+function renderTrajectory(view = 'combined') {
+  if (!dashboardPayload) return;
+  const collision = dashboardPayload.details.collision;
+  const identity = dashboardPayload.details.identity;
+  const svg = $('trajectory-svg');
+  const plots = view === 'combined'
+    ? collisionPlot(collision, 0, 450) + identityPlot(identity, 460, 450)
+    : view === 'collision' ? collisionPlot(collision, 25, 870) : identityPlot(identity, 25, 870);
+  svg.innerHTML = `<defs>
+    <marker id="arrow-primary" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="var(--cyan)"/></marker>
+    <marker id="arrow-secondary" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="var(--amber)"/></marker>
+  </defs>${plots}`;
+  const prediction = identity.prediction || {};
+  const metrics = view === 'identity' ? [
+    ['Selected identity', prediction.canonical_object_id], ['Match score', number(prediction.match_score, 6)], ['Candidate count', prediction.candidate_selection?.candidate_count]
+  ] : view === 'collision' ? [
+    ['Time of closest approach', collision.closest_approach?.time_of_closest_approach], ['Miss distance', `${number(collision.closest_approach?.miss_distance_km, 6)} km`], ['Collision probability', probabilityPct(collision.probability?.collision_probability)]
+  ] : [
+    ['Closest approach', `${number(collision.closest_approach?.miss_distance_km, 3)} km`], ['Prototype probability', probabilityPct(collision.probability?.collision_probability)], ['Selected match', `${prediction.canonical_object_id} / ${pct(prediction.match_score)}`]
+  ];
+  $('trajectory-metrics').innerHTML = metrics.map(([label, value]) => `<div class="trajectory-metric"><span>${esc(label)}</span><strong>${esc(value)}</strong></div>`).join('');
+  $('trajectory-legend').innerHTML = view === 'identity'
+    ? '<span><i style="background:var(--cyan)"></i>Tracking observation</span><span><i style="background:var(--green)"></i>Selected catalog match</span><span><i style="background:#798b93"></i>Alternative candidate</span>'
+    : view === 'collision'
+      ? '<span><i style="background:var(--cyan)"></i>SAT-001 reference path</span><span><i style="background:var(--amber)"></i>Secondary relative path</span><span><i style="background:var(--red)"></i>Miss distance / hard-body radius</span>'
+      : '<span><i style="background:var(--cyan)"></i>Primary / observation</span><span><i style="background:var(--amber)"></i>Secondary path</span><span><i style="background:var(--green)"></i>Selected identity</span><span><i style="background:#798b93"></i>Alternative candidate</span>';
+  document.querySelectorAll('.trajectory-tab').forEach(button => {
+    const active = button.dataset.view === view;
+    button.classList.toggle('active', active);
+    button.setAttribute('aria-pressed', String(active));
   });
 }
 
-function renderProbabilities(r){
-  $('probabilities').innerHTML='';
-  Object.entries(r.class_probabilities).sort((a,b)=>b[1]-a[1]).forEach(([key,value])=>{
-    const pct=Math.round(value*100), row=document.createElement('div'); row.className='prob-row';
-    row.innerHTML=`<span class="${key}">${key}</span><div class="prob-track"><i style="width:${pct}%;background:${colors[key]}"></i></div><strong>${pct}%</strong>`;
-    $('probabilities').appendChild(row);
-  });
-  $('recommendations').innerHTML=(r.recommendations||[]).slice(0,4).map(x=>`<li>${x}</li>`).join('');
+function setStatus(domain, value, note) {
+  $(`${domain}-status`).textContent = text(value);
+  $(`${domain}-dot`).style.background = tone(value);
+  $(`${domain}-dot`).style.boxShadow = `0 0 10px ${tone(value)}`;
+  $(`${domain}-note`).textContent = note;
 }
 
-function renderEvidence(r){
-  const evidence=[];
-  const statuses=Object.values(r.overall_health.subsystem_statuses||{});
-  const mlOnly=r.overall_health.contributors.length===1&&r.overall_health.contributors[0]==='ml_classifier';
-  const allSubsystemsHealthy=statuses.length>0&&statuses.every(status=>status==='Healthy');
+function render(payload) {
+  dashboardPayload = payload;
+  const {latest, summary, details} = payload;
+  const runParts = summary.run_id.split('-');
+  const shortRunId = runParts.length > 1 ? `${runParts[0]}…${runParts.at(-1)}` : summary.run_id;
+  $('run-id').textContent = shortRunId;
+  $('run-id').title = summary.run_id;
+  $('spacecraft').textContent = summary.primary_spacecraft_id;
+  $('scenario-label').textContent = summary.scenario_mode.replaceAll('_', ' ') + ' / ' + summary.orbital_source + ' orbital source';
+  $('identity-track').textContent = summary.identified_secondary_object_id || summary.tracked_secondary_subject_id;
+  $('published').textContent = new Date(latest.published_at).toLocaleString();
+  $('contract').textContent = `v${summary.dashboard_contract_version}`;
+  const temporalChecks = details.coa.operator_summary?.selection_basis?.filter(item => item.startsWith('Temporal check:')) || [];
+  $('evidence-alert').textContent = temporalChecks.length ? 'Evidence stale / unsynchronized' : 'Evidence timestamps aligned';
 
-  if(mlOnly&&r.overall_health.status!=='Healthy'){
-    const ranked=Object.entries(r.class_probabilities||{}).sort((a,b)=>b[1]-a[1]);
-    const top=ranked[0],runnerUp=ranked[1];
-    const topText=top?`${top[0]} ${Math.round(top[1]*100)}%`:'unavailable';
-    const runnerUpText=runnerUp?`, versus ${runnerUp[0]} ${Math.round(runnerUp[1]*100)}%`:'';
-    const ruleContext=allSubsystemsHealthy
-      ? 'All displayed subsystem rules remained Healthy.'
-      : `Any displayed subsystem rule findings remained below ${r.overall_health.status} severity.`;
-    evidence.push({
-      subsystem:'ML-only assessment',
-      parameter:'classifier votes',
-      message:`The model output was ${topText}${runnerUpText}. ${ruleContext} Per-feature attribution is not available, so this identifies a multivariate pattern rather than a specific failed component.`
-    });
+  const healthNote = details.health.data_quality?.status === 'degraded'
+    ? 'Health result available with degraded input quality.' : 'Subsystem result available for operator review.';
+  setStatus('health', summary.health_status, healthNote);
+  $('health-evidence').textContent = `Evidence: ${summary.evidence_usability.health}`;
+  setStatus('identity', summary.object_identification_decision,
+    summary.identified_secondary_object_id ? `Associated with ${summary.identified_secondary_object_id}. Affiliation does not establish intent.` : 'Canonical identity is withheld pending better evidence.');
+  setStatus('collision', `${text(summary.collision_risk_level)} risk`,
+    `Assessment ${text(summary.collision_assessment_status).toLowerCase()}. Prototype probability ${probabilityPct(details.collision.probability?.collision_probability)}.`);
+  setStatus('coa', summary.coa_status,
+    summary.coa_status === 'limited' ? 'Planning support is available, but evidence limits action selection.' : 'Response options reflect the current evidence posture.');
+
+  const evidenceDescriptions = {
+    health: 'Spacecraft state and subsystem assessment',
+    object_identification: 'Track association and catalog provenance',
+    collision_risk: 'Closest approach and probability evidence'
+  };
+  $('evidence-list').innerHTML = Object.entries(summary.evidence_usability).map(([kind, usability]) => `
+    <div class="evidence-row"><div><strong>${kind.replaceAll('_', ' ')}</strong><small>${evidenceDescriptions[kind]}</small></div><span class="usability ${usability}">${usability}</span></div>`).join('');
+  const values = Object.values(summary.evidence_usability);
+  $('overall-posture').textContent = values.includes('withheld') ? 'Blocked' : values.includes('degraded') ? 'Limited' : 'Usable';
+  $('limitations').innerHTML = summary.limitations.map(item => `<li>${item}</li>`).join('');
+
+  const candidates = details.coa.candidate_coas || [];
+  $('coa-list').innerHTML = candidates.map((candidate, index) => {
+    const code = candidate.code || summary.candidate_coa_codes[index];
+    const description = candidate.rationale || candidate.description || 'Operator review is required before any response.';
+    const type = candidate.disposition || (index === 0 ? 'Prerequisite' : 'Candidate');
+    return `<li class="coa-item"><div><h4>${candidate.name || coaNames[code] || code.replaceAll('_', ' ')}</h4><p>${description}</p></div><span class="coa-type">${type.replaceAll('_', ' ')}</span></li>`;
+  }).join('');
+  renderTrajectory('combined');
+  renderReport('health');
+
+  $('loading').hidden = true;
+  $('error').hidden = true;
+  $('dashboard').hidden = false;
+  $('section-nav').hidden = false;
+}
+
+function showError(error) {
+  $('loading').hidden = true;
+  $('dashboard').hidden = true;
+  $('section-nav').hidden = true;
+  $('error').hidden = false;
+  $('error-title').textContent = error.code === 'dashboard_version_unsupported' ? 'Contract version unsupported' : 'Validated run unavailable';
+  $('error-message').textContent = error.message || 'The dashboard could not resolve a complete validated run.';
+}
+
+async function load() {
+  $('error').hidden = true;
+  $('loading').hidden = false;
+  $('section-nav').hidden = true;
+  try {
+    const response = await fetch('/api/dashboard', {cache: 'no-store'});
+    const payload = await response.json();
+    if (!response.ok) throw payload.error || {message: `Data service returned HTTP ${response.status}.`};
+    render(payload);
+  } catch (error) {
+    showError(error);
   }
-  Object.entries(r.subsystem_health).forEach(([subsystem,assessment])=>(assessment.evidence||[]).forEach(e=>evidence.push({...e,subsystem})));
-  if(!evidence.length) evidence.push(...(r.assessment||[]).slice(0,3).map(message=>({subsystem:'nominal assessment',message})));
-  $('evidence').innerHTML=evidence.slice(0,6).map(e=>`<div class="evidence-item"><strong>${(names[e.subsystem]||e.subsystem).replaceAll('_',' ')} • ${e.parameter||'system check'}</strong><span>${e.message}${e.observed_value!==undefined?` Observed: ${safe(e.observed_value)}.`:''}</span></div>`).join('');
 }
 
-function renderTelemetry(r){
-  const priority=['battery_voltage_v','battery_current_a','battery_state_of_charge_pct','solar_array_current_a','flight_computer_temperature_c','payload_temperature_c','reaction_wheel_1_speed_rpm','downlink_rate_kbps','memory_usage_pct','propellant_remaining_pct','clock_drift_us_day','command_queue_depth'];
-  $('telemetry').innerHTML=priority.map(k=>`<div><span>${k.replaceAll('_',' ')}</span><strong>${safe(r.telemetry[k])}</strong></div>`).join('');
-}
-
-$('previous').onclick=()=>render(state.index-1); $('next').onclick=()=>render(state.index+1);
-$('play').onclick=()=>{if(state.timer){clearInterval(state.timer);state.timer=null;$('play').textContent='▶ Run timeline'}else{state.timer=setInterval(()=>render(state.index+1),1800);$('play').textContent='■ Pause timeline'}};
-$('details').onclick=()=>{const hidden=$('telemetry').classList.toggle('hidden');$('details').textContent=hidden?'Show telemetry details':'Hide telemetry details'};
-document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')render(state.index+1);if(e.key==='ArrowLeft')render(state.index-1)});
-if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
-  window.addEventListener('scroll',()=>{
-    const y=window.scrollY;
-    document.documentElement.style.setProperty('--stars-near',`${y*.09}px`);
-    document.documentElement.style.setProperty('--stars-far',`${y*.035}px`);
-    document.documentElement.style.setProperty('--station-shift',`${y*.06}px`);
-    document.documentElement.style.setProperty('--planet-shift',`${y*.025}px`);
-  },{passive:true});
-}
+$('retry').addEventListener('click', load);
+document.querySelectorAll('.report-tab').forEach(button => button.addEventListener('click', () => renderReport(button.dataset.report)));
+document.querySelectorAll('.trajectory-tab').forEach(button => button.addEventListener('click', () => renderTrajectory(button.dataset.view)));
+$('section-nav').querySelectorAll('a').forEach(link => link.addEventListener('click', () => {
+  $('section-nav').querySelectorAll('a').forEach(item => item.classList.toggle('active', item === link));
+}));
+const sectionObserver = new IntersectionObserver(entries => {
+  const visible = entries.filter(entry => entry.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+  if (!visible) return;
+  $('section-nav').querySelectorAll('a').forEach(link => link.classList.toggle('active', link.getAttribute('href') === `#${visible.target.id}`));
+}, {rootMargin: '-15% 0px -65% 0px', threshold: [0, .15, .4]});
+['mission', 'geometry', 'assessments', 'reports'].forEach(id => sectionObserver.observe($(id)));
+$('report-toggle').addEventListener('click', () => {
+  const expanded = $('report-toggle').getAttribute('aria-expanded') === 'true';
+  $('report-toggle').setAttribute('aria-expanded', String(!expanded));
+  $('report-toggle').textContent = expanded ? 'Show details' : 'Hide details';
+  $('report-tabs').hidden = expanded;
+  $('report-detail').hidden = expanded;
+  $('reports').classList.toggle('collapsed', expanded);
+});
 load();
